@@ -1,21 +1,22 @@
-namespace Network
-{
-    public class NetworkRunnerHandler
-    {
-        public NetworkRunner runnerPrefab;
+using Fusion;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
-        public void StartGame(GameMode mode)
+public class NetworkRunnerHandler : MonoBehaviour
+{
+    public NetworkRunner runnerPrefab;
+
+    public void StartGame(GameMode mode)
+    {
+        var runner = Instantiate(runnerPrefab);
+        runner.name = "NetworkRunner";
+        runner.ProvideInput = true;
+        runner.StartGame(new StartGameArgs
         {
-            var runner = Instantiate(runnerPrefab);
-            runner.name = "NetworkRunner";
-            runner.ProvideInput = true;
-            runner.StartGame(new StartGameArgs
-            {
-                GameMode = mode,
-                SessionName = "TwistedMetalRoom",
-                Scene = SceneManager.GetActiveScene().buildIndex,
-                SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
-            });
-        }
+            GameMode = mode,
+            SessionName = "TwistedMetalRoom",
+            Scene = null,
+            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+        });
     }
 }
