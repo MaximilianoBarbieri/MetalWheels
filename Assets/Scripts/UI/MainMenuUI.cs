@@ -1,8 +1,11 @@
+using Fusion;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MainMenuUI : MonoBehaviour
 {
+    [SerializeField] private NetworkRunnerHandler networkHandler;
+
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject optionsPanel;
 
@@ -14,6 +17,7 @@ public class MainMenuUI : MonoBehaviour
 
     public void OnStartClicked()
     {
+        networkHandler.StartGame(GameMode.AutoHostOrClient);
         SceneManager.LoadScene("Lobby");
     }
 
