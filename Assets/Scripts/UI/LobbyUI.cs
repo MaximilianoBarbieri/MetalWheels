@@ -7,27 +7,56 @@ public class LobbyUI : MonoBehaviour
     public GameObject nicknamePanel, selectCarPanel, roomPanel;
     public InputField nicknameInput;
     public Button startGameButton;
+    public Button continueButton;
+    public Button backButton;
     public Text connectedPlayersText;
 
     private void Start()
     {
-        nicknamePanel.SetActive(true);
-        selectCarPanel.SetActive(false);
-        roomPanel.SetActive(false);
+        ShowPanel(nicknamePanel);
     }
 
-    public void OnNicknameEntered()
+    private void ShowPanel(GameObject panelToShow)
     {
-        PlayerData.Nickname = nicknameInput.text;
         nicknamePanel.SetActive(false);
-        selectCarPanel.SetActive(true);
+        selectCarPanel.SetActive(false);
+        roomPanel.SetActive(false);
+
+        panelToShow.SetActive(true);
+    }
+
+    public void OnContinue()
+    {
+        if (nicknamePanel.activeSelf)
+        {
+            if (!string.IsNullOrEmpty(nicknameInput.text))
+            {
+                PlayerData.Nickname = nicknameInput.text;
+                ShowPanel(selectCarPanel);
+            }
+        }
+        else if (selectCarPanel.activeSelf)
+        {
+            // Esperamos que se haya seleccionado un auto antes
+            ShowPanel(roomPanel);
+        }
+    }
+
+    public void OnBack()
+    {
+        if (roomPanel.activeSelf)
+        {
+            ShowPanel(selectCarPanel);
+        }
+        else if (selectCarPanel.activeSelf)
+        {
+            ShowPanel(nicknamePanel);
+        }
     }
 
     public void OnCarSelected(int carIndex)
     {
         PlayerData.CarSelected = carIndex;
-        selectCarPanel.SetActive(false);
-        roomPanel.SetActive(true);
     }
 
     public void UpdateConnectedPlayers(int count)
