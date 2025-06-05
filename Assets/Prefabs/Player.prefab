@@ -919,6 +919,11 @@ MonoBehaviour:
   view: {fileID: 3512009382607172532}
   rb: {fileID: 2622635024698461167}
   shootPoint: {fileID: 7232069907805579775}
+  projectileNormalPrefab: {fileID: 7513055660988862017, guid: 8374c62b07a3622408be9f0756a6408f, type: 3}
+  projectileSpecialPrefab: {fileID: 6933365427572757142, guid: bb8c230c95e5f70489d1bca0a5ad46a9, type: 3}
+  jumpCooldown: 2
+  minCrashForce: 7
+  crashDamage: 30
 --- !u!114 &3198519767489255268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -938,6 +943,8 @@ MonoBehaviour:
   _Kills: 0
   _Deaths: 0
   _SpecialAmmo: 0
+  _IsDead: 0
+  _RespawnTimer: 0
 --- !u!114 &3512009382607172532
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Visuales y animaciones del auto
 public class ViewPlayer : MonoBehaviour
 {
     [SerializeField] private Renderer carRenderer;
