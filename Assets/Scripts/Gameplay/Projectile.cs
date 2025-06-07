@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Projectile : NetworkBehaviour
 {
-    [Networked] public int damage { get; set; }
+    [Networked] public int damage {get; set;}
     [Networked] public ModelPlayer.SpecialType specialType { get; set; } = ModelPlayer.SpecialType.None;
     [SerializeField] private float speed = 30f;
     [SerializeField] private float lifeTime = 3f;
@@ -12,6 +12,7 @@ public class Projectile : NetworkBehaviour
     {
         // Auto destruir después de cierto tiempo (en red)
         Invoke(nameof(SelfDestruct), lifeTime);
+        SetSpecialVisuals();
     }
 
     private void Update()
@@ -31,17 +32,18 @@ public class Projectile : NetworkBehaviour
             // Lógica extra para proyectiles especiales
             if (specialType == ModelPlayer.SpecialType.Stun)
             {
-                // Aplicar un efecto stun si tenés (agregar lógica más adelante)
+                targetModel.Stun(2f); // Aturde por 2 segundos
+                // TODO: Aplicar un efecto stun si tenés (agregar lógica más adelante)
             }
             else if (specialType == ModelPlayer.SpecialType.Fire)
             {
-                // Podés aplicar daño extra o quemadura aquí
+                // TODO: Podés aplicar daño extra o quemadura aquí
                 dmg += 20;
+                // TODO: Podés activar algún efecto visual de fuego en el auto aquí
             }
 
             // Modifica la vida y pasa el autor como atacante
             targetModel.ModifyLife(-dmg, Object.InputAuthority);
-
             Runner.Despawn(Object);
         }
         // Si toca cualquier otra cosa sólida, también se destruye
@@ -55,5 +57,32 @@ public class Projectile : NetworkBehaviour
     {
         if (Object != null && Object.IsValid)
             Runner.Despawn(Object);
+    }
+    
+    private void SetSpecialVisuals()
+    {
+        //TODO: Cambia color del mesh/material según el tipo especial
+        //TODO: Podés expandir esto para activar efectos de partículas o sonidos.
+        /*Stun:
+        Podés agregar una variable de red tipo isStunned y un timer en el player. Cuando se activa, deshabilitás controles por X segundos.
+
+        Fire:
+        Podés activar un efecto de quemadura visual y aplicar daño en el tiempo si querés.*/
+        
+        var rend = GetComponentInChildren<Renderer>();
+        if (rend == null) return;
+
+        if (specialType == ModelPlayer.SpecialType.Fire)
+        {
+            rend.material.color = Color.red;
+        }
+        else if (specialType == ModelPlayer.SpecialType.Stun)
+        {
+            rend.material.color = Color.cyan;
+        }
+        else
+        {
+            rend.material.color = Color.white;
+        }
     }
 }

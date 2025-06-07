@@ -1,3 +1,4 @@
+using System;
 using Fusion;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public SpecialType SpecialAmmo { get; set; }
     [Networked] public bool IsDead { get; set; }
     [Networked] public float RespawnTimer { get; set; }
+    [Networked] public bool IsStunned { get; set; }
+    [Networked] public float StunTimer { get; set; }
 
     public enum SpecialType { None, Stun, Fire }
 
@@ -72,5 +75,24 @@ public class ModelPlayer : NetworkBehaviour
     public void SetSpecial(SpecialType type)
     {
         SpecialAmmo = type;
+    }
+    
+    public void Stun(float duration)
+    {
+        IsStunned = true;
+        StunTimer = duration;
+    }
+
+    public void UpdateStun(float deltaTime)
+    {
+        if (IsStunned)
+        {
+            StunTimer -= deltaTime;
+            if (StunTimer <= 0f)
+            {
+                IsStunned = false;
+                StunTimer = 0f;
+            }
+        }
     }
 }

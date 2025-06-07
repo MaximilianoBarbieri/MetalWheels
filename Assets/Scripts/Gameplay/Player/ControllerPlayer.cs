@@ -26,6 +26,17 @@ public class ControllerPlayer : NetworkBehaviour
         Debug.Log("FIXED UPDATE");
         
         if (!HasInputAuthority) return;
+        
+        // Actualiza el stun desde Model
+        model.UpdateStun(Runner.DeltaTime);
+
+        // Si está stuneado, ignora inputs y frena el auto
+        if (model.IsStunned)
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            return;
+        }
 
         // Respawn timer lógica
         if (model.IsDead)
@@ -34,7 +45,7 @@ public class ControllerPlayer : NetworkBehaviour
             if (model.RespawnTimer <= 0)
             {
                 // Buscar spawn point libre y respawnear
-                Transform spawn = SpawnManager.Instance.GetFreeSpawnPoint();
+                Transform spawn = SpawnManager.Instance.GetFreePlayerSpawnPoint();
                 model.RespawnAt(spawn.position, spawn.rotation);
                 rb.velocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;

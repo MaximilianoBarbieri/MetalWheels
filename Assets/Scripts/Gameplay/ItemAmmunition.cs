@@ -11,6 +11,7 @@ public class ItemAmmunition : NetworkBehaviour
         if (model != null && !model.IsDead)
         {
             model.SetSpecial(specialType);
+            SpawnManager.Instance?.NotifyItemPicked(Object);
             Runner.Despawn(Object);
         }
     }
