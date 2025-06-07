@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6605139602779671156
+--- !u!1 &6782013714008322989
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,40 +8,41 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7092117014388658431}
-  - component: {fileID: 3762482400273996021}
+  - component: {fileID: 158211064127184443}
+  - component: {fileID: 4364964422968371122}
   m_Layer: 0
-  m_Name: NetworkRunnerHandler
+  m_Name: LobbyManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7092117014388658431
+--- !u!4 &158211064127184443
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6605139602779671156}
+  m_GameObject: {fileID: 6782013714008322989}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 967.19086, y: 400.78442, z: -2.5439267}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3762482400273996021
+--- !u!114 &4364964422968371122
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6605139602779671156}
+  m_GameObject: {fileID: 6782013714008322989}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 186d37008f061b6418e3e88e42a35418, type: 3}
+  m_Script: {fileID: 11500000, guid: ef080eda03b299b469d6224d78debd7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runnerPrefab: {fileID: 7302487859023300566, guid: 48fbc2508f8d1ab4881de52e0bf022dc, type: 3}
+  carPrefabs: []
+  spawnPoints: []
