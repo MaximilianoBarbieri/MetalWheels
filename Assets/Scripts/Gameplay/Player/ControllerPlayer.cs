@@ -1,8 +1,12 @@
+using Cinemachine;
 using Fusion;
 using UnityEngine;
 
 public class ControllerPlayer : NetworkBehaviour
 {
+    public CinemachineVirtualCamera vCamPrefab;
+    private CinemachineVirtualCamera myCam;
+    
     [SerializeField] public ModelPlayer model;
     [SerializeField] public ViewPlayer view;
     [SerializeField] private Rigidbody rb;
@@ -19,6 +23,26 @@ public class ControllerPlayer : NetworkBehaviour
     public override void Spawned()
     {
         model.InitStats(PlayerData.CarSelected);
+
+        // Solo instanciar cámara si es mi propio jugador
+        if (Object.HasInputAuthority)
+        {
+            if (vCamPrefab != null)
+            {
+                myCam = Instantiate(vCamPrefab);
+
+                // Buscar el CameraTarget (empty hijo del auto) o el propio transform
+                Transform camTarget = transform.Find("CameraTarget");
+                if (camTarget == null) camTarget = transform;
+
+                myCam.Follow = camTarget;
+                myCam.LookAt = camTarget;
+
+                // OPCIONAL: Si usás Tag "MainCamera" en la escena, desactivalo para que no haya conflicto de cámaras.
+                Camera mainCam = Camera.main;
+                if (mainCam != null) mainCam.gameObject.SetActive(false);
+            }
+        }
     }
 
     public override void FixedUpdateNetwork()
