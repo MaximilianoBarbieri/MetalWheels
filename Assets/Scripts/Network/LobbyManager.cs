@@ -1,6 +1,6 @@
 using Fusion;
 using UnityEngine;
-
+//TODO: codigo aparentemente innecesario
 public class LobbyManager : NetworkBehaviour
 {
     public GameObject[] carPrefabs;

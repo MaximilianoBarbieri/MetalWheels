@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class NetworkRunnerHandler : MonoBehaviour
 {
-    public NetworkRunner runnerPrefab;
+    [SerializeField] public NetworkRunner runnerPrefab;
     private static NetworkRunner currentRunner;
 
     public void StartGame(GameMode mode)
