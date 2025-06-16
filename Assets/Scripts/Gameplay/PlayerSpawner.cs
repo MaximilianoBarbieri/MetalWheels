@@ -5,57 +5,67 @@ using Fusion.Sockets;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
+public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef[] _playerPrefabs;
     [SerializeField] private Transform[] spawnPoints;
-    private List<int> usedIndices = new();
+    [Networked, Capacity(4)] 
+    private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
 
-    private Transform GetFreeSpawnPoint()
+    private Transform GetFreeSpawnPoint(PlayerRef player)
     {
         List<int> available = new();
+
         for (int i = 0; i < spawnPoints.Length; i++)
         {
-            if (!usedIndices.Contains(i))
+            if (!UsedSpawnIndices.ContainsValue(i))
                 available.Add(i);
         }
 
         if (available.Count == 0)
-            usedIndices.Clear();
+        {
+            Debug.LogWarning("Todos los puntos están ocupados. Se reutilizará uno al azar.");
+            return spawnPoints[Random.Range(0, spawnPoints.Length)];
+        }
 
-        int index = available.Count > 0
-            ? available[Random.Range(0, available.Count)]
-            : Random.Range(0, spawnPoints.Length);
-        usedIndices.Add(index);
+        int index = available[Random.Range(0, available.Count)];
+        UsedSpawnIndices.Add(player, index);
+
         return spawnPoints[index];
     }
-
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         int selection = PlayerData.CarSelected;
         NetworkPrefabRef prefab = _playerPrefabs[selection];
+        Debug.Log("OnPlayerJoined");
 
         if (runner.IsServer)
         {
-            Transform point = GetFreeSpawnPoint();
-            runner.Spawn(prefab, point.position, Quaternion.identity, player);
+            Debug.Log("OnPlayerJoined: runner.IsServer");
+            Transform point = GetFreeSpawnPoint(player);
+            runner.Spawn(prefab, point.transform.position, Quaternion.identity, player);
         }
+        
+        if (PlayerPrefs.GetInt("PlayerSelected", 0).Equals(0))
+            Debug.Log("Seleccionado CAR1");
+        else
+            Debug.Log("Seleccionado CAR2");
+    }
+    
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        if (UsedSpawnIndices.ContainsKey(player)) UsedSpawnIndices.Remove(player);
+    }
+    
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+    {
+        runner.Shutdown();
     }
 
     #region Unused Runner Callbacks
 
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-    {
-        throw new NotImplementedException();
-    }
-
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         throw new NotImplementedException();
     }

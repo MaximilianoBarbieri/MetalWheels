@@ -22,6 +22,8 @@ public class ItemSpawner : NetworkBehaviour
         }
     }
 
+    //TODO: modificar este metodo
+    //algo superior tiene que saber que spawnpoint obtuvo cada player para no pisar los puntos de spawn
     private void SpawnMissingItems()
     {
         for (int i = 0; i < spawnPoints.Length; i++)

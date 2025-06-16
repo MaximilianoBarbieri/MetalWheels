@@ -83,8 +83,7 @@ public class LobbyUI : MonoBehaviour
         _hostBTN.interactable = false;
         _networkHandler.CreateGame(_hostSessionNameInput.text, "Gameplay");
     }
-
-
+    
     private void Btn_Back()
     {
         //TODO: hacer algo parecido a esto que tenia
