@@ -33,15 +33,15 @@ public class ControllerPlayer : NetworkBehaviour
                 myCam = Instantiate(vCamPrefab);
 
                 // Buscar el CameraTarget (empty hijo del auto) o el propio transform
-                Transform camTarget = transform.Find("CameraTarget");
+                Transform camTarget = transform.FindChild("CameraTarget");
                 if (camTarget == null) camTarget = transform;
 
                 myCam.Follow = camTarget;
                 myCam.LookAt = camTarget;
 
                 // OPCIONAL: Si usás Tag "MainCamera" en la escena, desactivalo para que no haya conflicto de cámaras.
-                Camera mainCam = Camera.main;
-                if (mainCam != null) mainCam.gameObject.SetActive(false);
+                //Camera mainCam = Camera.main;
+                //if (mainCam != null) mainCam.gameObject.SetActive(false);
             }
         }
     }
