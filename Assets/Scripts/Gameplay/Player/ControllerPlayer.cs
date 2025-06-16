@@ -48,8 +48,6 @@ public class ControllerPlayer : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        Debug.Log("FIXED UPDATE");
-        
         if (!HasInputAuthority) return;
         
         // Actualiza el stun desde Model

@@ -47,7 +47,7 @@ public class PlayerSpawner : NetworkBehaviour,  IPlayerJoined, IPlayerLeft
             Runner.Spawn(prefab, point.transform.position, Quaternion.identity, player);
         }
         
-        if (PlayerPrefs.GetInt("PlayerSelected", 0).Equals(0))
+        if (PlayerData.CarSelected.Equals(0))
             Debug.Log("Seleccionado CAR1");
         else
             Debug.Log("Seleccionado CAR2");
