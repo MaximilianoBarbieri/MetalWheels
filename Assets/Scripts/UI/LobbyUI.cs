@@ -60,13 +60,9 @@ public class LobbyUI : MonoBehaviour
     void Btn_JoinLobby()
     {
         _networkHandler.JoinLobby();
-
-        //TODO: Usar PlayerData en vez de PlayerPrefs 
-        //PlayerPrefs.SetString("UserNickName", _nicknameInput.text);
+        
         PlayerData.Nickname = _nicknameInput.text;
-
-        /*_initialPanel.SetActive(false);
-        _statusPanel.SetActive(true);*/
+        
         ShowPanel(_statusPanel);
 
         _statusText.text = "Joining Lobby...";

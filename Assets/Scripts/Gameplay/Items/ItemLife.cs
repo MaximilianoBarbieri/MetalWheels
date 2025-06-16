@@ -1,24 +1,27 @@
 using Fusion;
 using UnityEngine;
 
-public class ItemLife : NetworkBehaviour, IItemPickup
+namespace Gameplay.Items
 {
-    [SerializeField] private int healAmount = 50;
-    private ItemSpawner _itemSpawner;
-
-    public void SetSpawner(ItemSpawner spawner)
+    public class ItemLife : NetworkBehaviour, IItemPickup
     {
-        _itemSpawner = spawner;
-    }
+        [SerializeField] private int healAmount = 50;
+        private ItemSpawner _itemSpawner;
 
-    private void OnTriggerEnter(Collider other)
-    {
-        var model = other.GetComponent<ModelPlayer>();
-        if (model != null && !model.IsDead)
+        public void SetSpawner(ItemSpawner spawner)
         {
-            model.ModifyLife(healAmount);
-            _itemSpawner?.NotifyItemPicked(Object);
-            Runner.Despawn(Object);
+            _itemSpawner = spawner;
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            var model = other.GetComponent<ModelPlayer>();
+            if (model != null && !model.IsDead)
+            {
+                model.ModifyLife(healAmount);
+                _itemSpawner?.NotifyItemPicked(Object);
+                Runner.Despawn(Object);
+            }
         }
     }
 }

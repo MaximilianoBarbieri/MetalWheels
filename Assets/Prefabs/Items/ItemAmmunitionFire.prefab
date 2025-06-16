@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 1163272030130583894}
   - component: {fileID: 4951914115862061070}
   - component: {fileID: 2912581345658000377}
-  - component: {fileID: 4283569347236984955}
   - component: {fileID: 3299740864585942272}
+  - component: {fileID: -4480627308556235036}
   m_Layer: 0
   m_Name: ItemAmmunitionFire
   m_TagString: Untagged
@@ -107,19 +107,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4283569347236984955
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5600123857951937204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79b2e874d08af70498c0a3f1b9b7fb1f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  specialType: 2
 --- !u!114 &3299740864585942272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,5 +124,18 @@ MonoBehaviour:
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: 4283569347236984955}
+  - {fileID: -4480627308556235036}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &-4480627308556235036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5600123857951937204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79b2e874d08af70498c0a3f1b9b7fb1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  specialType: 2

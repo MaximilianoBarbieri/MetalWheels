@@ -33,7 +33,7 @@ public class ControllerPlayer : NetworkBehaviour
                 myCam = Instantiate(vCamPrefab);
 
                 // Buscar el CameraTarget (empty hijo del auto) o el propio transform
-                Transform camTarget = transform.FindChild("CameraTarget");
+                Transform camTarget = transform.Find("CameraTarget");
                 if (camTarget == null) camTarget = transform;
 
                 myCam.Follow = camTarget;

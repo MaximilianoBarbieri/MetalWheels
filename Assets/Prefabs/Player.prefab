@@ -863,6 +863,7 @@ GameObject:
   - component: {fileID: 3198519767489255268}
   - component: {fileID: 3512009382607172532}
   - component: {fileID: 6984844880711415237}
+  - component: {fileID: -3423392941068675743}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1014,7 +1015,31 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 1929084465712203976}
   - {fileID: 3198519767489255268}
+  - {fileID: -3423392941068675743}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &-3423392941068675743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851659979244366952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a591d221a634417e9827eb58e17de84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 1
+  _interpolationTarget: {fileID: 0}
+  UsePreciseRotation: 0
+  UseRenderSleepThresholds: 1
+  RenderThresholds:
+    UseEnergy: 1
+    Position: 0.01
+    Rotation: 0.01
+    Scale: 0.01
 --- !u!1 &8283228725532981500
 GameObject:
   m_ObjectHideFlags: 0
