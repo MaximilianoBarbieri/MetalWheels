@@ -2733,8 +2733,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2035883012}
-  - {fileID: 139171277}
   - {fileID: 402482557}
+  - {fileID: 139171277}
   - {fileID: 1533690458}
   - {fileID: 867802816}
   - {fileID: 1629380799}
@@ -4723,8 +4723,8 @@ MonoBehaviour:
   _statusText: {fileID: 851730979}
   _nicknameInput: {fileID: 867802817}
   _hostSessionNameInput: {fileID: 319383994}
-  _carA: {fileID: 139171274}
-  _carB: {fileID: 402482558}
+  _carA: {fileID: 402482558}
+  _carB: {fileID: 139171274}
   _backBTN: {fileID: 1629380796}
   _joinLobbyBTN: {fileID: 1832564622}
   _goToHostPanelBTN: {fileID: 766198692}
