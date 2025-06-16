@@ -1,6 +1,7 @@
 using Cinemachine;
 using Fusion;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ControllerPlayer : NetworkBehaviour
 {
@@ -69,8 +70,11 @@ public class ControllerPlayer : NetworkBehaviour
             if (model.RespawnTimer <= 0)
             {
                 // Buscar spawn point libre y respawnear
-                Transform spawn = SpawnManager.Instance.GetFreePlayerSpawnPoint();
-                model.RespawnAt(spawn.position, spawn.rotation);
+                //TODO: VER COMO MIERDA HACER PARA PASARLE EL SPAWNPOINT AL QUE DEBE IR sin pisarse con los otros players
+                //Transform spawn = SpawnManager.Instance.GetFreePlayerSpawnPoint();
+                //model.RespawnAt(spawn.position, spawn.rotation);
+                Vector3 spawn = Vector3.zero;
+                model.RespawnAt(spawn, new Quaternion(0,0,0,0));
                 rb.velocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
             }

@@ -18784,111 +18784,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!1001 &557412876
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 967.19086
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 400.78442
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -2.5439267
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 158211064127184443, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: carPrefabs.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.size
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: carPrefabs.Array.data[0]
-      value: 
-      objectReference: {fileID: 5485838045370724214, guid: 17542fa30e150e34cac155265ff20429, type: 3}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: carPrefabs.Array.data[1]
-      value: 
-      objectReference: {fileID: 7519403795207061241, guid: ae8eb205669ee6941814fe3fe21ab7ed, type: 3}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[0]
-      value: 
-      objectReference: {fileID: 1501273190}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[1]
-      value: 
-      objectReference: {fileID: 1128878977}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[2]
-      value: 
-      objectReference: {fileID: 849089916}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[3]
-      value: 
-      objectReference: {fileID: 568913761}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[4]
-      value: 
-      objectReference: {fileID: 1501273190}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[5]
-      value: 
-      objectReference: {fileID: 1128878977}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[6]
-      value: 
-      objectReference: {fileID: 849089916}
-    - target: {fileID: 4364964422968371122, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: spawnPoints.Array.data[7]
-      value: 
-      objectReference: {fileID: 568913761}
-    - target: {fileID: 6782013714008322989, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
-      propertyPath: m_Name
-      value: LobbyManager
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 525a5a2763723ae4498a42146d2c1570, type: 3}
 --- !u!1 &560264827
 GameObject:
   m_ObjectHideFlags: 0
@@ -35711,8 +35606,7 @@ MonoBehaviour:
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
-  NetworkedBehaviours:
-  - {fileID: 1066331080}
+  NetworkedBehaviours: []
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1066331080
 MonoBehaviour:
@@ -35726,22 +35620,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a127d6ec4661dc44a902a75226600cd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _runner: {fileID: 0}
+  _object: {fileID: 0}
+  InvokeRpc: 0
+  ObjectIndex: 0
+  WordOffset: 0
+  WordCount: 0
+  DefaultReplicated: 1
+  _playerPrefabs: []
+  _playerPrefab:
+    RawGuidValue:
+    - 0
+    - 0
   playerSpawnPoints:
   - {fileID: 1501273190}
   - {fileID: 1128878977}
   - {fileID: 849089916}
   - {fileID: 568913761}
+  usedPlayerIndices: 
   itemSpawnPoints:
   - {fileID: 311747022}
   - {fileID: 774353168}
   - {fileID: 1257535048}
   - {fileID: 555422929}
   itemPrefabs:
-  - RawGuidValue: 6c6ffd20850978b4d86833144c01164d
-  - RawGuidValue: bdc759280b66b9944bf8082701fe8870
-  - RawGuidValue: 1a1e8505b6da64c449b4b8f6fbe8207c
-  - RawGuidValue: c3ba35b72584193448a0a64636d611d2
+  - RawGuidValue:
+    - -5442589682288464020
+    - 5554628616676141272
+  - RawGuidValue:
+    - -7730035087297099843
+    - 8109010409983899723
+  - RawGuidValue:
+    - -4295067669293097446
+    - 8944405028831540297
+  - RawGuidValue:
+    - 3754177061912427203
+    - -3309628722538700728
   itemSpawnInterval: 3
+  _spawnedItems: []
+  itemSpawnTimer: 0
 --- !u!1 &1066352192
 GameObject:
   m_ObjectHideFlags: 0
@@ -69938,7 +69855,6 @@ SceneRoots:
   - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 1844123267}
-  - {fileID: 557412876}
   - {fileID: 93583205}
   - {fileID: 666939489}
   - {fileID: 76509620}

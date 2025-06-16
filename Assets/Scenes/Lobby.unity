@@ -1341,7 +1341,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.00025793177}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &735429542
@@ -1495,7 +1495,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &750775315
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3645,6 +3645,63 @@ RectTransform:
   m_AnchoredPosition: {x: -250, y: 50}
   m_SizeDelta: {x: 250, y: 60}
   m_Pivot: {x: 0.5, y: 0}
+--- !u!1001 &1636265324
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6605139602779671156, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_Name
+      value: NetworkRunnerHandler
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7092117014388658431, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0a3f25f46125146428c6b9db73366e45, type: 3}
 --- !u!1 &1732515370
 GameObject:
   m_ObjectHideFlags: 0
@@ -4588,16 +4645,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84e75748cbe5cfa41847e655fab1c7f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nicknamePanel: {fileID: 1023794948}
-  selectCarPanel: {fileID: 0}
-  roomPanel: {fileID: 1870868547}
-  nicknameInput: {fileID: 867802817}
-  startGameButton: {fileID: 0}
-  continueButton: {fileID: 1832564622}
-  backButton: {fileID: 1629380796}
-  connectedPlayersText: {fileID: 0}
-  highlightA: {fileID: 402482556}
-  highlightB: {fileID: 139171273}
+  _networkHandler: {fileID: 0}
+  _initialPanel: {fileID: 1023794948}
+  _sessionPanel: {fileID: 128153705}
+  _hostPanel: {fileID: 1870868547}
+  _statusPanel: {fileID: 750775314}
+  _statusText: {fileID: 851730979}
+  _nicknameInput: {fileID: 867802817}
+  _hostSessionNameInput: {fileID: 319383994}
+  _carA: {fileID: 139171274}
+  _carB: {fileID: 402482558}
+  _backBTN: {fileID: 1629380796}
+  _joinLobbyBTN: {fileID: 1832564622}
+  _goToHostPanelBTN: {fileID: 766198692}
+  _hostBTN: {fileID: 1135501607}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4606,3 +4667,4 @@ SceneRoots:
   - {fileID: 1065845331}
   - {fileID: 2126630272}
   - {fileID: 1732515373}
+  - {fileID: 1636265324}
