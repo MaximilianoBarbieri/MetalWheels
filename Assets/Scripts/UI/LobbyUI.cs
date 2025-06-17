@@ -42,16 +42,8 @@ public class LobbyUI : MonoBehaviour
             _statusPanel.SetActive(false);
             _sessionPanel.SetActive(true);
         };
-        
-        _carA.onClick.AddListener(() =>
-        {
-            PlayerPrefs.SetInt("PlayerSelected", 0);
-        });
-        
-        _carB.onClick.AddListener(() =>
-        {
-            PlayerPrefs.SetInt("PlayerSelected", 1);
-        });
+        _carA.onClick.AddListener(() => PlayerPrefs.SetInt("PlayerSelected", 0));
+        _carB.onClick.AddListener(() => PlayerPrefs.SetInt("PlayerSelected", 1));
     }
     
     void Btn_JoinLobby()

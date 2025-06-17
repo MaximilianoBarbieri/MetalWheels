@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Fusion;
 using Fusion.Sockets;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -57,13 +59,25 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     
     async Task InitializeGame(GameMode gameMode, string sessionName, int sceneIndex)
     {
+        // Crear un token con la información del jugador
+        var playerData = new Dictionary<string, object>
+        {
+            { "PlayerSelected", PlayerPrefs.GetInt("PlayerSelected", 0) },
+            { "PlayerNickName", PlayerPrefs.GetString("PlayerNickName", "Player") }
+        };
+        
+        // Serializar el token
+        string json = JsonConvert.SerializeObject(playerData);
+        byte[] connectionToken = Encoding.UTF8.GetBytes(json);
+        
         _currentRunner.ProvideInput = true;
 
         var result = await _currentRunner.StartGame(new StartGameArgs()
         {
             GameMode = gameMode,
             Scene =  SceneRef.FromIndex(sceneIndex),
-            SessionName = sessionName
+            SessionName = sessionName,
+            ConnectionToken = connectionToken // Aquí pasamos el token
         });
         
         if (!result.Ok)

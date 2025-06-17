@@ -22,10 +22,6 @@ public class NetworkPlayer : NetworkBehaviour
 
     public override void Spawned()
     {
-        /*_myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
-        lifeHandler = GetComponent<LifeHandler>();*/
-        //lifeHandler.GetMyUI(_myItemUI);
-
         _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
         if (Object.HasInputAuthority)
@@ -39,7 +35,6 @@ public class NetworkPlayer : NetworkBehaviour
         else
         {
             //GetComponentInChildren<MeshRenderer>().material.color = Color.red; //TODO: ACA PODRIAMOS SETEARLE AL OTRO PLAYER OTRA MESH
-
             UpdateNickname();
         }
     }
