@@ -23,7 +23,8 @@ public class ControllerPlayer : NetworkBehaviour
 
     public override void Spawned()
     {
-        model.InitStats(PlayerData.CarSelected);
+        //TODO: ver si dejar aca o debajo de Object.HasInputAuthority
+        model.InitStats(PlayerPrefs.GetInt("PlayerSelected"));
 
         // Solo instanciar cámara si es mi propio jugador
         if (Object.HasInputAuthority)
@@ -38,10 +39,6 @@ public class ControllerPlayer : NetworkBehaviour
 
                 myCam.Follow = camTarget;
                 myCam.LookAt = camTarget;
-
-                // OPCIONAL: Si usás Tag "MainCamera" en la escena, desactivalo para que no haya conflicto de cámaras.
-                //Camera mainCam = Camera.main;
-                //if (mainCam != null) mainCam.gameObject.SetActive(false);
             }
         }
     }

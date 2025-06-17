@@ -5,12 +5,11 @@ using Fusion.Sockets;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class PlayerSpawner : NetworkBehaviour,  IPlayerJoined, IPlayerLeft
+public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 {
     [SerializeField] private NetworkPrefabRef[] _playerPrefabs;
     [SerializeField] private Transform[] spawnPoints;
-    [Networked, Capacity(4)] 
-    private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
+    [Networked, Capacity(4)] private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
 
     private Transform GetFreeSpawnPoint(PlayerRef player)
     {
@@ -36,7 +35,7 @@ public class PlayerSpawner : NetworkBehaviour,  IPlayerJoined, IPlayerLeft
 
     public void PlayerJoined(PlayerRef player)
     {
-        int selection = PlayerData.CarSelected;
+        int selection = PlayerPrefs.GetInt("PlayerSelected");
         NetworkPrefabRef prefab = _playerPrefabs[selection];
         Debug.Log("OnPlayerJoined");
 
@@ -46,11 +45,9 @@ public class PlayerSpawner : NetworkBehaviour,  IPlayerJoined, IPlayerLeft
             Transform point = GetFreeSpawnPoint(player);
             Runner.Spawn(prefab, point.transform.position, Quaternion.identity, player);
         }
-        
-        if (PlayerData.CarSelected.Equals(0))
-            Debug.Log("Seleccionado CAR1");
-        else
-            Debug.Log("Seleccionado CAR2");
+
+
+        Debug.Log("Seleccionado CAR: " + selection);
     }
 
     public void PlayerLeft(PlayerRef player)

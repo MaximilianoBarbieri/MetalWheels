@@ -43,17 +43,14 @@ public class LobbyUI : MonoBehaviour
             _sessionPanel.SetActive(true);
         };
         
-        //TODO: Usar PlayerData en vez de PlayerPrefs 
         _carA.onClick.AddListener(() =>
         {
-            PlayerData.CarSelected = 0;
-            //PlayerPrefs.SetInt("PlayerSelected", 0);
+            PlayerPrefs.SetInt("PlayerSelected", 0);
         });
         
         _carB.onClick.AddListener(() =>
         {
-            PlayerData.CarSelected = 1;
-            //PlayerPrefs.SetInt("PlayerSelected", 1));
+            PlayerPrefs.SetInt("PlayerSelected", 1);
         });
     }
     
@@ -61,7 +58,7 @@ public class LobbyUI : MonoBehaviour
     {
         _networkHandler.JoinLobby();
         
-        PlayerData.Nickname = _nicknameInput.text;
+        PlayerPrefs.SetString("PlayerNickName", _nicknameInput.text);
         
         ShowPanel(_statusPanel);
 
