@@ -38,11 +38,12 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
     public void PlayerJoined(PlayerRef player)
     {
         if (!Runner.IsServer) return;
+        
+        #region Obtain lobby data
+        // Obtener data del jugador que entra
+        int selectedCar = 0; // valor def
+        string nickname = "Player"; // valor def
 
-        int selectedCar = 0; // valor default
-        string nickname = "Player";
-
-        // Obtener el token enviado por el jugador que entra
         byte[] tokenBytes = Runner.GetPlayerConnectionToken(player);
         if (tokenBytes != null)
         {
@@ -51,13 +52,12 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 
             if (data != null)
             {
-                Debug.Log("data NOO null");
                 if (data.TryGetValue("PlayerSelected", out var carSelectedObj))
                     selectedCar = (int)(long)carSelectedObj;
 
                 if (data.TryGetValue("PlayerNickName", out var nicknameObj))
                     nickname = nicknameObj.ToString();
-                
+
                 Debug.Log("SELECTED CAR: " + selectedCar);
                 Debug.Log("NICKNAME: " + nickname);
             }
@@ -67,14 +67,15 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
             }
         }
 
-        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        Runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
-        /*NetworkObject playerObj = Runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);*/
+        #endregion
 
-        
-        /*int selection = PlayerPrefs.GetInt("PlayerSelected");
+        Transform spawnPoint = GetFreeSpawnPoint(player);
+        Runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
+        /*NetworkObject playerObj = Runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
+
+        int selection = PlayerPrefs.GetInt("PlayerSelected");
         NetworkPrefabRef prefab = _playerPrefabs[selection];
-        
+
         Debug.Log("OnPlayerJoined");
         Debug.Log("Seleccionado CAR: " + selection);
 
