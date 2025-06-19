@@ -7,11 +7,18 @@ using Newtonsoft.Json;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
+public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef[] _playerPrefabs;
     [SerializeField] private Transform[] spawnPoints;
     [Networked, Capacity(4)] private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
+
+    public override void Spawned()
+    {
+        base.Spawned();
+        if (!Runner.IsServer) return;
+        Runner.AddCallbacks(this);
+    }
 
     private Transform GetFreeSpawnPoint(PlayerRef player)
     {
@@ -35,16 +42,22 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         return spawnPoints[index];
     }
 
-    public void PlayerJoined(PlayerRef player)
+    public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if (!Runner.IsServer) return;
-        
+        throw new NotImplementedException();
+    }
+
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+    {
+        if (!runner.IsServer) return;
+
         #region Obtain lobby data
+
         // Obtener data del jugador que entra
         int selectedCar = 0; // valor def
         string nickname = "Player"; // valor def
 
-        byte[] tokenBytes = Runner.GetPlayerConnectionToken(player);
+        byte[] tokenBytes = runner.GetPlayerConnectionToken(player);
         if (tokenBytes != null)
         {
             string json = Encoding.UTF8.GetString(tokenBytes);
@@ -70,25 +83,80 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
         #endregion
 
         Transform spawnPoint = GetFreeSpawnPoint(player);
-        Runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
-        /*NetworkObject playerObj = Runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
-
-        int selection = PlayerPrefs.GetInt("PlayerSelected");
-        NetworkPrefabRef prefab = _playerPrefabs[selection];
-
-        Debug.Log("OnPlayerJoined");
-        Debug.Log("Seleccionado CAR: " + selection);
-
-        if (Runner.IsServer)
-        {
-            Debug.Log("OnPlayerJoined: runner.IsServer");
-            Transform point = GetFreeSpawnPoint(player);
-            Runner.Spawn(prefab, point.transform.position, Quaternion.identity, player);
-        }*/
+        runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
     }
 
-    public void PlayerLeft(PlayerRef player)
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
+        if (!runner.IsServer) return;
         if (UsedSpawnIndices.ContainsKey(player)) UsedSpawnIndices.Remove(player);
     }
+
+    #region Unused callbacks
+
+    public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
+    {
+    }
+
+    public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
+    {
+    }
+
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+    {
+    }
+
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+    {
+    }
+
+    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
+    {
+    }
+
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
+    {
+    }
+
+    public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
+    {
+    }
+
+    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data)
+    {
+    }
+
+    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
+    {
+    }
+
+    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
+    {
+    }
+
+    public void OnConnectedToServer(NetworkRunner runner)
+    {
+    }
+
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+    {
+    }
+
+    public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
+    {
+    }
+
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
+    {
+    }
+
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+    }
+
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+    }
+
+    #endregion
 }

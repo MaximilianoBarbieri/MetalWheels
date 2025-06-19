@@ -96,4 +96,4 @@ MonoBehaviour:
   - RawGuidValue: bdc759280b66b9944bf8082701fe8870
   - RawGuidValue: 1a1e8505b6da64c449b4b8f6fbe8207c
   - RawGuidValue: c3ba35b72584193448a0a64636d611d2
-  interval: 3
+  respawnDelay: 3
