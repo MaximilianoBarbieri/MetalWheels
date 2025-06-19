@@ -1,6 +1,3 @@
-﻿using Fusion;
-using UnityEngine;
-
 using Fusion;
 using UnityEngine;
 using System.Collections.Generic;
@@ -13,7 +10,7 @@ public class ItemSpawner : NetworkBehaviour
 
     [Networked, Capacity(20)] private NetworkArray<NetworkObject> spawnedItems { get; }
 
-    private bool isFirstSpawnDone = false;
+    private bool isFirstSpawnDone;
 
     private struct PendingRespawn
     {
@@ -87,6 +84,8 @@ public class ItemSpawner : NetworkBehaviour
         var itemObj = Runner.Spawn(itemPrefabs[prefabIndex], spawnPoints[index].position, Quaternion.identity);
 
         if (itemObj.TryGetComponent<IItemPickup>(out var pickup))
+
+
             pickup.SetSpawner(this);
 
         spawnedItems.Set(index, itemObj);

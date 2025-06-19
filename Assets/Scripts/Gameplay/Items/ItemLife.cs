@@ -1,27 +1,46 @@
 using Fusion;
 using UnityEngine;
 
-namespace Gameplay.Items
+public class ItemLife : NetworkBehaviour, IItemPickup
 {
-    public class ItemLife : NetworkBehaviour, IItemPickup
+    [SerializeField] private GameObject visual;
+    [SerializeField] private int healAmount = 50;
+
+    [Networked] private TickTimer RespawnTimer { get; set; }
+
+    private ItemSpawner _spawner;
+
+    public void SetSpawner(ItemSpawner spawner)
     {
-        [SerializeField] private int healAmount = 50;
-        private ItemSpawner _itemSpawner;
+        _spawner = spawner;
+    }
 
-        public void SetSpawner(ItemSpawner spawner)
+    public override void FixedUpdateNetwork()
+    {
+        if (RespawnTimer.ExpiredOrNotRunning(Runner)) return;
+
+        if (visual != null)
+            visual.SetActive(false);
+
+        if (RespawnTimer.Expired(Runner))
         {
-            _itemSpawner = spawner;
+            if (_spawner != null)
+                Runner.Despawn(Object);
         }
+    }
 
-        private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        if (other.CompareTag("Player"))
         {
             var model = other.GetComponent<ModelPlayer>();
-            if (model != null && !model.IsDead)
-            {
-                model.ModifyLife(healAmount);
-                _itemSpawner?.NotifyItemPicked(Object);
-                Runner.Despawn(Object);
-            }
+            model.ModifyLife(healAmount);
+
+            RespawnTimer = TickTimer.CreateFromSeconds(Runner, 3f);
+            _spawner.NotifyItemPicked(Object);
+            Runner.Despawn(Object);
         }
     }
 }

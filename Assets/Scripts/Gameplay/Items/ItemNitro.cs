@@ -3,20 +3,41 @@ using UnityEngine;
 
 public class ItemNitro : NetworkBehaviour, IItemPickup
 {
-    private ItemSpawner _itemSpawner;
+    [SerializeField] private GameObject visual;
+    [Networked] private TickTimer RespawnTimer { get; set; }
+
+    private ItemSpawner _spawner;
 
     public void SetSpawner(ItemSpawner spawner)
     {
-        _itemSpawner = spawner;
+        _spawner = spawner;
+    }
+
+    public override void FixedUpdateNetwork()
+    {
+        if (RespawnTimer.ExpiredOrNotRunning(Runner)) return;
+
+        if (visual != null)
+            visual.SetActive(false);
+
+        if (RespawnTimer.Expired(Runner))
+        {
+            if (_spawner != null)
+                Runner.Despawn(Object);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        var model = other.GetComponent<ModelPlayer>();
-        if (model != null && !model.IsDead)
+        if (!Object.HasStateAuthority) return;
+
+        if (other.CompareTag("Player"))
         {
+            var model = other.GetComponent<ModelPlayer>();
             model.Nitro = 1f;
-            _itemSpawner?.NotifyItemPicked(Object);
+            
+            RespawnTimer = TickTimer.CreateFromSeconds(Runner, 3f);
+            _spawner.NotifyItemPicked(Object);
             Runner.Despawn(Object);
         }
     }
