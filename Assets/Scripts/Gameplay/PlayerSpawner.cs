@@ -10,12 +10,16 @@ using Random = UnityEngine.Random;
 public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef[] _playerPrefabs;
+    
+    private CharacterInputHandler _characterInputHandler;
+    
     [SerializeField] private Transform[] spawnPoints;
     [Networked, Capacity(4)] private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
 
     public override void Spawned()
     {
         base.Spawned();
+
         if (!Runner.IsServer) return;
         Runner.AddCallbacks(this);
     }
@@ -44,7 +48,11 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        throw new NotImplementedException();
+        if (!NetworkPlayer.Local) return;
+
+        _characterInputHandler ??= NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
+
+        input.Set(_characterInputHandler.GetLocalInputs());
     }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)

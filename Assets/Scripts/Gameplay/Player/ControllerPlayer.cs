@@ -1,3 +1,4 @@
+using System;
 using Cinemachine;
 using Fusion;
 using UnityEngine;
@@ -5,15 +6,15 @@ using UnityEngine.UIElements;
 
 public class ControllerPlayer : NetworkBehaviour
 {
+    //NEW var
+    private NetworkCharacterControllerCustom _myCharacterController;
+    //private WeaponHandler _myWeaponHandler;
+
+    //OLD vars
     public CinemachineVirtualCamera vCamPrefab;
     private CinemachineVirtualCamera myCam;
-    
+
     [SerializeField] public ModelPlayer model;
-    [SerializeField] public ViewPlayer view;
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private Transform shootPoint;
-    [SerializeField] private GameObject projectileNormalPrefab;
-    [SerializeField] private GameObject projectileSpecialPrefab;
 
     [SerializeField] private float jumpCooldown = 2f;
     [SerializeField] private float minCrashForce = 7f;
@@ -21,6 +22,7 @@ public class ControllerPlayer : NetworkBehaviour
 
     private float nextJumpTime = 0f;
 
+    //TODO: ver si dejar esto aca o replantearlo en otro lado
     public override void Spawned()
     {
         //TODO: ver si dejar aca o debajo de Object.HasInputAuthority
@@ -43,10 +45,69 @@ public class ControllerPlayer : NetworkBehaviour
         }
     }
 
+    private void Awake()
+    {
+        _myCharacterController = GetComponent<NetworkCharacterControllerCustom>();
+        //_myWeaponHandler = GetComponent<WeaponHandler>();
+
+        /*var lifeHandler = GetComponent<LifeHandler>();
+
+        lifeHandler.OnDeadChange += (isDead) =>
+        {
+            _myCharacterController.Controller.enabled = !isDead;
+            enabled = !isDead;
+        };
+
+        lifeHandler.OnRespawn += () =>
+        {
+            _myCharacterController.Teleport(transform.position);
+        };*/
+    }
+
     public override void FixedUpdateNetwork()
     {
+        #region NEW
+
+        if (!GetInput(out NetworkInputData networkInputData)) return;
+
+        //MOVIMIENTO
+        Vector3 moveDirection = new Vector3(
+            networkInputData.movementInputHorizontal,
+            0,
+            networkInputData.movementInputVertical
+        );
+        _myCharacterController.Move(moveDirection);
+
+        //JUMP
+        if (networkInputData.isJumpPressed)
+            _myCharacterController.Jump();
+
+        //NITRO
+        //Todo: no deberia hacer falta xq se ejecuta dentro de _myCharacterController.Move
+        /*if (networkInputData.isNitroPressed)
+        {
+            _myCharacterController.Move(moveDirection);
+        }*/
+
+        //SHOOT NORMAL
+        if (networkInputData.isShootNormalPressed)
+        {
+        //_myWeaponHandler.Fire();
+        }
+
+        //SHOOT SPECIAL
+        if (networkInputData.isShootSpecialPressed)
+        {
+        //_myWeaponHandler.Fire();
+        }
+
+        #endregion
+
+        #region OLD
+
+        /*//OLD
         if (!HasInputAuthority) return;
-        
+
         // Actualiza el stun desde Model
         model.UpdateStun(Runner.DeltaTime);
 
@@ -112,7 +173,9 @@ public class ControllerPlayer : NetworkBehaviour
             if (proj != null && proj.GetComponent<Projectile>() != null)
                 proj.GetComponent<Projectile>().specialType = model.SpecialAmmo;
             model.SpecialAmmo = ModelPlayer.SpecialType.None;
-        }
+        }*/
+
+        #endregion
     }
 
     // Daño por colisión/crash
