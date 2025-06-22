@@ -1016,9 +1016,9 @@ MonoBehaviour:
   braking: 10
   maxSpeed: 2
   rotationSpeed: 15
-  carAcceleration: 50
+  carAcceleration: 800
   carRotationSpeed: 100
-  carMaxSpeed: 100
+  carMaxSpeed: 500
   carBraking: 8
   nitroAccelerationMultiplier: 2
   nitroMaxSpeed: 20
