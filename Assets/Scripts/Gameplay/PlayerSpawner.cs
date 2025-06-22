@@ -10,50 +10,11 @@ using Random = UnityEngine.Random;
 public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef[] _playerPrefabs;
-    
-    private CharacterInputHandler _characterInputHandler;
-    
+
     [SerializeField] private Transform[] spawnPoints;
-    [Networked, Capacity(4)] private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
 
-    public override void Spawned()
-    {
-        base.Spawned();
-
-        if (!Runner.IsServer) return;
-        Runner.AddCallbacks(this);
-    }
-
-    private Transform GetFreeSpawnPoint(PlayerRef player)
-    {
-        List<int> available = new();
-
-        for (int i = 0; i < spawnPoints.Length; i++)
-        {
-            if (!UsedSpawnIndices.ContainsValue(i))
-                available.Add(i);
-        }
-
-        if (available.Count == 0)
-        {
-            Debug.LogWarning("Todos los puntos están ocupados. Se reutilizará uno al azar.");
-            return spawnPoints[Random.Range(0, spawnPoints.Length)];
-        }
-
-        int index = available[Random.Range(0, available.Count)];
-        UsedSpawnIndices.Add(player, index);
-
-        return spawnPoints[index];
-    }
-
-    public void OnInput(NetworkRunner runner, NetworkInput input)
-    {
-        if (!NetworkPlayer.Local) return;
-
-        _characterInputHandler ??= NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
-
-        input.Set(_characterInputHandler.GetLocalInputs());
-    }
+    private CharacterInputHandler _characterInputHandler;
+    [Networked] [Capacity(4)] private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
@@ -62,13 +23,13 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
         #region Obtain lobby data
 
         // Obtener data del jugador que entra
-        int selectedCar = 0; // valor def
-        string nickname = "Player"; // valor def
+        var selectedCar = 0; // valor def
+        var nickname = "Player"; // valor def
 
-        byte[] tokenBytes = runner.GetPlayerConnectionToken(player);
+        var tokenBytes = runner.GetPlayerConnectionToken(player);
         if (tokenBytes != null)
         {
-            string json = Encoding.UTF8.GetString(tokenBytes);
+            var json = Encoding.UTF8.GetString(tokenBytes);
             var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
 
             if (data != null)
@@ -90,14 +51,56 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 
         #endregion
 
-        Transform spawnPoint = GetFreeSpawnPoint(player);
+        var spawnPoint = GetFreeSpawnPoint(player);
         runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
+    }
+
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        if (!NetworkPlayer.Local) return;
+
+        _characterInputHandler ??= NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
+
+        input.Set(_characterInputHandler.GetLocalInputs());
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         if (!runner.IsServer) return;
         if (UsedSpawnIndices.ContainsKey(player)) UsedSpawnIndices.Remove(player);
+    }
+
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+    {
+        runner.Shutdown();
+    }
+
+    public override void Spawned()
+    {
+        base.Spawned();
+
+        if (!Runner.IsServer) return;
+        Runner.AddCallbacks(this);
+    }
+
+    private Transform GetFreeSpawnPoint(PlayerRef player)
+    {
+        List<int> available = new();
+
+        for (var i = 0; i < spawnPoints.Length; i++)
+            if (!UsedSpawnIndices.ContainsValue(i))
+                available.Add(i);
+
+        if (available.Count == 0)
+        {
+            Debug.LogWarning("Todos los puntos están ocupados. Se reutilizará uno al azar.");
+            return spawnPoints[Random.Range(0, spawnPoints.Length)];
+        }
+
+        var index = available[Random.Range(0, available.Count)];
+        UsedSpawnIndices.Add(player, index);
+
+        return spawnPoints[index];
     }
 
     #region Unused callbacks
@@ -111,10 +114,6 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
-    {
-    }
-
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
     }
 

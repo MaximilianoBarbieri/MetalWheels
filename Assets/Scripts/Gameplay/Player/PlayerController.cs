@@ -1,14 +1,15 @@
-using System;
 using Cinemachine;
 using Fusion;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class ControllerPlayer : NetworkBehaviour
+[RequireComponent(typeof(NetworkCharacterControllerCustom))]
+[RequireComponent(typeof(WeaponHandler))]
+[RequireComponent(typeof(LifeHandler))]
+public class PlayerController : NetworkBehaviour
 {
     //NEW var
     private NetworkCharacterControllerCustom _myCharacterController;
-    //private WeaponHandler _myWeaponHandler;
+    private WeaponHandler _myWeaponHandler;
 
     //OLD vars
     public CinemachineVirtualCamera vCamPrefab;
@@ -26,11 +27,12 @@ public class ControllerPlayer : NetworkBehaviour
     public override void Spawned()
     {
         //TODO: ver si dejar aca o debajo de Object.HasInputAuthority
-        model.InitStats(PlayerPrefs.GetInt("PlayerSelected"));
 
         // Solo instanciar cámara si es mi propio jugador
         if (Object.HasInputAuthority)
         {
+            model.InitStats(PlayerPrefs.GetInt("PlayerSelected"));
+            
             if (vCamPrefab != null)
             {
                 myCam = Instantiate(vCamPrefab);
@@ -48,20 +50,17 @@ public class ControllerPlayer : NetworkBehaviour
     private void Awake()
     {
         _myCharacterController = GetComponent<NetworkCharacterControllerCustom>();
-        //_myWeaponHandler = GetComponent<WeaponHandler>();
+        _myWeaponHandler = GetComponent<WeaponHandler>();
 
-        /*var lifeHandler = GetComponent<LifeHandler>();
+        var lifeHandler = GetComponent<LifeHandler>();
 
-        lifeHandler.OnDeadChange += (isDead) =>
+        lifeHandler.OnDeadChange += isDead =>
         {
             _myCharacterController.Controller.enabled = !isDead;
             enabled = !isDead;
         };
 
-        lifeHandler.OnRespawn += () =>
-        {
-            _myCharacterController.Teleport(transform.position);
-        };*/
+        lifeHandler.OnRespawn += () => { _myCharacterController.Teleport(transform.position); };
     }
 
     public override void FixedUpdateNetwork()
@@ -92,20 +91,20 @@ public class ControllerPlayer : NetworkBehaviour
         //SHOOT NORMAL
         if (networkInputData.isShootNormalPressed)
         {
-        //_myWeaponHandler.Fire();
+            _myWeaponHandler.Fire();
         }
 
         //SHOOT SPECIAL
         if (networkInputData.isShootSpecialPressed)
         {
-        //_myWeaponHandler.Fire();
+            //_myWeaponHandler.Fire();
         }
 
         #endregion
 
         #region OLD
 
-        /*//OLD
+            /*//OLD
         if (!HasInputAuthority) return;
 
         // Actualiza el stun desde Model
@@ -181,7 +180,7 @@ public class ControllerPlayer : NetworkBehaviour
     // Daño por colisión/crash
     private void OnCollisionEnter(Collision collision)
     {
-        if (!HasInputAuthority || model.IsDead) return;
+        if (!HasInputAuthority && model.IsDead) return;
 
         // Detectar si es otro auto/jugador
         ModelPlayer otherModel = collision.gameObject.GetComponent<ModelPlayer>();

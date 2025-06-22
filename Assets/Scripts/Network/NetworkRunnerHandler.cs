@@ -100,15 +100,10 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         OnSessionListUpdate(sessionList);
     }
     
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-    {
-        runner.Shutdown();
-    }
-    
     #endregion
     
     #region Unused Runner Callbacks
-    
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }

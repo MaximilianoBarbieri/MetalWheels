@@ -1,4 +1,3 @@
-using System;
 using Fusion;
 using UnityEngine;
 
@@ -16,20 +15,26 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public bool IsStunned { get; set; }
     [Networked] public float StunTimer { get; set; }
 
-    public enum SpecialType { None, Stun, Fire }
+    public enum SpecialType
+    {
+        None,
+        Stun,
+        Fire
+    }
 
     public void InitStats(int carType)
     {
         if (carType == 0)
         {
             MaxHealth = 100;
-            MaxSpeed = 18f;
+            MaxSpeed = 30f;
         }
         else
         {
             MaxHealth = 200;
-            MaxSpeed = 12f;
+            MaxSpeed = 20f;
         }
+
         CurrentHealth = MaxHealth;
         Nitro = 1f;
         SpecialAmmo = SpecialType.None;
@@ -59,6 +64,7 @@ public class ModelPlayer : NetworkBehaviour
                 attackerModel.Kills++;
             }
         }
+
         Deaths++;
     }
 
@@ -76,7 +82,7 @@ public class ModelPlayer : NetworkBehaviour
     {
         SpecialAmmo = type;
     }
-    
+
     public void Stun(float duration)
     {
         IsStunned = true;

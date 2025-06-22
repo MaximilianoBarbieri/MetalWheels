@@ -4,9 +4,9 @@ using UnityEngine;
 public class NetworkCharacterControllerCustom : NetworkCharacterController
 {
     [Header("Movimiento tipo auto")]
-    public float carAcceleration = 50f;
+    public float carAcceleration = 800f;
     public float carRotationSpeed = 100f;
-    public float carMaxSpeed = 100f;
+    public float carMaxSpeed = 500f;
     public float carBraking = 8f;
     
     [Header("Nitro")]

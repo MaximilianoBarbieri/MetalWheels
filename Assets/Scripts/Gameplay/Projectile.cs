@@ -3,86 +3,74 @@ using UnityEngine;
 
 public class Projectile : NetworkBehaviour
 {
-    [Networked] public int damage {get; set;}
-    [Networked] public ModelPlayer.SpecialType specialType { get; set; } = ModelPlayer.SpecialType.None;
-    [SerializeField] private float speed = 30f;
-    [SerializeField] private float lifeTime = 3f;
+    [Header("General")]
+    [SerializeField] private float _despawnTime = 5f;
+    [SerializeField] private float _speed = 20f;
+    [SerializeField] private byte _damage;
 
+    [Header("Prefab References")]
+    [SerializeField] private NetworkPrefabRef _normalBullet;
+    [SerializeField] private NetworkPrefabRef _stunBullet;
+    [SerializeField] private NetworkPrefabRef _fireBullet;
+    
+    private TickTimer _life;
+    private Vector3 _direction;
+    
     public override void Spawned()
     {
-        // Auto destruir después de cierto tiempo (en red)
-        Invoke(nameof(SelfDestruct), lifeTime);
-        SetSpecialVisuals();
+        _life = TickTimer.CreateFromSeconds(Runner, _despawnTime);
+        //TODO: hacer que el damage varie dependiendo el tipo de bullet
+        _damage = 25;
     }
 
-    private void Update()
+    public void Init(Vector3 dir )
     {
-        // Movimiento simple hacia adelante
-        transform.Translate(Vector3.forward * (speed * Time.deltaTime));
+        _direction = dir.normalized;
+    }
+
+    public override void FixedUpdateNetwork()
+    {
+        if (_life.Expired(Runner))
+        {
+            Runner.Despawn(Object);
+            return;
+        }
+
+        transform.position += _direction * _speed * Runner.DeltaTime;
+    }
+
+    public void Launch(NetworkRunner runner, Vector3 position, Quaternion rotation, ModelPlayer.SpecialType bulletType, PlayerRef owner)
+    {
+        NetworkPrefabRef prefabToUse = bulletType switch
+        {
+            ModelPlayer.SpecialType.Stun => _stunBullet,
+            ModelPlayer.SpecialType.Fire => _fireBullet,
+            _ => _normalBullet
+        };
+
+        runner.Spawn(
+            prefabToUse,
+            position,
+            rotation,
+            owner,
+            (NetworkRunner r, NetworkObject obj) =>
+            {
+                var proj = obj.GetComponent<Projectile>();
+                proj.Init(rotation * Vector3.forward);
+            });
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!Object.HasStateAuthority) return; // Solo el host aplica daño y destruye
-
-        var targetModel = other.GetComponent<ModelPlayer>();
-        if (targetModel != null && !targetModel.IsDead)
-        {
-            int dmg = damage;
-            // Lógica extra para proyectiles especiales
-            if (specialType == ModelPlayer.SpecialType.Stun)
-            {
-                targetModel.Stun(2f); // Aturde por 2 segundos
-                // TODO: Aplicar un efecto stun si tenés (agregar lógica más adelante)
-            }
-            else if (specialType == ModelPlayer.SpecialType.Fire)
-            {
-                // TODO: Podés aplicar daño extra o quemadura aquí
-                dmg += 20;
-                // TODO: Podés activar algún efecto visual de fuego en el auto aquí
-            }
-
-            // Modifica la vida y pasa el autor como atacante
-            targetModel.ModifyLife(-dmg, Object.InputAuthority);
-            Runner.Despawn(Object);
-        }
-        // Si toca cualquier otra cosa sólida, también se destruye
-        else if (!other.isTrigger)
-        {
-            Runner.Despawn(Object);
-        }
-    }
-
-    private void SelfDestruct()
-    {
-        if (Object != null && Object.IsValid)
-            Runner.Despawn(Object);
-    }
-    
-    private void SetSpecialVisuals()
-    {
-        //TODO: Cambia color del mesh/material según el tipo especial
-        //TODO: Podés expandir esto para activar efectos de partículas o sonidos.
-        /*Stun:
-        Podés agregar una variable de red tipo isStunned y un timer en el player. Cuando se activa, deshabilitás controles por X segundos.
-
-        Fire:
-        Podés activar un efecto de quemadura visual y aplicar daño en el tiempo si querés.*/
+        if (!Object.HasStateAuthority) return;
         
-        var rend = GetComponentInChildren<Renderer>();
-        if (rend == null) return;
-
-        if (specialType == ModelPlayer.SpecialType.Fire)
+        if (other.TryGetComponent(out LifeHandler lifeHandler))
         {
-            rend.material.color = Color.red;
+            //TODO: hacer que el damage varie dependiendo el tipo de bullet
+            lifeHandler.TakeDamage(_damage);
         }
-        else if (specialType == ModelPlayer.SpecialType.Stun)
-        {
-            rend.material.color = Color.cyan;
-        }
-        else
-        {
-            rend.material.color = Color.white;
-        }
+        
+        // Acá podés agregar efectos específicos según tipo (stun, fire, etc.)
+        Runner.Despawn(Object);
     }
 }

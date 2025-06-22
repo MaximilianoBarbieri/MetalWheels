@@ -5,22 +5,22 @@ public class NetworkPlayer : NetworkBehaviour
 {
     public static NetworkPlayer Local { get; private set; }
 
-    //private NickNameBarLifeItem _myItemUI;
+    private NickNameBarLife _myItemUI;
 
     public event Action OnPlayerDespawned = delegate { };
 
     [Networked, OnChangedRender(nameof(OnNickNameChanged))]
     string NickName { get; set; }
 
-    //LifeHandler lifeHandler;
+    LifeHandler lifeHandler;
 
-    //public LifeHandler SendMyLiFeHandler() => lifeHandler;
+    public LifeHandler SendMyLiFeHandler() => lifeHandler;
 
     public override void Spawned()
     {
-        /*_myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
+        _myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
         lifeHandler = GetComponent<LifeHandler>();
-        lifeHandler.GetMyUI(_myItemUI);*/
+        lifeHandler.GetMyUI(_myItemUI);
 
         if (Object.HasInputAuthority)
         {
@@ -38,7 +38,7 @@ public class NetworkPlayer : NetworkBehaviour
 
     void OnNickNameChanged()
     {
-        //_myItemUI.UpdateNickName(NickName);
+        _myItemUI.UpdateNickName(NickName);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)

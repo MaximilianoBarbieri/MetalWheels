@@ -31,6 +31,7 @@ Transform:
   m_Children:
   - {fileID: 5034057886398438825}
   - {fileID: 6689097095987173286}
+  - {fileID: 8917424346233397459}
   - {fileID: 6184232289013163062}
   - {fileID: 2776464739007289135}
   - {fileID: 6916894141296934130}
@@ -143,6 +144,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1646706085947384031
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8917424346233397459}
+  m_Layer: 0
+  m_Name: DeathFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8917424346233397459
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646706085947384031}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6747138045418663039}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2152016843324764239
 GameObject:
   m_ObjectHideFlags: 0
@@ -865,6 +897,8 @@ GameObject:
   - component: {fileID: 6747240166403912663}
   - component: {fileID: -1983544812649688618}
   - component: {fileID: -8410449478962887658}
+  - component: {fileID: 3485858441941591664}
+  - component: {fileID: 4783653739179344723}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -910,6 +944,8 @@ MonoBehaviour:
   - {fileID: 4140154826601458244}
   - {fileID: 6747240166403912663}
   - {fileID: -1983544812649688618}
+  - {fileID: 3485858441941591664}
+  - {fileID: 4783653739179344723}
   ForceRemoteRenderTimeframe: 0
 --- !u!143 &7792159476141714268
 CharacterController:
@@ -931,12 +967,12 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 2
-  m_Radius: 0.5
+  m_Radius: 0.6
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.25, z: 0}
 --- !u!114 &4718606934396272411
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1041,6 +1077,35 @@ MonoBehaviour:
   carRenderer: {fileID: 958735685602687215}
   stunFX: {fileID: 5873322316220674071}
   fireFX: {fileID: 8283228725532981500}
+--- !u!114 &3485858441941591664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851659979244366952}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ee58d2e55f2ea4ea85a9135a399adb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerVisual: {fileID: 0}
+--- !u!114 &4783653739179344723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851659979244366952}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c96bef05d230224683eecf37e2fc0f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bulletPrefab:
+    RawGuidValue: 00000000000000000000000000000000
+  _firingPositionTransform: {fileID: 0}
+  _shootingParticles: {fileID: 0}
 --- !u!1 &8283228725532981500
 GameObject:
   m_ObjectHideFlags: 0
