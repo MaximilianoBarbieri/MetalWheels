@@ -71,6 +71,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         byte[] connectionToken = Encoding.UTF8.GetBytes(json);
         
         _currentRunner.ProvideInput = true;
+        Debug.Log("⚙️ ProvideInput activado en el Runner");
 
         var result = await _currentRunner.StartGame(new StartGameArgs()
         {

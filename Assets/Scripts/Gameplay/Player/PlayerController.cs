@@ -67,7 +67,13 @@ public class PlayerController : NetworkBehaviour
     {
         #region NEW
 
-        if (!GetInput(out NetworkInputData networkInputData)) return;
+        if (!GetInput(out NetworkInputData networkInputData))
+        {
+            Debug.LogWarning("❌ GetInput NO devuelve datos en este cliente.");
+            return;
+        }
+
+        Debug.Log($"✅ GetInput OK - H: {networkInputData.movementInputHorizontal}, V: {networkInputData.movementInputVertical}");
 
         //MOVIMIENTO
         Vector3 moveDirection = new Vector3(

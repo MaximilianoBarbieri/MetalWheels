@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Fusion;
+
 public class NetworkPlayer : NetworkBehaviour
 {
     public static NetworkPlayer Local { get; private set; }
@@ -24,9 +25,14 @@ public class NetworkPlayer : NetworkBehaviour
 
         if (Object.HasInputAuthority)
         {
+            Debug.Log("🎮 Este player tiene input authority: " + Object.InputAuthority);
             Local = this;
 
             RPC_SetNewName(PlayerPrefs.GetString("PlayerNickName"));
+        }
+        else
+        {
+            Debug.Log("🙅 Este player NO tiene input authority: " + Object.InputAuthority);
         }
     }
 
