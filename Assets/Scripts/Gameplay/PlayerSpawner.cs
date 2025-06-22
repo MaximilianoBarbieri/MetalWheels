@@ -15,6 +15,14 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 
     private CharacterInputHandler _characterInputHandler;
     [Networked] [Capacity(4)] private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
+    
+    public override void Spawned()
+    {
+        base.Spawned();
+
+        if (!Runner.IsServer) return;
+        Runner.AddCallbacks(this);
+    }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
@@ -73,14 +81,6 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         runner.Shutdown();
-    }
-
-    public override void Spawned()
-    {
-        base.Spawned();
-
-        if (!Runner.IsServer) return;
-        Runner.AddCallbacks(this);
     }
 
     private Transform GetFreeSpawnPoint(PlayerRef player)

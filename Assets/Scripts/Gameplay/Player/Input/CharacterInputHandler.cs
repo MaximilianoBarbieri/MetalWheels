@@ -14,7 +14,6 @@ public class CharacterInputHandler : MonoBehaviour
         _inputData = new NetworkInputData();
     }
     
-
     void Update()
     {
         _inputData.movementInputHorizontal = Input.GetAxis("Horizontal");
