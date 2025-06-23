@@ -20,7 +20,7 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
     {
         base.Spawned();
 
-        if (!Runner.IsServer) return;
+        //if (!Runner.IsServer) return;
         Runner.AddCallbacks(this);
     }
 
