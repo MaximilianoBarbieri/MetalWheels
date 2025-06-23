@@ -25,6 +25,7 @@ public class NPC : MonoBehaviour
     [SerializeField] private Talk_NPC talkNpc;
     [SerializeField] private Sitdown_NPC sitdownNpc;
     [SerializeField] private Death_NPC deathNpc;
+    private List<GoapAction> _actions;
 
 
     private void Start()
@@ -34,6 +35,7 @@ public class NPC : MonoBehaviour
         // Activamos la FSM
         _fsm.Active = true;
 
+        _actions = CreateActions();
         // Disparamos el primer plan
         StartCoroutine(RunPlanLoop());
 
@@ -107,7 +109,7 @@ public class NPC : MonoBehaviour
         };
     }
 
-    public List<GoapAction> GetAvailableActions()
+    public List<GoapAction> CreateActions()
     {
         return new List<GoapAction>
         {
@@ -116,76 +118,114 @@ public class NPC : MonoBehaviour
                 Name = "Idle",
                 Precondition = s => !s.carInRange,
                 Effect = s => s.Clone(),
-                Execute = () => (GoToState(idleNpc))
+                Execute = () => (GoToState(idleNpc)),
+                Cost = 4
             },
             new GoapAction
             {
                 Name = "Walk",
                 Precondition = s => !s.carInRange, //TODO: Agregar otra condicion, por ejemplo, vecinos cerca
                 Effect = s => s.Clone(),
-                Execute = () => (GoToState(walkNpc))
+                Execute = () => (GoToState(walkNpc)),
+                Cost = 3
             },
             new GoapAction
             {
                 Name = "Talk",
-                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Talk,
-                Effect = s => s.Clone(),
-                Execute = () => (GoToState(talkNpc))
+                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Talk && !s.hasTalked,
+                Effect = s =>
+                {
+                    var ns = s.Clone();
+                    ns.hasTalked = true;
+                    return ns;
+                },
+                Execute = () => (GoToState(talkNpc)),
+                Cost = 2
             },
             new GoapAction
             {
                 Name = "Sitdown",
-                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Sit,
-                Effect = s => s.Clone(),
-                Execute = () => (GoToState(sitdownNpc))
+                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Sit && !s.isSeated,
+                Effect = s =>
+                {
+                    var ns = s.Clone();
+                    ns.isSeated = true;
+                    return ns;
+                },
+                Execute = () => (GoToState(sitdownNpc)),
+                Cost = 2
             },
             new GoapAction
             {
                 Name = "Escape",
-                Precondition = s => s.life < 30f,
+                Precondition = s => s.carInRange && !s.isSafe,
                 Effect = s =>
                 {
                     var ns = s.Clone();
-                    ns.life += 20f;
+                    ns.isSafe = true;
                     return ns;
                 },
-                Execute = () => (GoToState(escapeNpc))
+                Execute = () => (GoToState(escapeNpc)),
+                Cost = 1
             },
             new GoapAction
             {
                 Name = "Death",
                 Precondition = s => s.life <= 0f,
                 Effect = s => s.Clone(),
-                Execute = () => (GoToState(deathNpc))
+                Execute = () => (GoToState(deathNpc)),
+                Cost = 0
             },
         };
     }
 
-    public IEnumerator RunPlan()
+    private List<GoapAction> GetAvailableActions() => _actions;
+    
+    private Func<WorldState, bool> SelectGoal(WorldState state)
     {
-        var current = GetCurrentWorldState();
-        var goal = new System.Func<WorldState, bool>(s => s.life >= 110f); // ejemplo
+        if (state.life <= 0f)
+            return s => s.life <= 0f;
 
-        var plan = GoapPlanner.Plan(current, goal, GetAvailableActions()).FirstOrDefault();
-        if (plan != null)
-        {
-            foreach (var action in plan)
-                yield return StartCoroutine(action.Execute());
-        }
-        else
-        {
-            Debug.Log("No plan found.");
-        }
+        if (state.carInRange && !state.isSafe)
+            return s => s.isSafe; // Queremos estar a salvo
+
+        if (state.interactionType == InteractionType.Talk && !state.hasTalked)
+            return s => s.hasTalked; // Queremos haber hablado
+
+        if (state.interactionType == InteractionType.Sit && !state.isSeated)
+            return s => s.isSeated; // Queremos habernos sentado
+
+        return s => s.life >= 110f; // Meta general: mejorar vida
     }
 
-    private IEnumerator RunPlanLoop()
+    private Queue<GoapAction> _currentPlan = new();
+
+    public IEnumerator RunPlanLoop()
     {
         while (true)
         {
-            yield return RunPlan();
-            yield return new WaitForSeconds(1f);
+            if (_currentPlan.Count == 0)
+            {
+                var current = GetCurrentWorldState();
+                var goal = SelectGoal(current);
+                var plan = GoapPlanner.Plan(current, goal, GetAvailableActions()).FirstOrDefault();
+
+                if (plan != null)
+                    _currentPlan = new Queue<GoapAction>(plan);
+                else
+                    Debug.Log("No plan found.");
+            }
+
+            if (_currentPlan.Count > 0)
+            {
+                var action = _currentPlan.Dequeue();
+                yield return StartCoroutine(action.Execute());
+            }
+
+            yield return null;  // o un pequeño delay
         }
-    } 
+    }
+
 
     private IEnumerator GoToState(IState nextState)
     {

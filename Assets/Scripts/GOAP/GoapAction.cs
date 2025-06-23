@@ -11,7 +11,7 @@ public class GoapAction
     public Func<WorldState, WorldState> Effect;
     public Func<IEnumerator?> Execute;
 
-    public float Cost = 1f; // opcional, para A*
+    public int Cost;
 
     public override string ToString() => Name;
 }

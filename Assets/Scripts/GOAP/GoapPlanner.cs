@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GoapPlanner : MonoBehaviour
@@ -9,12 +10,16 @@ public class GoapPlanner : MonoBehaviour
         Func<WorldState, bool> goal,
         IEnumerable<GoapAction> actions)
     {
-        var frontier = new Queue<(List<GoapAction> path, WorldState state)>();
-        frontier.Enqueue((new List<GoapAction>(), start));
+        var frontier = new List<(List<GoapAction> path, WorldState state, float cost)>();
+        frontier.Add((new List<GoapAction>(), start, 0));
 
         while (frontier.Count > 0)
         {
-            var (path, state) = frontier.Dequeue();
+            // Ordenamos por costo acumulado
+            frontier = frontier.OrderBy(f => f.cost).ToList();
+
+            var (path, state, currentCost) = frontier[0];
+            frontier.RemoveAt(0);
 
             if (goal(state))
             {
@@ -28,9 +33,37 @@ public class GoapPlanner : MonoBehaviour
                 {
                     var newState = action.Effect(state.Clone());
                     var newPath = new List<GoapAction>(path) { action };
-                    frontier.Enqueue((newPath, newState));
+                    var newCost = currentCost + action.Cost;
+                    frontier.Add((newPath, newState, newCost));
                 }
             }
         }
     }
+
+    #region Explain
+
+/*
+    GOAP Planner:
+    Genera posibles planes (secuencias de acciones) para llegar a un objetivo,
+    priorizando aquellos con menor costo acumulado.
+
+    Variables clave:
+    - frontier: Lista de nodos por explorar.
+      Cada nodo es (camino recorrido, estado actual, costo acumulado).
+
+    Flujo:
+    1️⃣ Ordena la frontera por costo (menor primero).
+    2️⃣ Toma el nodo de menor costo y lo explora.
+    3️⃣ Si el estado actual cumple el objetivo, devuelve el plan.
+    4️⃣ Para cada acción posible:
+       - Si cumple su precondición:
+         - Aplica el efecto (clonando el estado).
+         - Suma la acción al camino.
+         - Suma el costo de la acción al costo acumulado.
+         - Agrega el nuevo nodo a la frontera.
+    5️⃣ Repite hasta que no haya nodos o se encuentren planes.
+*/
+
+    #endregion
+
 }
