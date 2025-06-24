@@ -7,14 +7,15 @@ using UnityEngine;
 [RequireComponent(typeof(LifeHandler))]
 public class PlayerController : NetworkBehaviour
 {
-    //NEW var
+    [SerializeField] private ModelPlayer _model;
+
     private NetworkCharacterControllerCustom _myCharacterController;
     private WeaponHandler _myWeaponHandler;
 
-    //OLD vars
     public CinemachineVirtualCamera vCamPrefab;
     private CinemachineVirtualCamera myCam;
 
+    //OLD vars
     [SerializeField] public ModelPlayer model;
 
     [SerializeField] private float jumpCooldown = 2f;
@@ -23,28 +24,21 @@ public class PlayerController : NetworkBehaviour
 
     private float nextJumpTime = 0f;
 
-    //TODO: ver si dejar esto aca o replantearlo en otro lado
+
     public override void Spawned()
     {
-        //TODO: ver si dejar aca o debajo de Object.HasInputAuthority
-
         // Solo instanciar cámara si es mi propio jugador
-        if (Object.HasInputAuthority)
-        {
-            model.InitStats(PlayerPrefs.GetInt("PlayerSelected"));
-            
-            if (vCamPrefab != null)
-            {
-                myCam = Instantiate(vCamPrefab);
+        if (!Object.HasInputAuthority) return;
+        if (vCamPrefab == null) return;
 
-                // Buscar el CameraTarget (empty hijo del auto) o el propio transform
-                Transform camTarget = transform.Find("CameraTarget");
-                if (camTarget == null) camTarget = transform;
+        myCam = Instantiate(vCamPrefab);
 
-                myCam.Follow = camTarget;
-                myCam.LookAt = camTarget;
-            }
-        }
+        // Buscar el CameraTarget (empty hijo del auto) o el propio transform
+        Transform camTarget = transform.Find("CameraTarget");
+        if (camTarget == null) camTarget = transform;
+
+        myCam.Follow = camTarget;
+        myCam.LookAt = camTarget;
     }
 
     private void Awake()
@@ -67,13 +61,20 @@ public class PlayerController : NetworkBehaviour
     {
         #region NEW
 
+        model.UpdateStats(Runner.DeltaTime);
+
         if (!GetInput(out NetworkInputData networkInputData))
         {
             Debug.LogWarning("❌ GetInput NO devuelve datos en este cliente.");
             return;
         }
+        else
+        {
+            Debug.Log(
+                $"✅ GetInput OK - H: {networkInputData.movementInputHorizontal}, V: {networkInputData.movementInputVertical}");
+        }
 
-        Debug.Log($"✅ GetInput OK - H: {networkInputData.movementInputHorizontal}, V: {networkInputData.movementInputVertical}");
+        if (model.IsDead || model.IsStunned) return;
 
         //MOVIMIENTO
         Vector3 moveDirection = new Vector3(
@@ -97,7 +98,7 @@ public class PlayerController : NetworkBehaviour
         //SHOOT NORMAL
         if (networkInputData.isShootNormalPressed)
         {
-            _myWeaponHandler.Fire();
+            //_myWeaponHandler.Fire();
         }
 
         //SHOOT SPECIAL
@@ -110,19 +111,8 @@ public class PlayerController : NetworkBehaviour
 
         #region OLD
 
-            /*//OLD
+        /*//OLD
         if (!HasInputAuthority) return;
-
-        // Actualiza el stun desde Model
-        model.UpdateStun(Runner.DeltaTime);
-
-        // Si está stuneado, ignora inputs y frena el auto
-        if (model.IsStunned)
-        {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            return;
-        }
 
         // Respawn timer lógica
         if (model.IsDead)
@@ -131,7 +121,7 @@ public class PlayerController : NetworkBehaviour
             if (model.RespawnTimer <= 0)
             {
                 // Buscar spawn point libre y respawnear
-                //TODO: VER COMO MIERDA HACER PARA PASARLE EL SPAWNPOINT AL QUE DEBE IR sin pisarse con los otros players
+                //TODO: VER COMO HACER PARA PASARLE EL SPAWNPOINT AL QUE DEBE IR sin pisarse con los otros players
                 //Transform spawn = SpawnManager.Instance.GetFreePlayerSpawnPoint();
                 //model.RespawnAt(spawn.position, spawn.rotation);
                 Vector3 spawn = Vector3.zero;
@@ -141,14 +131,6 @@ public class PlayerController : NetworkBehaviour
             }
             return;
         }
-
-        // Movimiento tipo auto
-        float v = Input.GetAxisRaw("Vertical");
-        float h = Input.GetAxisRaw("Horizontal");
-        Vector3 forward = transform.forward * v * model.MaxSpeed;
-        rb.AddForce(forward, ForceMode.Acceleration);
-        if (Mathf.Abs(v) > 0.1f)
-            rb.MoveRotation(rb.rotation * Quaternion.Euler(0, h * 2f, 0));
 
         // Salto con cooldown
         if (Input.GetKeyDown(KeyCode.Space) && Runner.SimulationTime >= nextJumpTime)
@@ -188,7 +170,6 @@ public class PlayerController : NetworkBehaviour
     {
         if (!HasInputAuthority && model.IsDead) return;
 
-        // Detectar si es otro auto/jugador
         ModelPlayer otherModel = collision.gameObject.GetComponent<ModelPlayer>();
         if (otherModel != null && collision.contacts.Length > 0)
         {

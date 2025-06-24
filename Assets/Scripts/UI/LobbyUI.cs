@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 public class LobbyUI : MonoBehaviour
 {
@@ -30,7 +28,6 @@ public class LobbyUI : MonoBehaviour
     [SerializeField] private Button _goToHostPanelBTN;//me lleva al panel para ponerle nombre a mi sala
     [SerializeField] private Button _hostBTN;//btn para terminar de crear una sala (donde soy host)
     
-    
     private void Start()
     {
         _joinLobbyBTN.onClick.AddListener(Btn_JoinLobby);
@@ -42,18 +39,17 @@ public class LobbyUI : MonoBehaviour
             _statusPanel.SetActive(false);
             _sessionPanel.SetActive(true);
         };
-        _carA.onClick.AddListener(() => PlayerPrefs.SetInt("PlayerSelected", 0));
-        _carB.onClick.AddListener(() => PlayerPrefs.SetInt("PlayerSelected", 1));
+        _carA.onClick.AddListener(() => PlayerData.CarSelected = 0);
+        _carB.onClick.AddListener(() => PlayerData.CarSelected = 1);
     }
     
     void Btn_JoinLobby()
     {
         _networkHandler.JoinLobby();
         
-        PlayerPrefs.SetString("PlayerNickName", _nicknameInput.text);
+        PlayerData.Nickname = _nicknameInput.text;
         
         ShowPanel(_statusPanel);
-
         _statusText.text = "Joining Lobby...";
     }
     
@@ -112,24 +108,4 @@ public class LobbyUI : MonoBehaviour
 
         panelToShow.SetActive(true);
     }
-    
-    /*-----------------------------------------------------------------------------------*/
-    
-    
-    /*private void UpdatePlayerCount()
-    {
-        if (runner != null)
-        {
-            UpdateConnectedPlayers(runner.ActivePlayers.Count());
-        }
-    }*/
-    
-
-
-
-    /*public void UpdateConnectedPlayers(int count)
-    {
-        connectedPlayersText.text = $"Jugadores conectados: {count}";
-        startGameButton.interactable = (count >= 2);
-    }*/
 }

@@ -28,7 +28,7 @@ public class NetworkPlayer : NetworkBehaviour
             Debug.Log("🎮 Este player tiene input authority: " + Object.InputAuthority);
             Local = this;
 
-            RPC_SetNewName(PlayerPrefs.GetString("PlayerNickName"));
+            RPC_SetNewName(PlayerData.Nickname);
         }
         else
         {

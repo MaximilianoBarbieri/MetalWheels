@@ -62,8 +62,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         // Crear un token con la información del jugador
         var playerData = new Dictionary<string, object>
         {
-            { "PlayerSelected", PlayerPrefs.GetInt("PlayerSelected", 0) },
-            { "PlayerNickName", PlayerPrefs.GetString("PlayerNickName", "Player") }
+            { "PlayerSelected", PlayerData.CarSelected },
+            { "PlayerNickName", PlayerData.Nickname }
         };
         
         // Serializar el token

@@ -3,27 +3,33 @@ using UnityEngine;
 
 public class ModelPlayer : NetworkBehaviour
 {
-    [Networked] public int MaxHealth { get; set; }
-    [Networked] public int CurrentHealth { get; set; }
-    [Networked] public float MaxSpeed { get; set; }
+    [Networked] public int MaxHealth { get; private set; }
+    [Networked] public int CurrentHealth { get; private set; }
+    [Networked] public float MaxSpeed { get; private set; }
     [Networked] public float Nitro { get; set; }
-    [Networked] public int Kills { get; set; }
-    [Networked] public int Deaths { get; set; }
-    [Networked] public SpecialType SpecialAmmo { get; set; }
-    [Networked] public bool IsDead { get; set; }
-    [Networked] public float RespawnTimer { get; set; }
-    [Networked] public bool IsStunned { get; set; }
-    [Networked] public float StunTimer { get; set; }
+    [Networked] public int Kills { get; private set; }
+    [Networked] public int Deaths { get; private set; }
+    [Networked] public SpecialType SpecialAmmo { get; private set; }
+    [Networked] public bool IsDead { get; private set; }
+    [Networked] public float RespawnTimer { get; private set; }
+    [Networked] public bool IsStunned { get; private set; }
+    [Networked] public float StunTimer { get; private set; }
+    [Networked] public int CarType { get; private set; }
 
-    public enum SpecialType
+    public enum SpecialType { None, Stun, Fire }
+    
+    public override void Spawned()
     {
-        None,
-        Stun,
-        Fire
+        if (HasStateAuthority)
+        {
+            InitStats(CarType); // ya deberia estar seteado por el host
+        }
     }
 
-    public void InitStats(int carType)
+    private void InitStats(int carType)
     {
+        //TODO: agregar todas las variables necesarias y fijarse si hace falta que esten en NetworkCharacterControllerCustom
+        
         if (carType == 0)
         {
             MaxHealth = 100;
@@ -41,10 +47,21 @@ public class ModelPlayer : NetworkBehaviour
         IsDead = false;
         RespawnTimer = 0f;
     }
+    
+    public void SetCarType(int carType)
+    {
+        CarType = carType;
+    }
+    
+    public void UpdateStats(float deltaTime)
+    {
+        UpdateStun(deltaTime);
+    }
 
     public void ModifyLife(int amount, PlayerRef? attacker = null)
     {
         if (IsDead) return;
+        
         CurrentHealth = Mathf.Clamp(CurrentHealth + amount, 0, MaxHealth);
         if (CurrentHealth <= 0)
         {
@@ -89,16 +106,15 @@ public class ModelPlayer : NetworkBehaviour
         StunTimer = duration;
     }
 
-    public void UpdateStun(float deltaTime)
+    private void UpdateStun(float deltaTime)
     {
-        if (IsStunned)
+        if (!IsStunned) return;
+        
+        StunTimer -= deltaTime;
+        if (StunTimer <= 0f)
         {
-            StunTimer -= deltaTime;
-            if (StunTimer <= 0f)
-            {
-                IsStunned = false;
-                StunTimer = 0f;
-            }
+            IsStunned = false;
+            StunTimer = 0f;
         }
     }
 }
