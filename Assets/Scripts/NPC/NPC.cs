@@ -25,9 +25,9 @@ public class NPC : MonoBehaviour
     [SerializeField] private Talk_NPC talkNpc;
     [SerializeField] private Sitdown_NPC sitdownNpc;
     [SerializeField] private Death_NPC deathNpc;
+    
     private List<GoapAction> _actions;
-
-
+    
     private void Start()
     {
         _fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
@@ -118,7 +118,7 @@ public class NPC : MonoBehaviour
                 Name = "Idle",
                 Precondition = s => !s.carInRange,
                 Effect = s => s.Clone(),
-                Execute = () => (GoToState(idleNpc)),
+                Execute = () => (TransitionToCoroutine(idleNpc)),
                 Cost = 4
             },
             new GoapAction
@@ -126,7 +126,7 @@ public class NPC : MonoBehaviour
                 Name = "Walk",
                 Precondition = s => !s.carInRange, //TODO: Agregar otra condicion, por ejemplo, vecinos cerca
                 Effect = s => s.Clone(),
-                Execute = () => (GoToState(walkNpc)),
+                Execute = () => (TransitionToCoroutine(walkNpc)),
                 Cost = 3
             },
             new GoapAction
@@ -139,7 +139,7 @@ public class NPC : MonoBehaviour
                     ns.hasTalked = true;
                     return ns;
                 },
-                Execute = () => (GoToState(talkNpc)),
+                Execute = () => (TransitionToCoroutine(talkNpc)),
                 Cost = 2
             },
             new GoapAction
@@ -152,7 +152,7 @@ public class NPC : MonoBehaviour
                     ns.isSeated = true;
                     return ns;
                 },
-                Execute = () => (GoToState(sitdownNpc)),
+                Execute = () => (TransitionToCoroutine(sitdownNpc)),
                 Cost = 2
             },
             new GoapAction
@@ -165,7 +165,8 @@ public class NPC : MonoBehaviour
                     ns.isSafe = true;
                     return ns;
                 },
-                Execute = () => (GoToState(escapeNpc)),
+                //Execute = () => (TransitionToCoroutine(escapeNpc)),
+                Execute = () => (StartCoroutine(MoveAlongPath(path))),
                 Cost = 1
             },
             new GoapAction
@@ -173,7 +174,7 @@ public class NPC : MonoBehaviour
                 Name = "Death",
                 Precondition = s => s.life <= 0f,
                 Effect = s => s.Clone(),
-                Execute = () => (GoToState(deathNpc)),
+                Execute = () => (TransitionToCoroutine(deathNpc)),
                 Cost = 0
             },
         };
@@ -183,30 +184,42 @@ public class NPC : MonoBehaviour
     
     private Func<WorldState, bool> SelectGoal(WorldState state)
     {
+        // 1. Si la vida es 0 o menos, el objetivo es permanecer muerto.
+        //    Así el NPC no intentará ninguna acción posterior.
         if (state.life <= 0f)
-            return s => s.life <= 0f;
+            return s => s.life <= 0f; // Meta: estar muerto (meta terminal)
 
+        // 2. Si hay un auto cerca y aún no está a salvo, el objetivo es ponerse a salvo.
+        //    Esto fuerza a que escape, ignorando otras acciones hasta estar seguro.
         if (state.carInRange && !state.isSafe)
-            return s => s.isSafe; // Queremos estar a salvo
+            return s => s.isSafe; // Meta: estar a salvo
 
+        // 3. Si hay una oportunidad de hablar y aún no habló, el objetivo es completar esa charla.
         if (state.interactionType == InteractionType.Talk && !state.hasTalked)
-            return s => s.hasTalked; // Queremos haber hablado
+            return s => s.hasTalked; // Meta: haber hablado
 
+        // 4. Si puede sentarse y aún no está sentado, el objetivo es sentarse.
         if (state.interactionType == InteractionType.Sit && !state.isSeated)
-            return s => s.isSeated; // Queremos habernos sentado
+            return s => s.isSeated; // Meta: estar sentado
 
-        return s => s.life >= 110f; // Meta general: mejorar vida
+        // 5. Meta por defecto: Simplemente seguir existiendo y no hacer nada especial.
+        return s => true; // No hay meta "de mejora", solo existir.
     }
-
+    
     private Queue<GoapAction> _currentPlan = new();
 
     public IEnumerator RunPlanLoop()
     {
         while (true)
         {
+            var current = GetCurrentWorldState();
+
+            // Verificamos condiciones críticas
+            if ((current.carInRange && !current.isSafe))
+                _currentPlan.Clear();  // Cancelamos el plan actual
+
             if (_currentPlan.Count == 0)
             {
-                var current = GetCurrentWorldState();
                 var goal = SelectGoal(current);
                 var plan = GoapPlanner.Plan(current, goal, GetAvailableActions()).FirstOrDefault();
 
@@ -222,12 +235,12 @@ public class NPC : MonoBehaviour
                 yield return StartCoroutine(action.Execute());
             }
 
-            yield return null;  // o un pequeño delay
+            yield return null;
         }
     }
 
 
-    private IEnumerator GoToState(IState nextState)
+    private IEnumerator TransitionToCoroutine(IState nextState)
     {
         _fsm.TransitionTo(nextState);
         yield break;
