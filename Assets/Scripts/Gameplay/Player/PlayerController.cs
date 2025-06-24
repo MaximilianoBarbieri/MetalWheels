@@ -7,17 +7,14 @@ using UnityEngine;
 [RequireComponent(typeof(LifeHandler))]
 public class PlayerController : NetworkBehaviour
 {
-    [SerializeField] private ModelPlayer _model;
+    private ModelPlayer _model;
 
     private NetworkCharacterControllerCustom _myCharacterController;
     private WeaponHandler _myWeaponHandler;
 
     public CinemachineVirtualCamera vCamPrefab;
     private CinemachineVirtualCamera myCam;
-
-    //OLD vars
-    [SerializeField] public ModelPlayer model;
-
+    
     [SerializeField] private float jumpCooldown = 2f;
     [SerializeField] private float minCrashForce = 7f;
     [SerializeField] private int crashDamage = 30;
@@ -43,6 +40,8 @@ public class PlayerController : NetworkBehaviour
 
     private void Awake()
     {
+        _model = GetComponent<ModelPlayer>();
+        
         _myCharacterController = GetComponent<NetworkCharacterControllerCustom>();
         _myWeaponHandler = GetComponent<WeaponHandler>();
 
@@ -61,7 +60,7 @@ public class PlayerController : NetworkBehaviour
     {
         #region NEW
 
-        model.UpdateStats(Runner.DeltaTime);
+        _model.UpdateStats(Runner.DeltaTime);
 
         if (!GetInput(out NetworkInputData networkInputData))
         {
@@ -74,7 +73,7 @@ public class PlayerController : NetworkBehaviour
                 $"✅ GetInput OK - H: {networkInputData.movementInputHorizontal}, V: {networkInputData.movementInputVertical}");
         }
 
-        if (model.IsDead || model.IsStunned) return;
+        if (_model.IsDead || _model.IsStunned) return;
 
         //MOVIMIENTO
         Vector3 moveDirection = new Vector3(
@@ -115,17 +114,17 @@ public class PlayerController : NetworkBehaviour
         if (!HasInputAuthority) return;
 
         // Respawn timer lógica
-        if (model.IsDead)
+        if (_model.IsDead)
         {
-            model.RespawnTimer -= Runner.DeltaTime;
-            if (model.RespawnTimer <= 0)
+            _model.RespawnTimer -= Runner.DeltaTime;
+            if (_model.RespawnTimer <= 0)
             {
                 // Buscar spawn point libre y respawnear
                 //TODO: VER COMO HACER PARA PASARLE EL SPAWNPOINT AL QUE DEBE IR sin pisarse con los otros players
                 //Transform spawn = SpawnManager.Instance.GetFreePlayerSpawnPoint();
-                //model.RespawnAt(spawn.position, spawn.rotation);
+                //_model.RespawnAt(spawn.position, spawn.rotation);
                 Vector3 spawn = Vector3.zero;
-                model.RespawnAt(spawn, new Quaternion(0,0,0,0));
+                _model.RespawnAt(spawn, new Quaternion(0,0,0,0));
                 rb.velocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
             }
@@ -140,11 +139,11 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Nitro
-        if (Input.GetKey(KeyCode.LeftShift) && model.Nitro > 0f)
+        if (Input.GetKey(KeyCode.LeftShift) && _model.Nitro > 0f)
         {
-            rb.AddForce(transform.forward * model.MaxSpeed * 0.7f, ForceMode.Acceleration);
-            model.Nitro -= Runner.DeltaTime * 0.3f;
-            model.Nitro = Mathf.Clamp01(model.Nitro);
+            rb.AddForce(transform.forward * _model.MaxSpeed * 0.7f, ForceMode.Acceleration);
+            _model.Nitro -= Runner.DeltaTime * 0.3f;
+            _model.Nitro = Mathf.Clamp01(_model.Nitro);
         }
 
         // Shoot normal
@@ -154,12 +153,12 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Shoot special
-        if (Input.GetKeyDown(KeyCode.P) && model.SpecialAmmo != ModelPlayer.SpecialType.None)
+        if (Input.GetKeyDown(KeyCode.P) && _model.SpecialAmmo != ModelPlayer.SpecialType.None)
         {
             var proj = Runner.Spawn(projectileSpecialPrefab, shootPoint.position, shootPoint.rotation, Object.InputAuthority);
             if (proj != null && proj.GetComponent<Projectile>() != null)
-                proj.GetComponent<Projectile>().specialType = model.SpecialAmmo;
-            model.SpecialAmmo = ModelPlayer.SpecialType.None;
+                proj.GetComponent<Projectile>().specialType = _model.SpecialAmmo;
+            _model.SpecialAmmo = ModelPlayer.SpecialType.None;
         }*/
 
         #endregion
@@ -168,7 +167,7 @@ public class PlayerController : NetworkBehaviour
     // Daño por colisión/crash
     private void OnCollisionEnter(Collision collision)
     {
-        if (!HasInputAuthority && model.IsDead) return;
+        if (!HasInputAuthority && _model.IsDead) return;
 
         ModelPlayer otherModel = collision.gameObject.GetComponent<ModelPlayer>();
         if (otherModel != null && collision.contacts.Length > 0)

@@ -18,12 +18,11 @@ public class ModelPlayer : NetworkBehaviour
 
     public enum SpecialType { None, Stun, Fire }
     
-    public override void Spawned()
+    
+    public void SetCarType(int carType)
     {
-        if (HasStateAuthority)
-        {
-            InitStats(CarType); // ya deberia estar seteado por el host
-        }
+        CarType = carType;
+        InitStats(CarType);
     }
 
     private void InitStats(int carType)
@@ -46,11 +45,6 @@ public class ModelPlayer : NetworkBehaviour
         SpecialAmmo = SpecialType.None;
         IsDead = false;
         RespawnTimer = 0f;
-    }
-    
-    public void SetCarType(int carType)
-    {
-        CarType = carType;
     }
     
     public void UpdateStats(float deltaTime)
