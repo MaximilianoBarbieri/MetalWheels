@@ -6,34 +6,16 @@ public class NickNameBarLifeManager : MonoBehaviour
 {
     public static NickNameBarLifeManager Instance;
 
-    private List<NickNameBarLife> _allItems = new();
+    [SerializeField] private NickNameBarLife _itemPrefab;
 
-    [SerializeField] NickNameBarLife _itemPrefab;
-
-    private void Awake()
+    void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        Instance = this;
     }
-
-    public NickNameBarLife CreateNewItem(NetworkPlayer owner)
+    
+    public NickNameBarLife CreateNewItem(NetworkPlayer networkPlayer)
     {
-        var newItem = Instantiate(_itemPrefab, transform);
-        _allItems.Add(newItem);
-
-        newItem.SetOwner(owner);
-
-        owner.OnPlayerDespawned += () =>
-        {
-            _allItems.Remove(newItem);
-            Destroy(newItem.gameObject);
-        };
-
-        return newItem;
-    }
-
-    private void LateUpdate()
-    {
-        foreach (var item in _allItems) item.UpdatePosition();
+        var item = Instantiate(_itemPrefab);
+        return item;
     }
 }

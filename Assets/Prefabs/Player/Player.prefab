@@ -897,8 +897,6 @@ GameObject:
   - component: {fileID: 6747240166403912663}
   - component: {fileID: -1983544812649688618}
   - component: {fileID: -8410449478962887658}
-  - component: {fileID: 3485858441941591664}
-  - component: {fileID: 4783653739179344723}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -944,8 +942,6 @@ MonoBehaviour:
   - {fileID: 4140154826601458244}
   - {fileID: 6747240166403912663}
   - {fileID: -1983544812649688618}
-  - {fileID: 3485858441941591664}
-  - {fileID: 4783653739179344723}
   ForceRemoteRenderTimeframe: 0
 --- !u!143 &7792159476141714268
 CharacterController:
@@ -1035,10 +1031,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vCamPrefab: {fileID: 6023360113261883510, guid: a9ed83cc3d7684642a6232d819f135ba, type: 3}
-  model: {fileID: -1983544812649688618}
   jumpCooldown: 2
   minCrashForce: 7
   crashDamage: 30
+  playerLocalUIPrefab: {fileID: 9043751680056171376, guid: 75e2bc767602e1644b2459ad9c147887, type: 3}
 --- !u!114 &-1983544812649688618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1062,6 +1058,7 @@ MonoBehaviour:
   _RespawnTimer: 0
   _IsStunned: 0
   _StunTimer: 0
+  _CarType: 0
 --- !u!114 &-8410449478962887658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1077,35 +1074,6 @@ MonoBehaviour:
   carRenderer: {fileID: 958735685602687215}
   stunFX: {fileID: 5873322316220674071}
   fireFX: {fileID: 8283228725532981500}
---- !u!114 &3485858441941591664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7851659979244366952}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72ee58d2e55f2ea4ea85a9135a399adb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _playerVisual: {fileID: 0}
---- !u!114 &4783653739179344723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7851659979244366952}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c96bef05d230224683eecf37e2fc0f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _bulletPrefab:
-    RawGuidValue: 00000000000000000000000000000000
-  _firingPositionTransform: {fileID: 0}
-  _shootingParticles: {fileID: 0}
 --- !u!1 &8283228725532981500
 GameObject:
   m_ObjectHideFlags: 0

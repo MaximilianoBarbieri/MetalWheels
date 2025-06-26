@@ -15,13 +15,14 @@ public class NetworkPlayer : NetworkBehaviour
 
     LifeHandler lifeHandler;
 
-    public LifeHandler SendMyLiFeHandler() => lifeHandler;
 
     public override void Spawned()
     {
         _myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
-        lifeHandler = GetComponent<LifeHandler>();
-        lifeHandler.GetMyUI(_myItemUI);
+        _myItemUI.Init(NickName, transform, GetComponent<ModelPlayer>());
+        
+        //lifeHandler = GetComponent<LifeHandler>();
+        //lifeHandler.GetMyUI(_myItemUI);
 
         if (Object.HasInputAuthority)
         {

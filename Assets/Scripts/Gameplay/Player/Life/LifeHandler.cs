@@ -119,6 +119,6 @@ public class LifeHandler : NetworkBehaviour
 
     void OnLifeChanged()
     {
-        _myItemUI.UpdateLifeBar(CurrentLife / MAX_LIFE);
+        //_myItemUI.UpdateLifeBar(CurrentLife / MAX_LIFE);
     }
 }

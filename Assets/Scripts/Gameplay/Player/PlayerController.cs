@@ -3,8 +3,8 @@ using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkCharacterControllerCustom))]
-[RequireComponent(typeof(WeaponHandler))]
-[RequireComponent(typeof(LifeHandler))]
+/*[RequireComponent(typeof(WeaponHandler))]
+[RequireComponent(typeof(LifeHandler))]*/
 public class PlayerController : NetworkBehaviour
 {
     private ModelPlayer _model;
@@ -20,22 +20,37 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private int crashDamage = 30;
 
     private float nextJumpTime = 0f;
-
+    
+    //UI player
+    [SerializeField] private PlayerLocalUIHandler playerLocalUIPrefab;
 
     public override void Spawned()
     {
-        // Solo instanciar cámara si es mi propio jugador
+        // Si es mi propio jugador
         if (!Object.HasInputAuthority) return;
-        if (vCamPrefab == null) return;
+        
+        if (vCamPrefab != null)
+        {
+            myCam = Instantiate(vCamPrefab);
 
-        myCam = Instantiate(vCamPrefab);
+            // Buscar el CameraTarget (empty hijo del auto) o el propio transform
+            Transform camTarget = transform.Find("CameraTarget");
+            if (camTarget == null) camTarget = transform;
 
-        // Buscar el CameraTarget (empty hijo del auto) o el propio transform
-        Transform camTarget = transform.Find("CameraTarget");
-        if (camTarget == null) camTarget = transform;
-
-        myCam.Follow = camTarget;
-        myCam.LookAt = camTarget;
+            myCam.Follow = camTarget;
+            myCam.LookAt = camTarget;
+        }
+        
+        if (playerLocalUIPrefab != null)
+        {
+            Canvas globalCanvas = GameObject.Find("Canvas_LocalUI").GetComponent<Canvas>();
+            var uiInstance = Instantiate(playerLocalUIPrefab, globalCanvas.transform);
+            uiInstance.Init(_model, _myCharacterController);
+        }
+        else
+        {
+            Debug.LogError("Prefab PlayerLocalUI no asignado");
+        }
     }
 
     private void Awake()
@@ -45,7 +60,7 @@ public class PlayerController : NetworkBehaviour
         _myCharacterController = GetComponent<NetworkCharacterControllerCustom>();
         _myWeaponHandler = GetComponent<WeaponHandler>();
 
-        var lifeHandler = GetComponent<LifeHandler>();
+        /*var lifeHandler = GetComponent<LifeHandler>();
 
         lifeHandler.OnDeadChange += isDead =>
         {
@@ -53,7 +68,7 @@ public class PlayerController : NetworkBehaviour
             enabled = !isDead;
         };
 
-        lifeHandler.OnRespawn += () => { _myCharacterController.Teleport(transform.position); };
+        lifeHandler.OnRespawn += () => { _myCharacterController.Teleport(transform.position); };*/
     }
 
     public override void FixedUpdateNetwork()

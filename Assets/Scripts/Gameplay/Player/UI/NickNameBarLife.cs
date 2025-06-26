@@ -1,37 +1,41 @@
 using TMPro;
-using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NickNameBarLife : MonoBehaviour
 {
-    private const float Y_OFFSET = 1.75f;
+    public TextMeshProUGUI nicknameText;
+    public Slider healthBar;
 
-    private Transform _owner;
+    private Transform target;
+    private ModelPlayer playerModel;
+    private Camera _camera;
 
-    private TextMeshProUGUI _nameText;
-
-    [SerializeField] Image _lifeBarImage;
-
-
-    // Start is called before the first frame update
-    public void SetOwner(NetworkPlayer owner)
+    private void Start()
     {
-        _owner = owner.gameObject.transform;
-        _nameText = GetComponentInChildren<TextMeshProUGUI>();
+        _camera = Camera.main;
     }
 
-    public void UpdateNickName(string newNickName)
+    public void Init(string nickname, Transform playerTransform, ModelPlayer model)
     {
-        _nameText.text = newNickName;
+        nicknameText.text = nickname;
+        target = playerTransform;
+        playerModel = model;
+
+        healthBar.maxValue = playerModel.MaxHealth;
     }
 
-    public void UpdateLifeBar(float amount)
+    void Update()
     {
-        _lifeBarImage.fillAmount = amount;
+        if (target == null || playerModel == null) return;
+
+        transform.position = target.position + Vector3.up * 2f; // ajuste vertical
+        if (_camera != null) transform.LookAt(_camera.transform);
+        healthBar.value = playerModel.CurrentHealth;
     }
 
-    public void UpdatePosition()
+    public void UpdateNickName(string newNick)
     {
-        transform.position = _owner.position + Vector3.up * Y_OFFSET;
+        nicknameText.text = newNick;
     }
 }
