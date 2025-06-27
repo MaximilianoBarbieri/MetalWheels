@@ -7,33 +7,33 @@ public class NetworkPlayer : NetworkBehaviour
     public static NetworkPlayer Local { get; private set; }
 
     private NickNameBarLife _myItemUI;
-
-    public event Action OnPlayerDespawned = delegate { };
+    private LifeHandler _lifeHandler;
+    
+    //public event Action OnPlayerDespawned = delegate { };
 
     [Networked, OnChangedRender(nameof(OnNickNameChanged))]
     string NickName { get; set; }
 
-    LifeHandler lifeHandler;
 
 
     public override void Spawned()
     {
-        _myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
-        _myItemUI.Init(NickName, transform, GetComponent<ModelPlayer>());
-        
-        //lifeHandler = GetComponent<LifeHandler>();
-        //lifeHandler.GetMyUI(_myItemUI);
-
         if (Object.HasInputAuthority)
         {
-            Debug.Log("🎮 Este player tiene input authority: " + Object.InputAuthority);
             Local = this;
-
+            // Configuramos nuestro nickname en el servidor
             RPC_SetNewName(PlayerData.Nickname);
         }
         else
         {
-            Debug.Log("🙅 Este player NO tiene input authority: " + Object.InputAuthority);
+            // Sólo para los demás jugadores
+            _myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
+            _myItemUI.Init(NickName, transform);
+            //_myItemUI.Init(NickName, transform, GetComponent<ModelPlayer>());
+
+            // Conectamos LifeHandler → UI global
+            _lifeHandler = GetComponent<LifeHandler>();
+            _lifeHandler.GetMyUI(_myItemUI);
         }
     }
 
@@ -45,11 +45,14 @@ public class NetworkPlayer : NetworkBehaviour
 
     void OnNickNameChanged()
     {
-        _myItemUI.UpdateNickName(NickName);
+        if (_myItemUI != null)
+            _myItemUI.UpdateNickName(NickName);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        OnPlayerDespawned();
+        //OnPlayerDespawned();
+        // Limpiar UI global al despawnear
+        if (_myItemUI != null) Destroy(_myItemUI.gameObject);
     }
 }

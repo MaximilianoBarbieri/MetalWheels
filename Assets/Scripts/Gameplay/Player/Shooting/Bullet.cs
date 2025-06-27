@@ -49,7 +49,7 @@ public class Bullet : NetworkBehaviour
         {
             if (other.TryGetComponent(out LifeHandler lifeHandler))
             {
-                lifeHandler.TakeDamage(_damage);
+                lifeHandler.ModifyLife(_damage);
             }
             
             DespawnObject();

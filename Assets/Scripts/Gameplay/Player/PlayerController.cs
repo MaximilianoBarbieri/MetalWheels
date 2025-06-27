@@ -3,14 +3,15 @@ using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkCharacterControllerCustom))]
-/*[RequireComponent(typeof(WeaponHandler))]
-[RequireComponent(typeof(LifeHandler))]*/
+[RequireComponent(typeof(LifeHandler))]
+/*[RequireComponent(typeof(WeaponHandler))]*/
 public class PlayerController : NetworkBehaviour
 {
     private ModelPlayer _model;
 
     private NetworkCharacterControllerCustom _myCharacterController;
     private WeaponHandler _myWeaponHandler;
+    private LifeHandler _myLifeHandler;
 
     public CinemachineVirtualCamera vCamPrefab;
     private CinemachineVirtualCamera myCam;
@@ -45,7 +46,7 @@ public class PlayerController : NetworkBehaviour
         {
             Canvas globalCanvas = GameObject.Find("Canvas_LocalUI").GetComponent<Canvas>();
             var uiInstance = Instantiate(playerLocalUIPrefab, globalCanvas.transform);
-            uiInstance.Init(_model, _myCharacterController);
+            uiInstance.Init(_model, _myCharacterController, _myLifeHandler);
         }
         else
         {
@@ -59,16 +60,15 @@ public class PlayerController : NetworkBehaviour
         
         _myCharacterController = GetComponent<NetworkCharacterControllerCustom>();
         _myWeaponHandler = GetComponent<WeaponHandler>();
+        _myLifeHandler = GetComponent<LifeHandler>();
+        
+        _myLifeHandler.OnDead += () => {/* opcional: cámara, efectos, etc */ };
 
-        /*var lifeHandler = GetComponent<LifeHandler>();
-
-        lifeHandler.OnDeadChange += isDead =>
+        _myLifeHandler.OnRespawn += () =>
         {
-            _myCharacterController.Controller.enabled = !isDead;
-            enabled = !isDead;
+            /* opcional: reposicionar, limpiar estado */
+            _myCharacterController.Teleport(transform.position);
         };
-
-        lifeHandler.OnRespawn += () => { _myCharacterController.Teleport(transform.position); };*/
     }
 
     public override void FixedUpdateNetwork()
@@ -112,6 +112,7 @@ public class PlayerController : NetworkBehaviour
         //SHOOT NORMAL
         if (networkInputData.isShootNormalPressed)
         {
+            _myLifeHandler.ModifyLife(10);
             //_myWeaponHandler.Fire();
         }
 

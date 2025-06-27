@@ -897,6 +897,7 @@ GameObject:
   - component: {fileID: 6747240166403912663}
   - component: {fileID: -1983544812649688618}
   - component: {fileID: -8410449478962887658}
+  - component: {fileID: -6260556829295157084}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -942,6 +943,7 @@ MonoBehaviour:
   - {fileID: 4140154826601458244}
   - {fileID: 6747240166403912663}
   - {fileID: -1983544812649688618}
+  - {fileID: -6260556829295157084}
   ForceRemoteRenderTimeframe: 0
 --- !u!143 &7792159476141714268
 CharacterController:
@@ -1074,6 +1076,19 @@ MonoBehaviour:
   carRenderer: {fileID: 958735685602687215}
   stunFX: {fileID: 5873322316220674071}
   fireFX: {fileID: 8283228725532981500}
+--- !u!114 &-6260556829295157084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851659979244366952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ee58d2e55f2ea4ea85a9135a399adb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerVisual: {fileID: 473786962778597703}
 --- !u!1 &8283228725532981500
 GameObject:
   m_ObjectHideFlags: 0

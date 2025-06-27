@@ -67,7 +67,7 @@ public class Projectile : NetworkBehaviour
         if (other.TryGetComponent(out LifeHandler lifeHandler))
         {
             //TODO: hacer que el damage varie dependiendo el tipo de bullet
-            lifeHandler.TakeDamage(_damage);
+            lifeHandler.ModifyLife(_damage);
         }
         
         // Acá podés agregar efectos específicos según tipo (stun, fire, etc.)

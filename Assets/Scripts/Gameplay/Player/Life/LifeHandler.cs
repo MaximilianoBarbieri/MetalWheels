@@ -7,118 +7,79 @@ public class LifeHandler : NetworkBehaviour
 {
     [SerializeField] private GameObject _playerVisual;
 
-    [Networked, OnChangedRender(nameof(OnLifeChanged))]
+    [Networked, OnChangedRender(nameof(OnLifeChanged))] 
     private byte CurrentLife { get; set; }
 
-    private const byte MAX_LIFE = 100;
-    private const byte MAX_DEADS = 2;
+    [Networked] private NetworkBool IsDead { get; set; }
 
-    private byte _currentDeads;
+    private byte _maxLife;
+    private ChangeDetector _detector;
 
-    [Networked] NetworkBool IsDead { get; set; }
+    private NickNameBarLife _globalUI;
 
-    private ChangeDetector _changeDetector;
-
-    public event Action<bool> OnDeadChange = delegate { };
     public event Action<float> OnLifeUpdate = delegate { };
     public event Action OnRespawn = delegate { };
-    public event Action OnDespawn = delegate { };
-
-    private NickNameBarLife _myItemUI;
+    public event Action OnDead = delegate { };
 
     public override void Spawned()
     {
-        _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
-        CurrentLife = MAX_LIFE;
+        _detector = GetChangeDetector(ChangeDetector.Source.SimulationState);
+
+        // Obtengo el max life del ModelPlayer
+        var model = GetComponent<ModelPlayer>();
+        _maxLife = (byte)model.MaxHealth;
+        CurrentLife = _maxLife;
     }
 
-    public void GetMyUI(NickNameBarLife item) => _myItemUI = item;
-
-    //Al morir, si es mi primera vez, revivir a los 2 segundos
-    //Si es mi segunda vez, desconectar al jugador
-    public void TakeDamage(byte dmg)
+    // NetworkPlayer se encargará de llamarme tras crear la UI
+    public void GetMyUI(NickNameBarLife ui)
     {
-        if (dmg > CurrentLife) dmg = CurrentLife;
-
-        CurrentLife -= dmg;
-
-        if (CurrentLife == 0)
-        {
-            _currentDeads++;
-            if (_currentDeads == MAX_DEADS)
-            {
-                DisconnectPlayer();
-            }
-            else
-            {
-                StartCoroutine(Server_RespawnCooldown());
-                IsDead = true;
-            }
-        }
+        _globalUI = ui;
+        // primera actualización para que no se quede vacía
+        var norm = (float)CurrentLife / _maxLife;
+        _globalUI.UpdateLifeBar(norm);
     }
 
-    IEnumerator Server_RespawnCooldown()
+    // Método público para dañar o curar
+    public void ModifyLife(int delta)
     {
-        yield return new WaitForSeconds(2f);
+        if (IsDead) return;
 
-        Server_Revive();
+        var newLife = Mathf.Clamp(CurrentLife + delta, 0, _maxLife);
+        CurrentLife = (byte)newLife;
     }
 
-    void Server_Revive()
-    {
-        OnRespawn();
-        IsDead = false;
-        CurrentLife = MAX_LIFE;
-    }
-
-    void DisconnectPlayer()
-    {
-        if (!Object.HasInputAuthority)
-            Runner.Disconnect(Object.InputAuthority);
-
-        Runner.Despawn(Object);
-    }
-
+    // Cuando cambia CurrentLife en la red
     public override void Render()
     {
-        foreach (var change in _changeDetector.DetectChanges(this))
-        {
-            switch (change)
-            {
-                case nameof(IsDead):
-                    OnDeadChanged();
-                    break;
-            }
-        }
-    }
-
-    void OnDeadChanged()
-    {
-        if (IsDead)
-            RemoteDead();
-        else
-            RemoteRespawn();
-
-        OnDeadChange(IsDead);
-    }
-
-    void RemoteDead()
-    {
-        _playerVisual.SetActive(false);
-    }
-
-    void RemoteRespawn()
-    {
-        _playerVisual.SetActive(true);
-    }
-
-    public override void Despawned(NetworkRunner runner, bool hasState)
-    {
-        OnDespawn();
+        foreach (var change in _detector.DetectChanges(this))
+            if (change == nameof(CurrentLife))
+                OnLifeChanged();
     }
 
     void OnLifeChanged()
     {
-        //_myItemUI.UpdateLifeBar(CurrentLife / MAX_LIFE);
+        float norm = (float)CurrentLife / _maxLife;
+        // UI global
+        _globalUI?.UpdateLifeBar(norm);
+        // evento para UI local
+        OnLifeUpdate(norm);
+
+        if (CurrentLife == 0 && !IsDead)
+        {
+            // muero por primera vez
+            IsDead = true;
+            OnDead?.Invoke();
+            StartCoroutine(RespawnRoutine());
+        }
+    }
+
+    IEnumerator RespawnRoutine()
+    {
+        yield return new WaitForSeconds(2f);
+        // respawneo
+        IsDead = false;
+        CurrentLife = _maxLife;
+        OnRespawn?.Invoke();
     }
 }
