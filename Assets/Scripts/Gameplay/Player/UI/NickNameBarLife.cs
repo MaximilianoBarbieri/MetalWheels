@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class NickNameBarLife : MonoBehaviour
 {
-    public TextMeshProUGUI nicknameText;
-    public Slider healthBar;
+    [SerializeField] public TextMeshProUGUI nicknameText;
+    [SerializeField] public Image healthBar;
 
     private Transform target;
     private ModelPlayer playerModel;
@@ -22,7 +22,7 @@ public class NickNameBarLife : MonoBehaviour
         target = playerTransform;
         playerModel = model;
 
-        healthBar.maxValue = playerModel.MaxHealth;
+        healthBar.fillAmount = playerModel.MaxHealth;
     }
 
     void Update()
@@ -31,7 +31,7 @@ public class NickNameBarLife : MonoBehaviour
 
         transform.position = target.position + Vector3.up * 2f; // ajuste vertical
         if (_camera != null) transform.LookAt(_camera.transform);
-        healthBar.value = playerModel.CurrentHealth;
+        healthBar.fillAmount = playerModel.CurrentHealth / playerModel.MaxHealth;
     }
 
     public void UpdateNickName(string newNick)

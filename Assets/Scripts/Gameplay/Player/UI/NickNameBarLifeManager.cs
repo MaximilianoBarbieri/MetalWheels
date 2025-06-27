@@ -5,12 +5,12 @@ using UnityEngine;
 public class NickNameBarLifeManager : MonoBehaviour
 {
     public static NickNameBarLifeManager Instance;
-
     [SerializeField] private NickNameBarLife _itemPrefab;
 
     void Awake()
     {
-        Instance = this;
+        if(Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
     
     public NickNameBarLife CreateNewItem(NetworkPlayer networkPlayer)
