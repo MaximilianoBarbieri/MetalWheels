@@ -21,7 +21,7 @@ public class ModelPlayer : NetworkBehaviour
 
     public override void Spawned()
     {
-        if (!Object.HasInputAuthority) return;
+        if (!Object.HasStateAuthority) return;
         
         if (PlayerData.CarSelected == 0)
         {

@@ -53,8 +53,14 @@ public class LifeHandler : NetworkBehaviour
 
     void UpdateUI()
     {
-        float normalizedLife = _model.MaxHealth > 0 ? (float)CurrentLife / _model.MaxHealth : 0f;
-        
+        if (_model == null || _model.MaxHealth <= 0)
+        {
+            // Si el modelo no existe todavía, poné la barra vacía hasta que exista.
+            _globalUI?.UpdateLifeBar(0f);
+            OnLifeUpdate(0f);
+            return;
+        }
+        float normalizedLife = Mathf.Clamp01((float)CurrentLife / _model.MaxHealth);
         _globalUI?.UpdateLifeBar(normalizedLife);
         OnLifeUpdate(normalizedLife);
     }
