@@ -14,16 +14,16 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public float RespawnTimer { get; private set; }
     [Networked] public bool IsStunned { get; private set; }
     [Networked] public float StunTimer { get; private set; }
-    [Networked] public int CarType { get; private set; }
+    [Networked] public int CarType { get; set; }
 
     public enum SpecialType { None, Stun, Fire }
 
 
-    public override void Spawned()
+    /*public override void Spawned()
     {
         if (!Object.HasStateAuthority) return;
         
-        if (PlayerData.CarSelected == 0)
+        if (CarType == 0)
         {
             MaxHealth = 100;
             MaxSpeed = 30f;
@@ -39,8 +39,30 @@ public class ModelPlayer : NetworkBehaviour
         SpecialAmmo = SpecialType.None;
         IsDead = false;
         RespawnTimer = 0f;
-        CarType = PlayerData.CarSelected;
+    }*/
+    
+    public void InitStats(int carType)
+    {
+        CarType = carType;
+
+        if (CarType == 0)
+        {
+            MaxHealth = 100;
+            MaxSpeed = 30f;
+        }
+        else
+        {
+            MaxHealth = 200;
+            MaxSpeed = 20f;
+        }
+
+        CurrentHealth = MaxHealth;
+        Nitro = 1f;
+        SpecialAmmo = SpecialType.None;
+        IsDead = false;
+        RespawnTimer = 0f;
     }
+
 
     public void UpdateStats(float deltaTime)
     {

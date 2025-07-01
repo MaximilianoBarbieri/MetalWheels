@@ -29,7 +29,6 @@ public class NetworkPlayer : NetworkBehaviour
             // Sólo para los demás jugadores
             _myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
             _myItemUI.Init(NickName, transform);
-            //_myItemUI.Init(NickName, transform, GetComponent<ModelPlayer>());
 
             // Conectamos LifeHandler → UI global
             _lifeHandler = GetComponent<LifeHandler>();
