@@ -60,9 +60,8 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
         #endregion
 
         var spawnPoint = GetFreeSpawnPoint(player);
-        var obj = runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
-        // Al Car spawneado le seteo el modelo con los stats correspondientes
-        if (obj.TryGetBehaviour<ModelPlayer>(out var model)) model.SetCarType(selectedCar);
+        
+        runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)

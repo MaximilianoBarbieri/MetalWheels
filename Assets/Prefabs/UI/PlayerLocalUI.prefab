@@ -354,8 +354,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speedText: {fileID: 8706722316227738511}
-  healthBar: {fileID: 925231895221304577}
-  nitroBar: {fileID: 5142376341531065672}
+  healthBar: {fileID: 9195104798900034002}
+  nitroBar: {fileID: 5265700913422462137}
 --- !u!1 &8860707799116577832
 GameObject:
   m_ObjectHideFlags: 0

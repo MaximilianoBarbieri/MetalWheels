@@ -53,9 +53,10 @@ public class LifeHandler : NetworkBehaviour
 
     void UpdateUI()
     {
-        float norm = (float)CurrentLife / _model.MaxHealth;
-        _globalUI?.UpdateLifeBar(norm);
-        OnLifeUpdate(norm);
+        float normalizedLife = _model.MaxHealth > 0 ? (float)CurrentLife / _model.MaxHealth : 0f;
+        
+        _globalUI?.UpdateLifeBar(normalizedLife);
+        OnLifeUpdate(normalizedLife);
     }
 
     IEnumerator RespawnRoutine()

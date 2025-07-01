@@ -119,61 +119,6 @@ public class PlayerController : NetworkBehaviour
         }
 
         #endregion
-
-        #region OLD
-
-        /*//OLD
-        if (!HasInputAuthority) return;
-
-        // Respawn timer lógica
-        if (_model.IsDead)
-        {
-            _model.RespawnTimer -= Runner.DeltaTime;
-            if (_model.RespawnTimer <= 0)
-            {
-                // Buscar spawn point libre y respawnear
-                //TODO: VER COMO HACER PARA PASARLE EL SPAWNPOINT AL QUE DEBE IR sin pisarse con los otros players
-                //Transform spawn = SpawnManager.Instance.GetFreePlayerSpawnPoint();
-                //_model.RespawnAt(spawn.position, spawn.rotation);
-                Vector3 spawn = Vector3.zero;
-                _model.RespawnAt(spawn, new Quaternion(0,0,0,0));
-                rb.velocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-            return;
-        }
-
-        // Salto con cooldown
-        if (Input.GetKeyDown(KeyCode.Space) && Runner.SimulationTime >= nextJumpTime)
-        {
-            rb.AddForce(Vector3.up * 7f, ForceMode.Impulse);
-            nextJumpTime = (float)Runner.SimulationTime + jumpCooldown;
-        }
-
-        // Nitro
-        if (Input.GetKey(KeyCode.LeftShift) && _model.Nitro > 0f)
-        {
-            rb.AddForce(transform.forward * _model.MaxSpeed * 0.7f, ForceMode.Acceleration);
-            _model.Nitro -= Runner.DeltaTime * 0.3f;
-            _model.Nitro = Mathf.Clamp01(_model.Nitro);
-        }
-
-        // Shoot normal
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            Runner.Spawn(projectileNormalPrefab, shootPoint.position, shootPoint.rotation, Object.InputAuthority);
-        }
-
-        // Shoot special
-        if (Input.GetKeyDown(KeyCode.P) && _model.SpecialAmmo != ModelPlayer.SpecialType.None)
-        {
-            var proj = Runner.Spawn(projectileSpecialPrefab, shootPoint.position, shootPoint.rotation, Object.InputAuthority);
-            if (proj != null && proj.GetComponent<Projectile>() != null)
-                proj.GetComponent<Projectile>().specialType = _model.SpecialAmmo;
-            _model.SpecialAmmo = ModelPlayer.SpecialType.None;
-        }*/
-
-        #endregion
     }
 
     // Daño por colisión/crash

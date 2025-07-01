@@ -17,19 +17,13 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public int CarType { get; private set; }
 
     public enum SpecialType { None, Stun, Fire }
-    
-    
-    public void SetCarType(int carType)
-    {
-        CarType = carType;
-        InitStats(CarType);
-    }
 
-    private void InitStats(int carType)
+
+    public override void Spawned()
     {
-        //TODO: agregar todas las variables necesarias y fijarse si hace falta que esten en NetworkCharacterControllerCustom
+        if (!Object.HasInputAuthority) return;
         
-        if (carType == 0)
+        if (PlayerData.CarSelected == 0)
         {
             MaxHealth = 100;
             MaxSpeed = 30f;
@@ -45,8 +39,9 @@ public class ModelPlayer : NetworkBehaviour
         SpecialAmmo = SpecialType.None;
         IsDead = false;
         RespawnTimer = 0f;
+        CarType = PlayerData.CarSelected;
     }
-    
+
     public void UpdateStats(float deltaTime)
     {
         UpdateStun(deltaTime);
