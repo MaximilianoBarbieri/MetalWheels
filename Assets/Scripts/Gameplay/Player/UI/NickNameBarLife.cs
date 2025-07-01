@@ -42,7 +42,7 @@ public class NickNameBarLife : MonoBehaviour
     // Llamado desde LifeHandler para actualizar la barra de vida.
     public void UpdateLifeBar(float normalizedLife)
     {
-        healthBar.fillAmount = Mathf.Clamp01(normalizedLife);;
+        healthBar.fillAmount = Mathf.Clamp01(normalizedLife);
     }
 
     // Actualiza la posición y rotación cada frame.

@@ -371,6 +371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nicknameText: {fileID: 639659784786259634}
   healthBar: {fileID: 8750028251951987786}
+  offset: {x: 0, y: 2, z: 0}
 --- !u!1 &6917644393605091022
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,8 +5,8 @@ using TMPro;
 public class PlayerLocalUIHandler : MonoBehaviour
 {
     public TextMeshProUGUI speedText;
-    public Slider healthSlider;
-    public Slider nitroSlider;
+    public Image healthBar;
+    public Image nitroBar;
 
     //private ModelPlayer modelPlayer;
     private NetworkCharacterControllerCustom _controller;
@@ -17,14 +17,15 @@ public class PlayerLocalUIHandler : MonoBehaviour
         _controller = characterController;
         _lifeHandler = lifeHandler;
 
-        healthSlider.maxValue = model.MaxHealth;
+        // Barra llena al inicio
+        healthBar.fillAmount = 1;
         // suscribo al evento
-        _lifeHandler.OnLifeUpdate += norm => healthSlider.value = norm * model.MaxHealth;
+        _lifeHandler.OnLifeUpdate += norm => healthBar.fillAmount = norm * model.MaxHealth;
     }
 
     void Update()
     {
         speedText.text = $"{_controller.Velocity.magnitude:F1} km/h";
-        nitroSlider.value = _controller.Object.TryGetBehaviour<ModelPlayer>(out var mp) ? mp.Nitro : 0f;
+        nitroBar.fillAmount = _controller.Object.TryGetBehaviour<ModelPlayer>(out var mp) ? mp.Nitro : 0f;
     }
 }
