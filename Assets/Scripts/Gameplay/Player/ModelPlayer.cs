@@ -17,29 +17,6 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public int CarType { get; set; }
 
     public enum SpecialType { None, Stun, Fire }
-
-
-    /*public override void Spawned()
-    {
-        if (!Object.HasStateAuthority) return;
-        
-        if (CarType == 0)
-        {
-            MaxHealth = 100;
-            MaxSpeed = 30f;
-        }
-        else
-        {
-            MaxHealth = 200;
-            MaxSpeed = 20f;
-        }
-
-        CurrentHealth = MaxHealth;
-        Nitro = 1f;
-        SpecialAmmo = SpecialType.None;
-        IsDead = false;
-        RespawnTimer = 0f;
-    }*/
     
     public void InitStats(int carType)
     {

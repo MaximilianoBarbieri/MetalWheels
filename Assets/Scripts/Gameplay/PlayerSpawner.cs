@@ -63,7 +63,6 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
         
         var playerObject = runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
         var modelPlayer = playerObject.GetComponent<ModelPlayer>();
- //       modelPlayer.CarType = selectedCar;
         modelPlayer.InitStats(selectedCar);
     }
 
