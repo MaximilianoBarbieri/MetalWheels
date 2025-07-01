@@ -21,7 +21,7 @@ public class CharacterInputHandler : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space)) _isJumpPressed = true;
         if (Input.GetKeyDown(KeyCode.Q)) _isShootNormalPressed = true;
-        if (Input.GetKeyDown(KeyCode.P)) _isShootNormalPressed = true;
+        if (Input.GetKeyDown(KeyCode.E)) _isShootNormalPressed = true;
         
         _isNitroPressed |= Input.GetKey(KeyCode.LeftShift);
     }

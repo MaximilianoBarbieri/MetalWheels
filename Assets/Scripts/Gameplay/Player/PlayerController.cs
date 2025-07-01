@@ -82,11 +82,6 @@ public class PlayerController : NetworkBehaviour
             Debug.LogWarning("❌ GetInput NO devuelve datos en este cliente.");
             return;
         }
-        else
-        {
-            Debug.Log(
-                $"✅ GetInput OK - H: {networkInputData.movementInputHorizontal}, V: {networkInputData.movementInputVertical}");
-        }
 
         if (_model.IsDead || _model.IsStunned) return;
 
@@ -112,13 +107,14 @@ public class PlayerController : NetworkBehaviour
         //SHOOT NORMAL
         if (networkInputData.isShootNormalPressed)
         {
-            _myLifeHandler.ModifyLife(10);
+            _myLifeHandler.ModifyLife(-25);
             //_myWeaponHandler.Fire();
         }
 
         //SHOOT SPECIAL
         if (networkInputData.isShootSpecialPressed)
         {
+            _myLifeHandler.ModifyLife(25);
             //_myWeaponHandler.Fire();
         }
 

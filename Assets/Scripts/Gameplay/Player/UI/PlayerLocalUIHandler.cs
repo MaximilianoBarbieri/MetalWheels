@@ -8,24 +8,29 @@ public class PlayerLocalUIHandler : MonoBehaviour
     public Image healthBar;
     public Image nitroBar;
 
-    //private ModelPlayer modelPlayer;
     private NetworkCharacterControllerCustom _controller;
+    private ModelPlayer _model;
     private LifeHandler _lifeHandler;
 
     public void Init(ModelPlayer model, NetworkCharacterControllerCustom characterController, LifeHandler lifeHandler)
     {
+        _model = model;
         _controller = characterController;
         _lifeHandler = lifeHandler;
 
-        // Barra llena al inicio
-        healthBar.fillAmount = 1;
-        // suscribo al evento
-        _lifeHandler.OnLifeUpdate += norm => healthBar.fillAmount = norm * model.MaxHealth;
+        healthBar.fillAmount = 1f;
+
+        _lifeHandler.OnLifeUpdate += UpdateHealthUI;
     }
 
     void Update()
     {
         speedText.text = $"{_controller.Velocity.magnitude:F1} km/h";
-        nitroBar.fillAmount = _controller.Object.TryGetBehaviour<ModelPlayer>(out var mp) ? mp.Nitro : 0f;
+        nitroBar.fillAmount = _model.Nitro;
+    }
+
+    void UpdateHealthUI(float normalizedLife)
+    {
+        healthBar.fillAmount = normalizedLife;
     }
 }
