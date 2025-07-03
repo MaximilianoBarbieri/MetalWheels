@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
+using static MoodsNpc;
 using UnityEngine;
 
 public class NPC : MonoBehaviour
@@ -25,9 +26,9 @@ public class NPC : MonoBehaviour
     [SerializeField] private Talk_NPC talkNpc;
     [SerializeField] private Sitdown_NPC sitdownNpc;
     [SerializeField] private Death_NPC deathNpc;
-    
+
     private List<GoapAction> _actions;
-    
+
     private void Start()
     {
         _fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
@@ -77,17 +78,23 @@ public class NPC : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Interactable"))
+        if (!other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
+            return;
+
+        if (interactable.type != InteractionType.NoInteractable)
             _interactablesInRange.Add(other.gameObject);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Interactable"))
+        if (!other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
+            return;
+
+        if (interactable.type != InteractionType.NoInteractable)
             _interactablesInRange.Remove(other.gameObject);
     }
 
-    public GameObject GetClosestInteractable()
+    public GameObject GetClosestInteractable() //TODO: PODRIA INTEGRARLO A UN SPATIAL GRID
     {
         return _interactablesInRange
             .Where(obj => obj != null)
@@ -102,7 +109,6 @@ public class NPC : MonoBehaviour
 
         return new WorldState
         {
-            isAlive = _life > 0f,
             life = _life,
             carInRange = closest != null,
             interactionType = type
@@ -116,40 +122,42 @@ public class NPC : MonoBehaviour
             new GoapAction
             {
                 Name = "Idle",
-                Precondition = s => !s.carInRange,
-                Effect = s => s.Clone(),
+                Precondition = s => !s.carInRange && s.steps == 0,
+                Effect = s => s.Clone(), //AWAIT 3 SEG -> RECUPERO 3 STEPS DE GOLPE
                 Execute = () => (TransitionToCoroutine(idleNpc)),
                 Cost = 4
             },
             new GoapAction
             {
                 Name = "Walk",
-                Precondition = s => !s.carInRange, //TODO: Agregar otra condicion, por ejemplo, vecinos cerca
-                Effect = s => s.Clone(),
+                Precondition = s => !s.carInRange && s.steps > 0,
+                Effect = s =>
+                    s.Clone(), //PERDER STEPS -> PARA LLEGAR A LA POSICION DESEADA TODO: SI TENGO UN STOCK DE 20 STEPS, QUIERO QUE TOME UN VALOR RANDOM DE 0 HASTA SU MAXVALUE PARA MOVERSE
                 Execute = () => (TransitionToCoroutine(walkNpc)),
                 Cost = 3
             },
             new GoapAction
             {
                 Name = "Talk",
-                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Talk && !s.hasTalked,
-                Effect = s =>
-                {
-                    var ns = s.Clone();
-                    ns.hasTalked = true;
-                    return ns;
-                },
+                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Talk && s.mood != Curious,
+                Effect =
+                    s => //QUEDARSE QUIETO Y SIMULAR UNA CONVERSACION CON UN "FALSO" NPC TODO: ESTOS PODRIAN SPAWNEAR LAS "CONVERSACIONES"/"GLOBOS DE TEXTO" COMO UNICA RESPONSABILIDAD
+                    {
+                        var ns = s.Clone();
+                        ns.mood = Curious;
+                        return ns;
+                    },
                 Execute = () => (TransitionToCoroutine(talkNpc)),
                 Cost = 2
             },
             new GoapAction
             {
                 Name = "Sitdown",
-                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Sit && !s.isSeated,
-                Effect = s =>
+                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Sit && s.mood != Relaxed,
+                Effect = s => //ME MANTENGO 5 SEGUNDOS, PERO RECUPERO TODOS MIS STEPS + RECUPERO TODA MI STAMINA
                 {
                     var ns = s.Clone();
-                    ns.isSeated = true;
+                    ns.mood = Relaxed;
                     return ns;
                 },
                 Execute = () => (TransitionToCoroutine(sitdownNpc)),
@@ -158,15 +166,15 @@ public class NPC : MonoBehaviour
             new GoapAction
             {
                 Name = "Escape",
-                Precondition = s => s.carInRange && !s.isSafe,
-                Effect = s =>
-                {
-                    var ns = s.Clone();
-                    ns.isSafe = true;
-                    return ns;
-                },
-                //Execute = () => (TransitionToCoroutine(escapeNpc)),
-                Execute = () => (StartCoroutine(MoveAlongPath(path))),
+                Precondition = s => s.carInRange && s.mood != Safe,
+                Effect =
+                    s => //TODO: DIVIDIR LA ESCENA EN SEGMENTOS, PARA ESCAPAR, DEBO ENCONTRAR UN SEGMENTO DONDE NO HAYA NINGUN VEHICULO 
+                    {
+                        var ns = s.Clone();
+                        ns.mood = Safe;
+                        return ns;
+                    },
+                Execute = () => (TransitionToCoroutine(escapeNpc)),
                 Cost = 1
             },
             new GoapAction
@@ -181,7 +189,7 @@ public class NPC : MonoBehaviour
     }
 
     private List<GoapAction> GetAvailableActions() => _actions;
-    
+
     private Func<WorldState, bool> SelectGoal(WorldState state)
     {
         // 1. Si la vida es 0 o menos, el objetivo es permanecer muerto.
@@ -191,21 +199,21 @@ public class NPC : MonoBehaviour
 
         // 2. Si hay un auto cerca y aún no está a salvo, el objetivo es ponerse a salvo.
         //    Esto fuerza a que escape, ignorando otras acciones hasta estar seguro.
-        if (state.carInRange && !state.isSafe)
-            return s => s.isSafe; // Meta: estar a salvo
+        if (state.carInRange && state.mood != Safe)
+            return s => s.mood == Safe; // Meta: estar a salvo
 
         // 3. Si hay una oportunidad de hablar y aún no habló, el objetivo es completar esa charla.
-        if (state.interactionType == InteractionType.Talk && !state.hasTalked)
-            return s => s.hasTalked; // Meta: haber hablado
+        if (state.interactionType == InteractionType.Talk && state.mood != Curious)
+            return s => s.mood == Curious; // Meta: haber hablado
 
         // 4. Si puede sentarse y aún no está sentado, el objetivo es sentarse.
-        if (state.interactionType == InteractionType.Sit && !state.isSeated)
-            return s => s.isSeated; // Meta: estar sentado
+        if (state.interactionType == InteractionType.Sit && state.mood != Relaxed)
+            return s => s.mood == Relaxed; // Meta: estar sentado
 
         // 5. Meta por defecto: Simplemente seguir existiendo y no hacer nada especial.
         return s => true; // No hay meta "de mejora", solo existir.
     }
-    
+
     private Queue<GoapAction> _currentPlan = new();
 
     public IEnumerator RunPlanLoop()
@@ -215,8 +223,8 @@ public class NPC : MonoBehaviour
             var current = GetCurrentWorldState();
 
             // Verificamos condiciones críticas
-            if ((current.carInRange && !current.isSafe))
-                _currentPlan.Clear();  // Cancelamos el plan actual
+            if ((current.carInRange && current.mood != Safe))
+                _currentPlan.Clear(); // Cancelamos el plan actual
 
             if (_currentPlan.Count == 0)
             {
