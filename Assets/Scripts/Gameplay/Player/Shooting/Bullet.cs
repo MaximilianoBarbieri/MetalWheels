@@ -9,8 +9,9 @@ public class Bullet : NetworkBehaviour
     private TickTimer _lifeTimeTickTimer = TickTimer.None;
 
     [Header("Bullet Settings")]
+    [SerializeField] private float _force = 150f; // Ajustá el valor en cada prefab
     [SerializeField] private byte _damage = 25;
-    [SerializeField] private ModelPlayer.SpecialType _specialType = ModelPlayer.SpecialType.None; // None, Stun, Fire
+    [SerializeField] private ModelPlayer.SpecialType _specialType = ModelPlayer.SpecialType.None;
 
     [Header("Special FX")]
     [SerializeField] private ParticleSystem _impactParticles;
@@ -23,9 +24,7 @@ public class Bullet : NetworkBehaviour
 
     public override void Spawned()
     {
-        // Usá distintos valores según el tipo si querés
-        float force = (_specialType == ModelPlayer.SpecialType.Stun) ? 120f : 150f;
-        _networkRb.Rigidbody.AddForce(transform.forward * force, ForceMode.VelocityChange);
+        _networkRb.Rigidbody.AddForce(transform.forward * _force, ForceMode.VelocityChange);
 
         if (Object.HasStateAuthority)
             _lifeTimeTickTimer = TickTimer.CreateFromSeconds(Runner, 2);

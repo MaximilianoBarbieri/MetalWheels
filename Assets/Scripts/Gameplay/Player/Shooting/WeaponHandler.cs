@@ -10,6 +10,9 @@ public class WeaponHandler : NetworkBehaviour
     [SerializeField] private Transform _firingPositionTransform;
     [SerializeField] private ParticleSystem _shootingParticles;
 
+    private double  _nextFireTimeNormal = 0;
+    [SerializeField] private float fireCooldown = 1f; // 1 segundo para fire
+    
     [Networked] NetworkBool _spawnedBullet { get; set; }
 
     private ChangeDetector _changeDetector;
@@ -35,8 +38,16 @@ public class WeaponHandler : NetworkBehaviour
     public void FireNormal()
     {
         if (!HasStateAuthority) return;
+        if (Runner.SimulationTime < _nextFireTimeNormal) {
+            Debug.Log($"[Cooldown] ¡Todavía no podés disparar! Faltan: {_nextFireTimeNormal - Runner.SimulationTime:F2}s");
+            return;
+        }
+        if (Runner.SimulationTime < _nextFireTimeNormal) return;
+
         _spawnedBullet = !_spawnedBullet;
         Runner.Spawn(_bulletNormalPrefab, _firingPositionTransform.position, transform.rotation);
+
+        _nextFireTimeNormal = Runner.SimulationTime + fireCooldown;
     }
 
     public void FireSpecial(ModelPlayer.SpecialType specialType)
