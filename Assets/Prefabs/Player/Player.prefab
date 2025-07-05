@@ -894,10 +894,11 @@ GameObject:
   - component: {fileID: 4718606934396272411}
   - component: {fileID: 2837510912700450510}
   - component: {fileID: 4140154826601458244}
-  - component: {fileID: 6747240166403912663}
   - component: {fileID: -1983544812649688618}
+  - component: {fileID: 6747240166403912663}
   - component: {fileID: -8410449478962887658}
   - component: {fileID: -6260556829295157084}
+  - component: {fileID: -941250226265239958}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -941,9 +942,10 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 4718606934396272411}
   - {fileID: 4140154826601458244}
-  - {fileID: 6747240166403912663}
   - {fileID: -1983544812649688618}
+  - {fileID: 6747240166403912663}
   - {fileID: -6260556829295157084}
+  - {fileID: -941250226265239958}
   ForceRemoteRenderTimeframe: 0
 --- !u!143 &7792159476141714268
 CharacterController:
@@ -1020,6 +1022,30 @@ MonoBehaviour:
   carBraking: 8
   nitroAccelerationMultiplier: 2
   nitroMaxSpeed: 20
+--- !u!114 &-1983544812649688618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851659979244366952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b49fb9982733684994f5ebc80fe3d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _MaxHealth: 100
+  _CurrentHealth: 0
+  _MaxSpeed: 0
+  _Nitro: 0
+  _Kills: 0
+  _Deaths: 0
+  _SpecialAmmo: 0
+  _IsDead: 0
+  _RespawnTimer: 0
+  _IsStunned: 0
+  _StunTimer: 0
+  _CarType: 0
 --- !u!114 &6747240166403912663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1037,30 +1063,6 @@ MonoBehaviour:
   minCrashForce: 7
   crashDamage: 30
   playerLocalUIPrefab: {fileID: 9043751680056171376, guid: 75e2bc767602e1644b2459ad9c147887, type: 3}
---- !u!114 &-1983544812649688618
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7851659979244366952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b49fb9982733684994f5ebc80fe3d8d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _MaxHealth: 0
-  _CurrentHealth: 0
-  _MaxSpeed: 0
-  _Nitro: 0
-  _Kills: 0
-  _Deaths: 0
-  _SpecialAmmo: 0
-  _IsDead: 0
-  _RespawnTimer: 0
-  _IsStunned: 0
-  _StunTimer: 0
-  _CarType: 0
 --- !u!114 &-8410449478962887658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1089,6 +1091,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerVisual: {fileID: 473786962778597703}
+--- !u!114 &-941250226265239958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851659979244366952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c96bef05d230224683eecf37e2fc0f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bulletNormalPrefab:
+    RawGuidValue: 8374c62b07a3622408be9f0756a6408f
+  _bulletSpecialPrefab:
+    RawGuidValue: bb8c230c95e5f70489d1bca0a5ad46a9
+  _firingPositionTransform: {fileID: 7232069907805579775}
+  _shootingParticles: {fileID: 0}
 --- !u!1 &8283228725532981500
 GameObject:
   m_ObjectHideFlags: 0

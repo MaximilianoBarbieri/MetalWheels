@@ -4,7 +4,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(NetworkCharacterControllerCustom))]
 [RequireComponent(typeof(LifeHandler))]
-/*[RequireComponent(typeof(WeaponHandler))]*/
+[RequireComponent(typeof(WeaponHandler))]
 public class PlayerController : NetworkBehaviour
 {
     private ModelPlayer _model;
@@ -24,6 +24,23 @@ public class PlayerController : NetworkBehaviour
     
     //UI player
     [SerializeField] private PlayerLocalUIHandler playerLocalUIPrefab;
+    
+    private void Awake()
+    {
+        _model = GetComponent<ModelPlayer>();
+        
+        _myCharacterController = GetComponent<NetworkCharacterControllerCustom>();
+        _myWeaponHandler = GetComponent<WeaponHandler>();
+        _myLifeHandler = GetComponent<LifeHandler>();
+        
+        _myLifeHandler.OnDead += () => {/* opcional: cámara, efectos, etc */ };
+
+        _myLifeHandler.OnRespawn += () =>
+        {
+            /* opcional: reposicionar, limpiar estado */
+            _myCharacterController.Teleport(transform.position);
+        };
+    }
 
     public override void Spawned()
     {
@@ -44,31 +61,14 @@ public class PlayerController : NetworkBehaviour
         
         if (playerLocalUIPrefab != null)
         {
+            Debug.Log("PlayerController -> Model inicializado antes de ejecutar global canvas: " + _model.MaxHealth);
             Canvas globalCanvas = GameObject.Find("Canvas_LocalUI").GetComponent<Canvas>();
             var uiInstance = Instantiate(playerLocalUIPrefab, globalCanvas.transform);
             uiInstance.Init(_model, _myCharacterController, _myLifeHandler);
+            
+            // Forzar update
+            _myLifeHandler?.UpdateUI();
         }
-        else
-        {
-            Debug.LogError("Prefab PlayerLocalUI no asignado");
-        }
-    }
-
-    private void Awake()
-    {
-        _model = GetComponent<ModelPlayer>();
-        
-        _myCharacterController = GetComponent<NetworkCharacterControllerCustom>();
-        _myWeaponHandler = GetComponent<WeaponHandler>();
-        _myLifeHandler = GetComponent<LifeHandler>();
-        
-        _myLifeHandler.OnDead += () => {/* opcional: cámara, efectos, etc */ };
-
-        _myLifeHandler.OnRespawn += () =>
-        {
-            /* opcional: reposicionar, limpiar estado */
-            _myCharacterController.Teleport(transform.position);
-        };
     }
 
     public override void FixedUpdateNetwork()
@@ -77,11 +77,7 @@ public class PlayerController : NetworkBehaviour
 
         _model.UpdateStats(Runner.DeltaTime);
 
-        if (!GetInput(out NetworkInputData networkInputData))
-        {
-            Debug.LogWarning("❌ GetInput NO devuelve datos en este cliente.");
-            return;
-        }
+        if (!GetInput(out NetworkInputData networkInputData)) return;
 
         if (_model.IsDead || _model.IsStunned) return;
 
@@ -107,15 +103,24 @@ public class PlayerController : NetworkBehaviour
         //SHOOT NORMAL
         if (networkInputData.isShootNormalPressed)
         {
-            _myLifeHandler.ModifyLife(-25);
-            //_myWeaponHandler.Fire();
+            _myWeaponHandler.FireNormal();
         }
 
         //SHOOT SPECIAL
         if (networkInputData.isShootSpecialPressed)
         {
+            // Solo disparar si tiene munición especial
+            if (_model.SpecialAmmo != ModelPlayer.SpecialType.None)
+            {
+                _myWeaponHandler.FireSpecial();
+                _model.SetSpecial(ModelPlayer.SpecialType.None); // Gasta la especial
+            }
+        }
+        
+        //DEBUG TAKE DAMAGE
+        if (networkInputData.isTakeDamagePressed)
+        {
             _myLifeHandler.ModifyLife(25);
-            //_myWeaponHandler.Fire();
         }
 
         #endregion

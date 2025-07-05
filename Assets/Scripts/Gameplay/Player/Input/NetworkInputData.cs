@@ -9,6 +9,8 @@ public struct NetworkInputData : INetworkInput
     public NetworkBool isShootSpecialPressed;
     public NetworkBool isJumpPressed;
     public NetworkBool isNitroPressed;
+    
+    public NetworkBool isTakeDamagePressed;
 
     public NetworkButtons networkButtons;
 }

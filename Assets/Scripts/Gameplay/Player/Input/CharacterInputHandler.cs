@@ -8,6 +8,9 @@ public class CharacterInputHandler : MonoBehaviour
     private bool _isNitroPressed;
     private bool _isShootNormalPressed;
     private bool _isShootSpecialPressed;
+    
+    //debug
+    private bool _isTakeDamagePressed;
 
     void Start()
     {
@@ -20,8 +23,9 @@ public class CharacterInputHandler : MonoBehaviour
         _inputData.movementInputVertical = Input.GetAxis("Vertical");
 
         if (Input.GetKeyDown(KeyCode.Space)) _isJumpPressed = true;
-        if (Input.GetKeyDown(KeyCode.Q)) _isShootNormalPressed = true;
         if (Input.GetKeyDown(KeyCode.E)) _isShootNormalPressed = true;
+        if (Input.GetKeyDown(KeyCode.Q)) _isShootSpecialPressed = true;
+        if (Input.GetKeyDown(KeyCode.F)) _isTakeDamagePressed = true;
         
         _isNitroPressed |= Input.GetKey(KeyCode.LeftShift);
     }
@@ -39,6 +43,9 @@ public class CharacterInputHandler : MonoBehaviour
         
         _inputData.networkButtons.Set(MyButtons.NITRO, _isNitroPressed);
         _isNitroPressed = false;
+        
+        _inputData.isTakeDamagePressed = _isTakeDamagePressed;
+        _isTakeDamagePressed = false;
         
         return _inputData;
     }

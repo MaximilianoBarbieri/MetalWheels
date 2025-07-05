@@ -17,7 +17,7 @@ public class PlayerLocalUIHandler : MonoBehaviour
         _model = model;
         _controller = characterController;
         _lifeHandler = lifeHandler;
-
+        
         // Usar Clamp y chequeo
         float normalizedLife = (_model.MaxHealth > 0) ? Mathf.Clamp01((float)_model.CurrentHealth / _model.MaxHealth) : 0f;
         healthBar.fillAmount = normalizedLife;

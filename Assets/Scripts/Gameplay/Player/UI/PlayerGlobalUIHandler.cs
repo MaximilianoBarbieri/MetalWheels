@@ -2,11 +2,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class NickNameBarLife : MonoBehaviour
+public class PlayerGlobalUIHandler : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI nicknameText;
-    [SerializeField] Image healthBar;      // Image tipo “Fill”
-    [SerializeField] private Vector3 offset = new Vector3(0f, 2f, 0f);
+    [SerializeField] private TextMeshProUGUI nicknameText;
+    [SerializeField] private Image healthBar;      // Image tipo “Fill”
+    [SerializeField] private Vector3 offset = new(0f, 2f, 0f);
 
     private Camera _cam;
     private Transform _target;

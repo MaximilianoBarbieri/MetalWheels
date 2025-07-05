@@ -15,8 +15,6 @@ public class NetworkCharacterControllerCustom : NetworkCharacterController
 
     public override void Move(Vector3 inputDirection)
     {
-        Debug.Log("🚗 Move() ejecutado con dirección: " + inputDirection);
-
         float deltaTime = Runner.DeltaTime;
         Vector3 previousPosition = transform.position;
         Vector3 moveVelocity = Velocity;

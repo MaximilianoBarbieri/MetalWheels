@@ -6,7 +6,7 @@ public class NetworkPlayer : NetworkBehaviour
 {
     public static NetworkPlayer Local { get; private set; }
 
-    private NickNameBarLife _myItemUI;
+    private PlayerGlobalUIHandler _myItemUI;
     private LifeHandler _lifeHandler;
     
     //public event Action OnPlayerDespawned = delegate { };
@@ -27,7 +27,7 @@ public class NetworkPlayer : NetworkBehaviour
         else
         {
             // Sólo para los demás jugadores
-            _myItemUI = NickNameBarLifeManager.Instance.CreateNewItem(this);
+            _myItemUI = PlayerGlobalUIManager.Instance.CreateNewItem();
             _myItemUI.Init(NickName, transform);
 
             // Conectamos LifeHandler → UI global

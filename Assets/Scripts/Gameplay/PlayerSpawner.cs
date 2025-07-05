@@ -68,24 +68,13 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        Debug.Log("🔥 OnInput ejecutado en: " + runner.LocalPlayer);
-
-        
-        if (!NetworkPlayer.Local)
-        {
-            Debug.LogWarning("❌ NetworkPlayer.Local es NULL");
-            return;
-        }
+        if (!NetworkPlayer.Local) return;
 
         _characterInputHandler ??= NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
-        if (_characterInputHandler == null)
-        {
-            Debug.LogWarning("❌ No se encontró CharacterInputHandler en NetworkPlayer.Local");
-            return;
-        }
+        
+        if (_characterInputHandler == null) return;
         
         var data = _characterInputHandler.GetLocalInputs();
-        Debug.Log($"✅ Inputs: H: {data.movementInputHorizontal} | V: {data.movementInputVertical}");
 
         input.Set(data);
     }

@@ -11,7 +11,7 @@ public class LifeHandler : NetworkBehaviour
     private int CurrentLife { get; set; }
 
     private ModelPlayer _model;
-    private NickNameBarLife _globalUI;
+    private PlayerGlobalUIHandler _globalUI;
 
     public event Action<float> OnLifeUpdate = delegate { };
     public event Action OnRespawn = delegate { };
@@ -21,9 +21,12 @@ public class LifeHandler : NetworkBehaviour
     {
         _model = GetComponent<ModelPlayer>();
         CurrentLife = _model.CurrentHealth;
+        
+        
+        UpdateUI(); // <-- AGREGADO
     }
 
-    public void GetMyUI(NickNameBarLife ui)
+    public void GetMyUI(PlayerGlobalUIHandler ui)
     {
         _globalUI = ui;
         UpdateUI();
@@ -44,14 +47,12 @@ public class LifeHandler : NetworkBehaviour
     {
         UpdateUI();
 
-        if (_model.IsDead)
-        {
-            OnDead?.Invoke();
-            StartCoroutine(RespawnRoutine());
-        }
+        if (!_model.IsDead) return;
+        OnDead?.Invoke();
+        StartCoroutine(RespawnRoutine());
     }
 
-    void UpdateUI()
+    public void UpdateUI()
     {
         if (_model == null || _model.MaxHealth <= 0)
         {
