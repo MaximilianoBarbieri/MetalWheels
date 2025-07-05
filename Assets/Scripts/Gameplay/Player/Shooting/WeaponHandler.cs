@@ -4,7 +4,9 @@ using UnityEngine;
 public class WeaponHandler : NetworkBehaviour
 {
     [SerializeField] private NetworkPrefabRef _bulletNormalPrefab;
-    [SerializeField] private NetworkPrefabRef _bulletSpecialPrefab;
+    [SerializeField] private NetworkPrefabRef _bulletStunPrefab;
+    [SerializeField] private NetworkPrefabRef _bulletFirePrefab;
+
     [SerializeField] private Transform _firingPositionTransform;
     [SerializeField] private ParticleSystem _shootingParticles;
 
@@ -37,11 +39,21 @@ public class WeaponHandler : NetworkBehaviour
         Runner.Spawn(_bulletNormalPrefab, _firingPositionTransform.position, transform.rotation);
     }
 
-    public void FireSpecial()
+    public void FireSpecial(ModelPlayer.SpecialType specialType)
     {
         if (!HasStateAuthority) return;
-        _spawnedBullet = !_spawnedBullet;
-        Runner.Spawn(_bulletSpecialPrefab, _firingPositionTransform.position, transform.rotation);
+
+        var prefabToUse = specialType switch
+        {
+            ModelPlayer.SpecialType.Stun => _bulletStunPrefab,
+            ModelPlayer.SpecialType.Fire => _bulletFirePrefab
+        };
+
+        if (prefabToUse != null)
+        {
+            _spawnedBullet = !_spawnedBullet;
+            Runner.Spawn(prefabToUse, _firingPositionTransform.position, transform.rotation);
+        }
     }
 
     void RemoteParticles()

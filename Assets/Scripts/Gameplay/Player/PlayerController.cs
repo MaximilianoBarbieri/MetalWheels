@@ -112,7 +112,7 @@ public class PlayerController : NetworkBehaviour
             // Solo disparar si tiene munición especial
             if (_model.SpecialAmmo != ModelPlayer.SpecialType.None)
             {
-                _myWeaponHandler.FireSpecial();
+                _myWeaponHandler.FireSpecial(_model.SpecialAmmo);
                 _model.SetSpecial(ModelPlayer.SpecialType.None); // Gasta la especial
             }
         }
