@@ -49,45 +49,52 @@ public class Bullet : NetworkBehaviour
     {
         if (!Object || !Object.HasStateAuthority) return;
 
-        bool didHit = false;
-
-        // Si golpea un player/enemigo
-        if (other.TryGetComponent(out LifeHandler lifeHandler))
+        // 1) Si choca con PLAYER
+        if (other.CompareTag("Player"))
         {
-            lifeHandler.ModifyLife(_damage);
-
-            // Efecto STUN
-            if (_specialType == ModelPlayer.SpecialType.Stun)
+            if (other.TryGetComponent(out LifeHandler lifeHandler))
             {
-                var model = lifeHandler.GetComponent<ModelPlayer>();
-                model?.Stun(2f); // 2 segundos de stun
+                Debug.Log($"[Bullet] Haciendo daño a {other.name}");
+                lifeHandler.ModifyLife(-_damage);
+
+                // Efecto STUN
+                if (_specialType == ModelPlayer.SpecialType.Stun)
+                {
+                    var model = lifeHandler.GetComponent<ModelPlayer>();
+                    model.Stun(2f); // 2 segundos de stun
+                }
+
+                // Efecto FIRE (puedes sumar lógica de quemadura aquí)
             }
 
-            // Efecto FIRE (ejemplo simple: daño extra o DOT futuro)
-            if (_specialType == ModelPlayer.SpecialType.Fire)
-            {
-                var model = lifeHandler.GetComponent<ModelPlayer>();
-                // Aquí podrías implementar un efecto DOT o quemadura
-                // Por ahora, simplemente podrías aplicar más daño
-                // model?.ApplyBurningEffect(); // Si tuvieras este método
-            }
-
-            didHit = true;
+            PlayImpactFX();
+            DespawnObject();
+            return;
         }
 
-        // Spawnea partículas de impacto si tenés
-        if (_impactParticles != null && didHit)
+        // 2) Si choca con OBJECT o NPC, solo se destruye
+        if (other.CompareTag("Object") || other.CompareTag("NPC"))
+        {
+            PlayImpactFX();
+            DespawnObject();
+            return;
+        }
+
+        // Si querés, podés agregar lógica para otros tags acá
+    }
+
+    // Método para manejar efectos visuales al impactar
+    void PlayImpactFX()
+    {
+        if (_impactParticles != null)
         {
             _impactParticles.transform.position = transform.position;
             _impactParticles.Play();
         }
-
-        // Si querés dejar una marca de fuego, instanciala
-        if (_specialType == ModelPlayer.SpecialType.Fire && _fireEffectPrefab != null && didHit)
+        if (_specialType == ModelPlayer.SpecialType.Fire && _fireEffectPrefab != null)
         {
             Instantiate(_fireEffectPrefab, transform.position, Quaternion.identity);
         }
-
-        DespawnObject();
     }
+
 }

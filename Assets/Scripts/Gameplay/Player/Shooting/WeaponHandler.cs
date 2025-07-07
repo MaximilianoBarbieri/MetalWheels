@@ -45,7 +45,7 @@ public class WeaponHandler : NetworkBehaviour
         if (Runner.SimulationTime < _nextFireTimeNormal) return;
 
         _spawnedBullet = !_spawnedBullet;
-        Runner.Spawn(_bulletNormalPrefab, _firingPositionTransform.position, transform.rotation);
+        Runner.Spawn(_bulletNormalPrefab, _firingPositionTransform.position, transform.rotation, null);
 
         _nextFireTimeNormal = Runner.SimulationTime + fireCooldown;
     }

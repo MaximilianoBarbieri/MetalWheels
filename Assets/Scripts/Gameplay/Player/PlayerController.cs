@@ -120,7 +120,7 @@ public class PlayerController : NetworkBehaviour
         //DEBUG TAKE DAMAGE
         if (networkInputData.isTakeDamagePressed)
         {
-            _myLifeHandler.ModifyLife(25);
+            _myLifeHandler.ModifyLife(-25);
         }
 
         #endregion

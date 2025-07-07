@@ -76,6 +76,10 @@ PrefabInstance:
       propertyPath: _CurrentHealth
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 4216371955622992830, guid: a404282cb93037e49af265224f69af00, type: 3}
+      propertyPath: SortKey
+      value: 4278209408
+      objectReference: {fileID: 0}
     - target: {fileID: 4451762914749015327, guid: a404282cb93037e49af265224f69af00, type: 3}
       propertyPath: m_Name
       value: Player

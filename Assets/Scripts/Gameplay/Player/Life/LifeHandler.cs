@@ -36,11 +36,15 @@ public class LifeHandler : NetworkBehaviour
     {
         if (_model.IsDead) return;
         
+        Debug.Log($"[LifeHandler] Antes de daño: CurrentLife={CurrentLife} | delta={delta} | StateAuth={Object.HasStateAuthority}");
+        
         // Modifico en el modelo, el cual maneja el estado real
         _model.ModifyLife(delta);
 
         // Actualizo la propiedad local networked
         CurrentLife = _model.CurrentHealth;
+        
+        Debug.Log($"[LifeHandler] Después de daño: CurrentLife={CurrentLife} | ModelCurrentHealth={_model.CurrentHealth}");
     }
 
     void OnLifeChanged()

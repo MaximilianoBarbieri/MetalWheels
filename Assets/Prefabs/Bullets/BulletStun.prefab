@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 6190763079182472113}
   m_Layer: 0
   m_Name: BulletStun
-  m_TagString: Untagged
+  m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -103,11 +103,11 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &2653839457909119918
 Rigidbody:
@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _force: 80
-  _damage: 15
+  _damage: 30
   _specialType: 1
   _impactParticles: {fileID: 0}
   _fireEffectPrefab: {fileID: 0}
