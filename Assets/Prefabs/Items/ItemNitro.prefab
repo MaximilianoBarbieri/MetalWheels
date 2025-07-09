@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 8286735268487339290}
   - component: {fileID: 7121583155957107650}
   - component: {fileID: 4195106842113011063}
+  - component: {fileID: 8570618375212683963}
   m_Layer: 0
   m_Name: ItemNitro
   m_TagString: Untagged
@@ -170,4 +171,22 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7121583155957107650}
+  - {fileID: 8570618375212683963}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &8570618375212683963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8989211397556805100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0

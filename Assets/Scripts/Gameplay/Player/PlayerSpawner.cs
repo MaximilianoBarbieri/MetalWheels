@@ -9,18 +9,17 @@ using Random = UnityEngine.Random;
 
 public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 {
+    public static PlayerSpawner Instance { get; private set; }
+    
     [SerializeField] private NetworkPrefabRef[] _playerPrefabs;
-
     [SerializeField] private Transform[] spawnPoints;
-
     private CharacterInputHandler _characterInputHandler;
     [Networked] [Capacity(4)] private NetworkDictionary<PlayerRef, int> UsedSpawnIndices => default;
     
     public override void Spawned()
     {
         base.Spawned();
-
-        //if (!Runner.IsServer) return;
+        if (Instance == null) Instance = this;
         Runner.AddCallbacks(this);
     }
 
@@ -109,7 +108,22 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 
         return spawnPoints[index];
     }
-
+    
+    public Vector3 GetSpawnPointForPlayer(PlayerRef player)
+    {
+        if (UsedSpawnIndices.TryGet(player, out var index))
+        {
+            if (index >= 0 && index < spawnPoints.Length)
+            {
+                Debug.LogWarning("GetSpawnPointForPlayer -> Indice correctamente seleccionado");
+                return spawnPoints[index].position;
+            }
+        }
+        // Si por alguna razón no existe, devolvé el primero o random
+        Debug.LogWarning("GetSpawnPointForPlayer -> Indice no encontrado");
+        return spawnPoints[0].position;
+    }
+    
     #region Unused callbacks
 
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)

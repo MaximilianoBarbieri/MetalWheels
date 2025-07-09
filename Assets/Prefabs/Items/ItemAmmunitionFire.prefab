@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 2912581345658000377}
   - component: {fileID: -4480627308556235036}
   - component: {fileID: 3299740864585942272}
+  - component: {fileID: 604875283116409459}
   m_Layer: 0
   m_Name: ItemAmmunitionFire
   m_TagString: Untagged
@@ -152,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visual: {fileID: 4853121818088737122}
+  specialType: 2
 --- !u!114 &3299740864585942272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,4 +172,22 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: -4480627308556235036}
+  - {fileID: 604875283116409459}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &604875283116409459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5600123857951937204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0

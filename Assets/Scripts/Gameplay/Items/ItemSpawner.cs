@@ -83,10 +83,7 @@ public class ItemSpawner : NetworkBehaviour
         int prefabIndex = Random.Range(0, itemPrefabs.Length);
         var itemObj = Runner.Spawn(itemPrefabs[prefabIndex], spawnPoints[index].position, Quaternion.identity);
 
-        if (itemObj.TryGetComponent<IItemPickup>(out var pickup))
-
-
-            pickup.SetSpawner(this);
+        if (itemObj.TryGetComponent<IItemPickup>(out var pickup)) pickup.SetSpawner(this);
 
         spawnedItems.Set(index, itemObj);
     }
