@@ -127,7 +127,7 @@ public class PlayerController : NetworkBehaviour
     }
 
     // Daño por colisión/crash
-    private void OnCollisionEnter(Collision collision)
+    /*private void OnCollisionEnter(Collision collision)
     {
         if (!HasInputAuthority && _model.IsDead) return;
 
@@ -141,5 +141,5 @@ public class PlayerController : NetworkBehaviour
                 otherModel.ModifyLife(-crashDamage, Object.InputAuthority);
             }
         }
-    }
+    }*/
 }

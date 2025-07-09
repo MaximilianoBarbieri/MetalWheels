@@ -1,10 +1,11 @@
 using Fusion;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class ItemLife : NetworkBehaviour, IItemPickup
 {
     [SerializeField] private GameObject visual;
-    [SerializeField] private int healAmount = 50;
+    [SerializeField] private int healtAmount = 50;
 
     [Networked] private TickTimer RespawnTimer { get; set; }
 
@@ -35,8 +36,13 @@ public class ItemLife : NetworkBehaviour, IItemPickup
 
         if (other.CompareTag("Player"))
         {
-            var model = other.GetComponent<ModelPlayer>();
-            model.ModifyLife(healAmount);
+            /*var model = other.GetComponent<ModelPlayer>();
+            model.ModifyLife(healtAmount);*/
+            if (other.TryGetComponent(out LifeHandler lifeHandler))
+            {
+                Debug.Log($"[ItemLife] Curando a {other.name}");
+                lifeHandler.ModifyLife(healtAmount);
+            }
 
             RespawnTimer = TickTimer.CreateFromSeconds(Runner, 3f);
             _spawner.NotifyItemPicked(Object);
