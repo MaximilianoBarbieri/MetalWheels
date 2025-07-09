@@ -22,9 +22,14 @@ public class LifeHandler : NetworkBehaviour
         _model = GetComponent<ModelPlayer>();
         CurrentLife = _model.CurrentHealth;
         
+        OnDead += DisableVisuals; //se puede agregar efectos visuales aca
+        OnRespawn += EnableVisuals; //se puede agregar efectos visuales aca
         
         UpdateUI(); // <-- AGREGADO
     }
+    
+    private void DisableVisuals() => _playerVisual.SetActive(false);
+    private void EnableVisuals() => _playerVisual.SetActive(true);
 
     public void GetMyUI(PlayerGlobalUIHandler ui)
     {
@@ -73,6 +78,13 @@ public class LifeHandler : NetworkBehaviour
     IEnumerator RespawnRoutine()
     {
         yield return new WaitForSeconds(_model.RespawnTimer);
+        // TODO: Elegir punto de respawn (puede ser random, o el mismo de spawn original)
+        Vector3 respawnPos = new Vector3(0, 2.5f, 0); // obtené del SpawnManager o guardalo en OnPlayerJoined
+        Quaternion respawnRot = Quaternion.identity;
+
+        _model.RespawnAt(respawnPos, respawnRot);
+
+        OnRespawn?.Invoke();
         OnRespawn?.Invoke();
     }
 }

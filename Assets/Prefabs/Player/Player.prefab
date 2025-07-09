@@ -963,14 +963,14 @@ MonoBehaviour:
   _MaxHealth: 100
   _CurrentHealth: 0
   _MaxSpeed: 0
-  _Nitro: 0
+  _Nitro: 100
   _Kills: 0
   _Deaths: 0
   _SpecialAmmo: 0
   _IsDead: 0
-  _RespawnTimer: 0
+  _RespawnTimer: 1
   _IsStunned: 0
-  _StunTimer: 0
+  _StunTimer: 1
   _CarType: 0
 --- !u!114 &6747240166403912663
 MonoBehaviour:
