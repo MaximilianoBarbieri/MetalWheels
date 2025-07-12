@@ -1,3 +1,4 @@
+using System.Collections;
 using Fusion;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,6 +49,9 @@ public class PlayerLocalUIHandler : MonoBehaviour
             HandleGameStateChanged(GameManager.Instance.CurrentState);
             HandleWinnerChanged(GameManager.Instance.Winner);
         }
+        
+        // Delay para sincronización de estado al ingresar el Client
+        StartCoroutine(DelayedInitialUIRefresh());
 
         // Usar Clamp y chequeo
         float normalizedLife =
@@ -103,6 +107,24 @@ public class PlayerLocalUIHandler : MonoBehaviour
     {
         hostDisconnectedPanel.SetActive(true);
     }
+    
+    IEnumerator DelayedInitialUIRefresh()
+    {
+        // Espera a que GameManager.Instance esté sincronizado y el CurrentState sea Playing
+        float timeout = 2f;
+        float elapsed = 0f;
+        while (GameManager.Instance == null || GameManager.Instance.CurrentState == GameState.WaitingForPlayers)
+        {
+            elapsed += Time.deltaTime;
+            if (elapsed > timeout)
+                break;
+            yield return null;
+        }
+        // Forzar update una vez más
+        if (GameManager.Instance != null)
+            HandleGameStateChanged(GameManager.Instance.CurrentState);
+    }
+
 
     void OnDestroy()
     {
