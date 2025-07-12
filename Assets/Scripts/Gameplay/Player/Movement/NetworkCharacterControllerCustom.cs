@@ -8,10 +8,6 @@ public class NetworkCharacterControllerCustom : NetworkCharacterController
     public float carRotationSpeed = 100f;
     public float carMaxSpeed = 500f;
     public float carBraking = 8f;
-    
-    [Header("CurrentNitro")]
-    public float nitroAccelerationMultiplier = 2f;
-    public float nitroMaxSpeed = 20f;
 
     public void Move(Vector3 inputDirection, float acceleration, float maxSpeed)
     {
