@@ -16,6 +16,13 @@ public class Bullet : NetworkBehaviour
     [Header("Special FX")]
     [SerializeField] private ParticleSystem _impactParticles;
     [SerializeField] private GameObject _fireEffectPrefab;
+    
+    public PlayerRef OwnerPlayerRef { get; private set; }
+
+    public void SetOwner(PlayerRef playerRef)
+    {
+        OwnerPlayerRef = playerRef;
+    }
 
     private void Awake()
     {
@@ -54,8 +61,8 @@ public class Bullet : NetworkBehaviour
         {
             if (other.TryGetComponent(out LifeHandler lifeHandler))
             {
-                Debug.Log($"[Bullet] Haciendo daño a {other.name}");
-                lifeHandler.ModifyLife(-_damage);
+                Debug.Log($"[Bullet] Haciendo daño a {other.name} de {OwnerPlayerRef.ToString()}");
+                lifeHandler.ModifyLife(-_damage, OwnerPlayerRef);
 
                 // Efecto STUN
                 if (_specialType == ModelPlayer.SpecialType.Stun)

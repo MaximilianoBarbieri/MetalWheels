@@ -8,7 +8,6 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public float MaxNitro { get; set; }
     [Networked] public float CurrentNitro { get; set; } 
     [Networked] public int Kills { get; private set; }
-    [Networked] public int Deaths { get; private set; }
     [Networked] public SpecialType SpecialAmmo { get; private set; }
     [Networked] public bool IsDead { get; private set; }
     [Networked] public float RespawnTimer { get; private set; }
@@ -28,6 +27,11 @@ public class ModelPlayer : NetworkBehaviour
         IsDead = false;
         RespawnTimer = 0f;
     }
+    
+    public void UpdateStats(float deltaTime)
+    {
+        UpdateStun(deltaTime);
+    }
 
     public bool ConsumeNitro(float amount)
     {
@@ -45,11 +49,6 @@ public class ModelPlayer : NetworkBehaviour
         CurrentNitro = Mathf.Min(CurrentNitro + amount, MaxNitro);
     }
 
-    public void UpdateStats(float deltaTime)
-    {
-        UpdateStun(deltaTime);
-    }
-
     public void ModifyLife(int amount, PlayerRef? attacker = null)
     {
         if (IsDead) return;
@@ -63,18 +62,40 @@ public class ModelPlayer : NetworkBehaviour
 
     private void Die(PlayerRef? attacker)
     {
-        IsDead = true;
-        RespawnTimer = 1.0f; // 1 segundo para respawn
+        Debug.Log($"[Die] Ejecutando Die en {name} | StateAuthority: {HasStateAuthority} | Attacker: {attacker}");
 
-        if (attacker != null && Runner.TryGetPlayerObject(attacker.Value, out NetworkObject playerObj))
+        IsDead = true;
+        RespawnTimer = 1.0f;
+
+        if (!HasStateAuthority) return;
+
+        if (attacker != null)
         {
-            if (playerObj.TryGetBehaviour(out ModelPlayer attackerModel))
+            if (Runner.TryGetPlayerObject(attacker.Value, out NetworkObject playerObj))
             {
-                attackerModel.Kills++;
+                Debug.Log($"[Die] Encontrado NetworkObject para attacker: {attacker} -> {playerObj.name}");
+                if (playerObj.TryGetBehaviour(out ModelPlayer attackerModel))
+                {
+                    attackerModel.AddKill();
+                    Debug.Log($"[Die] Kill sumada a: {playerObj.name}");
+                }
+                else
+                {
+                    Debug.Log("[Die] No se encontró ModelPlayer en el NetworkObject del atacante.");
+                }
+            }
+            else
+            {
+                Debug.Log("[Die] No se encontró NetworkObject para attacker PlayerRef.");
             }
         }
+    }
 
-        Deaths++;
+
+    private void AddKill()
+    {
+        Kills++;
+        Debug.Log($"[ModelPlayer] Nueva Kill, total={Kills}");
     }
 
     public void RespawnAt(Vector3 pos, Quaternion rot)

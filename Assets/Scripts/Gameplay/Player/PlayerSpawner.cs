@@ -61,6 +61,7 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
         var spawnPoint = GetFreeSpawnPoint(player);
         
         var playerObject = runner.Spawn(_playerPrefabs[selectedCar], spawnPoint.position, Quaternion.identity, player);
+        runner.SetPlayerObject(player, playerObject); //Registro explicito para evitar error de no contar kills
         var modelPlayer = playerObject.GetComponent<ModelPlayer>();
         modelPlayer.InitStats(selectedCar);
     }

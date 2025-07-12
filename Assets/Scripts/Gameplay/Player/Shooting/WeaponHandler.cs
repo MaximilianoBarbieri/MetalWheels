@@ -10,9 +10,9 @@ public class WeaponHandler : NetworkBehaviour
     [SerializeField] private Transform _firingPositionTransform;
     [SerializeField] private ParticleSystem _shootingParticles;
 
-    private double  _nextFireTimeNormal = 0;
+    private double _nextFireTimeNormal = 0;
     [SerializeField] private float fireCooldown = 1f; // 1 segundo para fire
-    
+
     [Networked] NetworkBool _spawnedBullet { get; set; }
 
     private ChangeDetector _changeDetector;
@@ -38,14 +38,17 @@ public class WeaponHandler : NetworkBehaviour
     public void FireNormal()
     {
         if (!HasStateAuthority) return;
-        if (Runner.SimulationTime < _nextFireTimeNormal) {
-            Debug.Log($"[Cooldown] ¡Todavía no podés disparar! Faltan: {_nextFireTimeNormal - Runner.SimulationTime:F2}s");
-            return;
-        }
         if (Runner.SimulationTime < _nextFireTimeNormal) return;
 
         _spawnedBullet = !_spawnedBullet;
-        Runner.Spawn(_bulletNormalPrefab, _firingPositionTransform.position, transform.rotation, null);
+        var bulletObj = Runner.Spawn(_bulletNormalPrefab, _firingPositionTransform.position, transform.rotation, null);
+        if (bulletObj != null)
+        {
+            if (bulletObj.TryGetComponent<Bullet>(out var bullet))
+            {
+                bullet.SetOwner(Object.InputAuthority);
+            }
+        }
 
         _nextFireTimeNormal = Runner.SimulationTime + fireCooldown;
     }
@@ -60,10 +63,12 @@ public class WeaponHandler : NetworkBehaviour
             ModelPlayer.SpecialType.Fire => _bulletFirePrefab
         };
 
-        if (prefabToUse != null)
+        _spawnedBullet = !_spawnedBullet;
+        var bulletObj = Runner.Spawn(prefabToUse, _firingPositionTransform.position,
+            transform.rotation);
+        if (bulletObj != null && bulletObj.TryGetComponent<Bullet>(out var bullet))
         {
-            _spawnedBullet = !_spawnedBullet;
-            Runner.Spawn(prefabToUse, _firingPositionTransform.position, transform.rotation);
+            bullet.SetOwner(Object.InputAuthority);
         }
     }
 
