@@ -2,6 +2,12 @@ using Cinemachine;
 using Fusion;
 using UnityEngine;
 
+/*
+Escucha el evento de GameManager y se desactiva si corresponde.
+
+Alternativamente, el GameManager puede hacer un FindObjectsOfType<PlayerController>() y desactivar directamente.
+ */
+
 [RequireComponent(typeof(NetworkCharacterControllerCustom))]
 [RequireComponent(typeof(LifeHandler))]
 [RequireComponent(typeof(WeaponHandler))]
@@ -69,6 +75,10 @@ public class PlayerController : NetworkBehaviour
             // Forzar update
             _myLifeHandler?.UpdateUI();
         }
+        
+        GameManager.OnGameStateChanged += OnGameStateChanged;
+        // Ajusta el estado inicial del controller
+        if (GameManager.Instance != null) OnGameStateChanged(GameManager.Instance.CurrentState);
     }
 
     public override void FixedUpdateNetwork()
@@ -133,6 +143,33 @@ public class PlayerController : NetworkBehaviour
             _myLifeHandler.ModifyLife(-25);
         }
 
+    }
+    
+    /*void OnEnable()
+    {
+        GameManager.OnGameStateChanged += OnGameStateChanged;
+    }
+    void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= OnGameStateChanged;
+    }*/
+    
+    void OnDestroy()
+    {
+        GameManager.OnGameStateChanged -= OnGameStateChanged;
+    }
+    
+    void OnGameStateChanged(GameState state)
+    {
+        // Solo bloquea el movimiento del jugador local
+        if (!Object.HasInputAuthority) return;
+
+        if (state == GameState.WaitingForPlayers)
+            enabled = false;
+        else if (state == GameState.Playing)
+            enabled = true;
+        else if (state == GameState.Ended)
+            enabled = false;
     }
 
     // Daño por colisión/crash
