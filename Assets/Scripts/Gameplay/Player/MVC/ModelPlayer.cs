@@ -6,8 +6,8 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public int MaxHealth { get; private set; }
     [Networked] public int CurrentHealth { get; private set; }
     [Networked] public float MaxSpeed { get; private set; }
-    [Networked] public float MaxNitro { get; set; }  //100
-    [Networked] public float CurrentNitro { get; set; } // de 0 a 100
+    [Networked] public float MaxNitro { get; set; }
+    [Networked] public float CurrentNitro { get; set; } 
     [Networked] public int Kills { get; private set; }
     [Networked] public int Deaths { get; private set; }
     [Networked] public SpecialType SpecialAmmo { get; private set; }
@@ -35,7 +35,7 @@ public class ModelPlayer : NetworkBehaviour
         }
 
         CurrentHealth = MaxHealth;
-        CurrentNitro = MaxNitro; // Cambiado a 100f
+        CurrentNitro = MaxNitro; 
         SpecialAmmo = SpecialType.None;
         IsDead = false;
         RespawnTimer = 0f;
@@ -94,6 +94,7 @@ public class ModelPlayer : NetworkBehaviour
     public void RespawnAt(Vector3 pos, Quaternion rot)
     {
         CurrentHealth = MaxHealth;
+        CurrentNitro = MaxNitro;
         transform.position = pos;
         transform.rotation = rot;
         IsDead = false;
