@@ -27,7 +27,7 @@ public class CharacterInputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q)) _isShootSpecialPressed = true;
         if (Input.GetKeyDown(KeyCode.F)) _isTakeDamagePressed = true;
         
-        _isNitroPressed |= Input.GetKey(KeyCode.LeftShift);
+        _isNitroPressed = Input.GetKey(KeyCode.LeftShift);
     }
 
     public NetworkInputData GetLocalInputs()
@@ -41,6 +41,7 @@ public class CharacterInputHandler : MonoBehaviour
         _inputData.isShootSpecialPressed = _isShootSpecialPressed;
         _isShootSpecialPressed = false;
         
+        _inputData.isNitroPressed = _isNitroPressed;
         _inputData.networkButtons.Set(MyButtons.NITRO, _isNitroPressed);
         _isNitroPressed = false;
         

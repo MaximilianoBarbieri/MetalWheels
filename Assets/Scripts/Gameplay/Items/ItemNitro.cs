@@ -34,7 +34,7 @@ public class ItemNitro : NetworkBehaviour, IItemPickup
         if (other.CompareTag("Player"))
         {
             var model = other.GetComponent<ModelPlayer>();
-            model.Nitro = 1f;
+            model.AddNitro(100f);
             
             RespawnTimer = TickTimer.CreateFromSeconds(Runner, 3f);
             _spawner.NotifyItemPicked(Object);

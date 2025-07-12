@@ -73,32 +73,43 @@ public class PlayerController : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        #region NEW
 
         _model.UpdateStats(Runner.DeltaTime);
 
         if (!GetInput(out NetworkInputData networkInputData)) return;
-
         if (_model.IsDead || _model.IsStunned) return;
 
-        //MOVIMIENTO
+        // Movimiento
         Vector3 moveDirection = new Vector3(
             networkInputData.movementInputHorizontal,
             0,
             networkInputData.movementInputVertical
         );
-        _myCharacterController.Move(moveDirection);
+
+        // ------ NITRO ------
+        bool usingNitro = false;
+        float acceleration = _myCharacterController.carAcceleration;
+        float maxSpeed = _myCharacterController.carMaxSpeed;
+
+        if (networkInputData.isNitroPressed && _model.Nitro > 0)
+        {
+            Debug.Log("-----------PRESIONANDO NITRO-----------");
+            float nitroToConsume = 25f * Runner.DeltaTime;
+            if (_model.ConsumeNitro(nitroToConsume))
+            {
+                usingNitro = true;
+                acceleration *= 2f;
+                maxSpeed *= 2f;
+            }
+        }
+
+        // Llama a Move pasando los valores correctos
+        _myCharacterController.Move(moveDirection, acceleration, maxSpeed);
+        
 
         //JUMP
         if (networkInputData.isJumpPressed)
             _myCharacterController.Jump();
-
-        //NITRO
-        //Todo: no deberia hacer falta xq se ejecuta dentro de _myCharacterController.Move
-        /*if (networkInputData.isNitroPressed)
-        {
-            _myCharacterController.Move(moveDirection);
-        }*/
 
         //SHOOT NORMAL
         if (networkInputData.isShootNormalPressed)
@@ -123,7 +134,6 @@ public class PlayerController : NetworkBehaviour
             _myLifeHandler.ModifyLife(-25);
         }
 
-        #endregion
     }
 
     // Daño por colisión/crash
