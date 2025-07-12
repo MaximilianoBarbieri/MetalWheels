@@ -109,17 +109,17 @@ public class SpatialGrid : MonoBehaviour {
         var fromCoord = GetPositionInGrid(from);
         var toCoord   = GetPositionInGrid(to);
 
-        fromCoord = Tuple.Create(Utils.Clamp(fromCoord.Item1, 0, width), Utils.Clamp(fromCoord.Item2, 0, height));
-        toCoord   = Tuple.Create(Utils.Clamp(toCoord.Item1,   0, width), Utils.Clamp(toCoord.Item2,   0, height));
+        fromCoord = Tuple.Create(Generators.Clamp(fromCoord.Item1, 0, width), Generators.Clamp(fromCoord.Item2, 0, height));
+        toCoord   = Tuple.Create(Generators.Clamp(toCoord.Item1,   0, width), Generators.Clamp(toCoord.Item2,   0, height));
 
         if (!IsInsideGrid(fromCoord) && !IsInsideGrid(toCoord))
             return Empty;
 
         // Creamos tuplas de cada celda
-        var cols = Utils.Generate(fromCoord.Item1, x => x + 1)
+        var cols = Generators.Generate(fromCoord.Item1, x => x + 1)
                        .TakeWhile(n => n < width && n <= toCoord.Item1);
 
-        var rows = Utils.Generate(fromCoord.Item2, y => y + 1)
+        var rows = Generators.Generate(fromCoord.Item2, y => y + 1)
                        .TakeWhile(y => y < height && y <= toCoord.Item2);
 
         var cells = cols.SelectMany(
@@ -178,7 +178,7 @@ public class SpatialGrid : MonoBehaviour {
     public bool showLogs = true;
 
     private void OnDrawGizmos() {
-        var rows = Utils.Generate(z, curr => curr + cellHeight)
+        var rows = Generators.Generate(z, curr => curr + cellHeight)
                        .Select(row => Tuple.Create(new Vector3(x,                     0, row),
                                                    new Vector3(x + cellWidth * width, 0, row)));
 
@@ -188,7 +188,7 @@ public class SpatialGrid : MonoBehaviour {
             Gizmos.DrawLine(new Vector3(x, 0, z + cellHeight * i), new Vector3(x + cellWidth * width,0, z + cellHeight * i));
         }*/
 
-        var cols = Utils.Generate(x, curr => curr + cellWidth)
+        var cols = Generators.Generate(x, curr => curr + cellWidth)
                        .Select(col => Tuple.Create(new Vector3(col, 0, z),
                                                    new Vector3(col, 0, z + cellHeight * height)));
 

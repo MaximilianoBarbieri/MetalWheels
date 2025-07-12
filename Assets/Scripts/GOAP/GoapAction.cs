@@ -13,4 +13,3 @@ public class GoapAction
 
     public override string ToString() => Name;
 }
-

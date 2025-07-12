@@ -13,6 +13,7 @@ public class Escape_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
+        npc.animator.SetTrigger(AnimNpc.EscapeNpc);
     }
 
     public override Dictionary<string, object> Exit(IState to)

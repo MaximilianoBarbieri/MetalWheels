@@ -13,6 +13,7 @@ public class Talk_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
+        npc.animator.SetTrigger(AnimNpc.TalkNpc);
     }
 
     public override Dictionary<string, object> Exit(IState to)

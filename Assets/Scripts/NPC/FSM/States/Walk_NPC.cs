@@ -13,6 +13,8 @@ public class Walk_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
+        
+        npc.animator.SetTrigger(AnimNpc.WalkNpc);
     }
 
     public override Dictionary<string, object> Exit(IState to)
