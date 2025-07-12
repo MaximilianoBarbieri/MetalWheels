@@ -91,14 +91,13 @@ public class PlayerController : NetworkBehaviour
         float acceleration = _myCharacterController.carAcceleration;
         float maxSpeed = _myCharacterController.carMaxSpeed;
 
-        if (networkInputData.isNitroPressed && _model.Nitro > 0)
+        if (networkInputData.isNitroPressed && _model.CurrentNitro > 0)
         {
-            Debug.Log("-----------PRESIONANDO NITRO-----------");
             float nitroToConsume = 25f * Runner.DeltaTime;
             if (_model.ConsumeNitro(nitroToConsume))
             {
                 usingNitro = true;
-                acceleration *= 2f;
+                acceleration *= 1.5f;
                 maxSpeed *= 2f;
             }
         }

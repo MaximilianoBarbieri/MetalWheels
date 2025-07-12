@@ -19,8 +19,12 @@ public class PlayerLocalUIHandler : MonoBehaviour
         _lifeHandler = lifeHandler;
         
         // Usar Clamp y chequeo
-        float normalizedLife = (_model.MaxHealth > 0) ? Mathf.Clamp01((float)_model.CurrentHealth / _model.MaxHealth) : 0f;
+        float normalizedLife = _model.MaxHealth > 0 ? Mathf.Clamp01((float)_model.CurrentHealth / _model.MaxHealth) : 0f;
         healthBar.fillAmount = normalizedLife;
+        
+        // Usar Clamp y chequeo
+        float normalizedNitro= _model.MaxNitro > 0 ? Mathf.Clamp01(_model.CurrentNitro / _model.MaxNitro) : 0f;
+        nitroBar.fillAmount = normalizedNitro;
 
         _lifeHandler.OnLifeUpdate += UpdateHealthUI;
     }
@@ -28,7 +32,7 @@ public class PlayerLocalUIHandler : MonoBehaviour
     void Update()
     {
         speedText.text = $"{_controller.Velocity.magnitude:F1} km/h";
-        nitroBar.fillAmount = _model.Nitro;
+        nitroBar.fillAmount = Mathf.Clamp01(_model.CurrentNitro / _model.MaxNitro);
     }
 
     void UpdateHealthUI(float normalizedLife)

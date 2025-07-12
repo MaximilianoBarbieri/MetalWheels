@@ -963,7 +963,8 @@ MonoBehaviour:
   _MaxHealth: 100
   _CurrentHealth: 0
   _MaxSpeed: 0
-  _Nitro: 100
+  _MaxNitro: 100
+  _CurrentNitro: 0
   _Kills: 0
   _Deaths: 0
   _SpecialAmmo: 0

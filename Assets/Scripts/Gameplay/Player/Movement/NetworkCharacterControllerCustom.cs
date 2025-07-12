@@ -9,7 +9,7 @@ public class NetworkCharacterControllerCustom : NetworkCharacterController
     public float carMaxSpeed = 500f;
     public float carBraking = 8f;
     
-    [Header("Nitro")]
+    [Header("CurrentNitro")]
     public float nitroAccelerationMultiplier = 2f;
     public float nitroMaxSpeed = 20f;
 
@@ -22,9 +22,7 @@ public class NetworkCharacterControllerCustom : NetworkCharacterController
         float v = inputDirection.z;
         float h = inputDirection.x;
 
-        // Gravedad, suelo, etc...
-        if (Grounded && moveVelocity.y < 0)
-            moveVelocity.y = 0f;
+        if (Grounded && moveVelocity.y < 0) moveVelocity.y = 0f;
 
         moveVelocity.y += gravity * deltaTime;
 

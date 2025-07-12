@@ -6,7 +6,8 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public int MaxHealth { get; private set; }
     [Networked] public int CurrentHealth { get; private set; }
     [Networked] public float MaxSpeed { get; private set; }
-    [Networked] public float Nitro { get; set; } // de 0 a 100
+    [Networked] public float MaxNitro { get; set; }  //100
+    [Networked] public float CurrentNitro { get; set; } // de 0 a 100
     [Networked] public int Kills { get; private set; }
     [Networked] public int Deaths { get; private set; }
     [Networked] public SpecialType SpecialAmmo { get; private set; }
@@ -34,7 +35,7 @@ public class ModelPlayer : NetworkBehaviour
         }
 
         CurrentHealth = MaxHealth;
-        Nitro = 100f; // Cambiado a 100f
+        CurrentNitro = MaxNitro; // Cambiado a 100f
         SpecialAmmo = SpecialType.None;
         IsDead = false;
         RespawnTimer = 0f;
@@ -43,19 +44,19 @@ public class ModelPlayer : NetworkBehaviour
     // Nuevo método:
     public bool ConsumeNitro(float amount)
     {
-        if (Nitro >= amount) {
-            Nitro -= amount;
-            Nitro = Mathf.Max(0, Nitro);
+        if (CurrentNitro >= amount) {
+            CurrentNitro -= amount;
+            CurrentNitro = Mathf.Max(0, CurrentNitro);
             return true;
         }
-        Nitro = 0;
+        CurrentNitro = 0;
         return false;
     }
     
     // Si necesitas recargar nitro con un ítem:
     public void AddNitro(float amount)
     {
-        Nitro = Mathf.Min(Nitro + amount, 100f);
+        CurrentNitro = Mathf.Min(CurrentNitro + amount, MaxNitro);
     }
 
     public void UpdateStats(float deltaTime)
