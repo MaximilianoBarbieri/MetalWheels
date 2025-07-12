@@ -9,18 +9,11 @@ using UnityEngine;
 
 public class NPCGoap : MonoBehaviour
 {
-    [SerializeField] private Idle_NPC idleNpc;
-    [SerializeField] private Walk_NPC walkNpc;
-    [SerializeField] private Escape_NPC escapeNpc;
-    [SerializeField] private Talk_NPC talkNpc;
-    [SerializeField] private Sitdown_NPC sitdownNpc;
-    [SerializeField] private Death_NPC deathNpc;
-
     private Queue<GoapAction> _currentPlan = new();
 
     private List<GoapAction> _actions;
 
-    public WorldState worldState;
+    [SerializeField] public WorldState worldState;
 
     private NPC npc;
 
@@ -29,6 +22,14 @@ public class NPCGoap : MonoBehaviour
     private void Start()
     {
         _actions = CreateActions();
+
+        if (worldState == null)
+            worldState = new WorldState();
+
+        worldState.steps = 0; // o el valor que quieras
+        worldState.maxsteps = 10;
+        worldState.life = 100f;
+        worldState.mood = Safe; // o Safe, según el caso
 
         StartCoroutine(RunPlanLoop());
     }
@@ -60,16 +61,19 @@ public class NPCGoap : MonoBehaviour
                     ns.steps = Mathf.Min(ns.steps + 3, ns.maxsteps); // Simula ganancia
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(idleNpc),
+                Execute = () => TransitionToCoroutine(npc.idleNpc),
                 Cost = 4
             },
             new GoapAction
             {
                 Name = WalkGoapNpc,
-                Precondition = s => !s.carInRange && s.steps > 0,
+                Precondition = s => !s.carInRange && s.steps >= s.maxsteps,
                 Effect = s =>
-                    s.Clone(), //PERDER STEPS -> PARA LLEGAR A LA POSICION DESEADA TODO: SI TENGO UN STOCK DE 20 STEPS, QUIERO QUE TOME UN VALOR RANDOM DE 0 HASTA SU MAXVALUE PARA MOVERSE
-                Execute = () => (TransitionToCoroutine(walkNpc)),
+                {
+                    s.steps = 0; // representa que el NPC gastó sus pasos al caminar
+                    return s;
+                },
+                Execute = () => (TransitionToCoroutine(npc.walkNpc)),
                 Cost = 3
             },
             new GoapAction
@@ -83,7 +87,7 @@ public class NPCGoap : MonoBehaviour
                         ns.mood = Curious;
                         return ns;
                     },
-                Execute = () => (TransitionToCoroutine(talkNpc)),
+                Execute = () => (TransitionToCoroutine(npc.talkNpc)),
                 Cost = 2
             },
             new GoapAction
@@ -96,7 +100,7 @@ public class NPCGoap : MonoBehaviour
                     ns.mood = Relaxed;
                     return ns;
                 },
-                Execute = () => (TransitionToCoroutine(sitdownNpc)),
+                Execute = () => (TransitionToCoroutine(npc.sitdownNpc)),
                 Cost = 2
             },
             new GoapAction
@@ -110,7 +114,7 @@ public class NPCGoap : MonoBehaviour
                         ns.mood = Safe;
                         return ns;
                     },
-                Execute = () => (TransitionToCoroutine(escapeNpc)),
+                Execute = () => (TransitionToCoroutine(npc.escapeNpc)),
                 Cost = 1
             },
             new GoapAction
@@ -118,7 +122,7 @@ public class NPCGoap : MonoBehaviour
                 Name = DeathGoapNpc,
                 Precondition = s => s.life <= 0f,
                 Effect = s => s.Clone(),
-                Execute = () => (TransitionToCoroutine(deathNpc)),
+                Execute = () => (TransitionToCoroutine(npc.deathNpc)),
                 Cost = 0
             },
         };
@@ -146,8 +150,12 @@ public class NPCGoap : MonoBehaviour
         if (state.interactionType == InteractionType.Sit && state.mood != Relaxed)
             return s => s.mood == Relaxed; // Meta: estar sentado
 
-        // 5. Meta por defecto: Simplemente seguir existiendo y no hacer nada especial.
-        return s => true; // No hay meta "de mejora", solo existir.
+        // 5. Meta por defecto: si tengo steps completos, quiero moverme.
+        if (state.steps >= state.maxsteps)
+            return s => s.steps < state.maxsteps; // Meta: haber gastado steps
+
+        // 6. Si no hay nada más que hacer, no tengo meta real.
+        return s => true;
     }
 
     private IEnumerator RunPlanLoop()

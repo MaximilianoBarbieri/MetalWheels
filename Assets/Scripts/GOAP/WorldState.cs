@@ -1,3 +1,12 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using FSM;
+using static MoodsNpc;
+using static GoapActionName;
+using UnityEngine;
+
 public class WorldState
 {
     // La vida del NPC

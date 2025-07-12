@@ -27,7 +27,7 @@ public class InteractableNPC : MonoBehaviour
         closest.type = type;
         assignedNode = closest;
         
-        Debug.Log("El " +$"{gameObject.name}" + " ha sido asociado al nodo " + $"{assignedNode}");
+//        Debug.Log("El " +$"{gameObject.name}" + " ha sido asociado al nodo " + $"{assignedNode}");
     }
 
     private void OnDrawGizmosSelected()

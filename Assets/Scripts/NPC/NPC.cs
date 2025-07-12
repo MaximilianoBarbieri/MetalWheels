@@ -1,10 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
-using static MoodsNpc;
-using static GoapActionName;
+using static StatesNpc;
 using UnityEngine;
 
 /*Gestión de colisiones y estados cercanos (correcto aquí).
@@ -18,37 +15,41 @@ public class NPC : MonoBehaviour
     private HashSet<InteractableNPC> _interactablesInRange = new();
 
     private HashSet<CharacterController> _carsInRange = new();
-    
+
     private const int CarDistance = 5;
 
     private float _life;
 
-    public Transform target;
+    //public Transform target;
     public Animator animator;
     public float speed;
     public float speedRotation;
 
     public FiniteStateMachine fsm;
 
-    [SerializeField] private Idle_NPC idleNpc;
-    [SerializeField] private Walk_NPC walkNpc;
-    [SerializeField] private Escape_NPC escapeNpc;
-    [SerializeField] private Talk_NPC talkNpc;
-    [SerializeField] private Sitdown_NPC sitdownNpc;
-    [SerializeField] private Death_NPC deathNpc;
-    private Queue<GoapAction> _currentPlan = new();
-    private List<GoapAction> _actions;
-    public WorldState worldState;
+    [SerializeField] internal Idle_NPC idleNpc;
+    [SerializeField] internal Walk_NPC walkNpc;
+    [SerializeField] internal Escape_NPC escapeNpc;
+    [SerializeField] internal Talk_NPC talkNpc;
+    [SerializeField] internal Sitdown_NPC sitdownNpc;
+    [SerializeField] internal Death_NPC deathNpc;
 
     //Pathfinding
-    
-    List<GameObject> nodes = NodeGenerator.Instance.GetNodes();
-    
+
+    //List<GameObject> nodes = NodeGenerator.Instance.GetNodes();
+
     private void Start()
     {
-        fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
+        currentNode = NodeGenerator.Instance.GetNodes()
+            .Select(go => go.GetComponent<Node>())
+            .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
+            .FirstOrDefault(); // Asigna el nodo más cercano
 
         // Activamos la FSM
+        fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
+        
+        initFSM();
+        
         fsm.Active = true;
     }
 
@@ -63,7 +64,7 @@ public class NPC : MonoBehaviour
         if (other.gameObject.TryGetComponent<CharacterController>(out var car))
             _carsInRange.Add(car);
     }
-    
+
     private void OnTriggerExit(Collider other)
     {
         if (other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
@@ -94,39 +95,46 @@ public class NPC : MonoBehaviour
     /// <returns></returns>
     public bool HasCarNearby => _carsInRange.Any(car =>
         car != null && Vector3.Distance(transform.position, car.transform.position) < CarDistance);
+
+    public Node currentNode;
+
+    void initFSM()
+    {
+        fsm.AddTransition(ToIdleNpc, walkNpc, idleNpc);
+        fsm.AddTransition(ToIdleNpc, escapeNpc, idleNpc);
+        fsm.AddTransition(ToIdleNpc, talkNpc, idleNpc);
+        fsm.AddTransition(ToIdleNpc, sitdownNpc, idleNpc);
+
+        fsm.AddTransition(ToWalkNpc, idleNpc, walkNpc);
+        fsm.AddTransition(ToWalkNpc, escapeNpc, walkNpc);
+        fsm.AddTransition(ToWalkNpc, talkNpc, walkNpc);
+        fsm.AddTransition(ToWalkNpc, sitdownNpc, walkNpc);
+
+        fsm.AddTransition(ToEscapeNpc, idleNpc, escapeNpc);
+        fsm.AddTransition(ToEscapeNpc, walkNpc, escapeNpc);
+        fsm.AddTransition(ToEscapeNpc, talkNpc, escapeNpc);
+        fsm.AddTransition(ToEscapeNpc, sitdownNpc, escapeNpc);
+
+        fsm.AddTransition(ToTalkNpc, idleNpc, talkNpc);
+        fsm.AddTransition(ToTalkNpc, walkNpc, talkNpc);
+        fsm.AddTransition(ToTalkNpc, escapeNpc, talkNpc);
+        fsm.AddTransition(ToTalkNpc, sitdownNpc, talkNpc);
+
+        fsm.AddTransition(ToSitdownNpc, idleNpc, sitdownNpc);
+        fsm.AddTransition(ToSitdownNpc, walkNpc, sitdownNpc);
+        fsm.AddTransition(ToSitdownNpc, escapeNpc, sitdownNpc);
+        fsm.AddTransition(ToSitdownNpc, talkNpc, sitdownNpc);
+
+        fsm.AddTransition(ToDeathNpc, idleNpc, deathNpc);
+        fsm.AddTransition(ToDeathNpc, walkNpc, deathNpc);
+        fsm.AddTransition(ToDeathNpc, escapeNpc, deathNpc);
+        fsm.AddTransition(ToDeathNpc, talkNpc, deathNpc);
+        fsm.AddTransition(ToDeathNpc, sitdownNpc, deathNpc);
+    }
 }
 
 #region OldFSM
 
-// _fsm.AddTransition(Utils.ToIdleNpc, walkNpc, idleNpc);
-// _fsm.AddTransition(Utils.ToIdleNpc, escapeNpc, idleNpc);
-// _fsm.AddTransition(Utils.ToIdleNpc, talkNpc, idleNpc);
-// _fsm.AddTransition(Utils.ToIdleNpc, sitdownNpc, idleNpc);
-//
-// _fsm.AddTransition(Utils.ToWalkNpc, idleNpc, walkNpc);
-// _fsm.AddTransition(Utils.ToWalkNpc, escapeNpc, walkNpc);
-// _fsm.AddTransition(Utils.ToWalkNpc, talkNpc, walkNpc);
-// _fsm.AddTransition(Utils.ToWalkNpc, sitdownNpc, walkNpc);
-//
-// _fsm.AddTransition(Utils.ToEscapeNpc, idleNpc, escapeNpc);
-// _fsm.AddTransition(Utils.ToEscapeNpc, walkNpc, escapeNpc);
-// _fsm.AddTransition(Utils.ToEscapeNpc, talkNpc, escapeNpc);
-// _fsm.AddTransition(Utils.ToEscapeNpc, sitdownNpc, escapeNpc);
-//
-// _fsm.AddTransition(Utils.ToTalkNpc, idleNpc, talkNpc);
-// _fsm.AddTransition(Utils.ToTalkNpc, walkNpc, talkNpc);
-// _fsm.AddTransition(Utils.ToTalkNpc, escapeNpc, talkNpc);
-// _fsm.AddTransition(Utils.ToTalkNpc, sitdownNpc, talkNpc);
-//
-// _fsm.AddTransition(Utils.ToSitdownNpc, idleNpc, sitdownNpc);
-// _fsm.AddTransition(Utils.ToSitdownNpc, walkNpc, sitdownNpc);
-// _fsm.AddTransition(Utils.ToSitdownNpc, escapeNpc, sitdownNpc);
-// _fsm.AddTransition(Utils.ToSitdownNpc, talkNpc, sitdownNpc);
-//
-// _fsm.AddTransition(Utils.ToDeathNpc, idleNpc, deathNpc);
-// _fsm.AddTransition(Utils.ToDeathNpc, walkNpc, deathNpc);
-// _fsm.AddTransition(Utils.ToDeathNpc, escapeNpc, deathNpc);
-// _fsm.AddTransition(Utils.ToDeathNpc, talkNpc, deathNpc);
-// _fsm.AddTransition(Utils.ToDeathNpc, sitdownNpc, deathNpc);
+ 
 
 #endregion
