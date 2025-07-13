@@ -47284,7 +47284,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1987843145}
   - {fileID: 785348062}
   - {fileID: 1572104196}
   - {fileID: 495715420}
@@ -65475,14 +65474,14 @@ Transform:
   m_GameObject: {fileID: 1987843144}
   serializedVersion: 2
   m_LocalRotation: {x: -0.040048163, y: 0.69239736, z: 0.0367978, w: 0.71946365}
-  m_LocalPosition: {x: -46.5, y: -0.61854184, z: -16.6}
+  m_LocalPosition: {x: 38.941887, y: 0.08750671, z: 42.47341}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1396428894}
   - {fileID: 2014932451}
   - {fileID: 1491108983}
-  m_Father: {fileID: 1406843692}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -6.234, y: 87.811005, z: -0.14500001}
 --- !u!95 &1987843146
 Animator:
@@ -65518,9 +65517,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
-  speed: 10
+  speed: 2
   speedRotation: 10
-  idleNpc: {fileID: 0}
+  idleNpc: {fileID: 349195761}
   walkNpc: {fileID: 2010992314}
   escapeNpc: {fileID: 1672485841}
   talkNpc: {fileID: 199907170}
@@ -70874,3 +70873,4 @@ SceneRoots:
   - {fileID: 1406843692}
   - {fileID: 266941770}
   - {fileID: 177688793}
+  - {fileID: 1987843145}

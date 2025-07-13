@@ -12,13 +12,11 @@ public class Idle_NPC : MonoBaseState
 
     public override IState ProcessInput()
     {
-        Debug.Log("Estoy en Idle");
         return this;
     }
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        Debug.Log("Estoy en Idle");
         //npc.animator.SetTrigger(AnimNpc.IdleNpc);
         _recoverStepsRoutine = npc.StartCoroutine(RecoverStepsOverTime());
     }
@@ -28,6 +26,8 @@ public class Idle_NPC : MonoBaseState
         if (_recoverStepsRoutine != null)
             StopCoroutine(_recoverStepsRoutine);
 
+        Debug.Log("Sali de IDLE");
+        
         return base.Exit(to);
     }
 

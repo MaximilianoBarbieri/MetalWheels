@@ -5,25 +5,21 @@ using UnityEngine;
 
 public class NodeGenerator : MonoBehaviour
 {
-    [Header("Tamaño de la grilla (X-Z)")]
-    public Vector2Int gridSize = new Vector2Int(20, 20);
+    [Header("Tamaño de la grilla (X-Z)")] public Vector2Int gridSize = new Vector2Int(20, 20);
 
-    [Header("Espaciado entre nodos")]
-    public int nodeSpacing;
+    [Header("Espaciado entre nodos")] public int nodeSpacing;
 
-    [Header("Prefab del nodo")]
-    public GameObject nodePrefab;
+    [Header("Prefab del nodo")] public GameObject nodePrefab;
 
-    [Header("Generación Lazy")]
-    public int nodesPerFrame = 10;
-    
-    [Header("Lista de interactuables en la escena")]
-    [SerializeField] private List<InteractableNPC> _interactables;
+    [Header("Generación Lazy")] public int nodesPerFrame = 10;
+
+    [Header("Lista de interactuables en la escena")] [SerializeField]
+    private List<InteractableNPC> _interactables;
 
     private List<GameObject> _nodes;
     private Coroutine _generationRoutine;
     public bool IsReady => _nodes != null && _nodes.Count == gridSize.x * gridSize.y;
-    
+
     public static NodeGenerator Instance { get; private set; }
 
     private void Awake()
@@ -32,10 +28,10 @@ public class NodeGenerator : MonoBehaviour
             Destroy(gameObject);
         else
             Instance = this;
+
+        GetNodes();
     }
 
-    private void Start() => GetNodes();
-        
     public List<GameObject> GetNodes()
     {
         if (!IsReady && _generationRoutine == null)
@@ -70,7 +66,7 @@ public class NodeGenerator : MonoBehaviour
 
         Debug.Log($"[Grid] Generación completada: {_nodes.Count} nodos.");
         _generationRoutine = null;
-        
+
         DetectAllNeighbors(nodeSpacing);
     }
 
@@ -87,7 +83,7 @@ public class NodeGenerator : MonoBehaviour
         if (!_interactables.Contains(npc))
             _interactables.Add(npc);
     }
-    
+
     private void ActivateInteractable() => _interactables.ToList().ForEach(i => i.AssignClosestNode(2f));
 
     public void ClearGrid()
@@ -99,6 +95,7 @@ public class NodeGenerator : MonoBehaviour
             if (node != null)
                 DestroyImmediate(node);
         }
+
         _nodes.Clear();
     }
 

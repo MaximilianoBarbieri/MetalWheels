@@ -17,11 +17,9 @@ public class NPCGoap : MonoBehaviour
 
     private NPC npc;
 
-    private void Awake() => npc = GetComponent<NPC>();
-
-    private void Start()
+    private void Awake()
     {
-        _actions = CreateActions();
+        npc = GetComponent<NPC>();
 
         if (worldState == null)
             worldState = new WorldState();
@@ -30,6 +28,8 @@ public class NPCGoap : MonoBehaviour
         worldState.maxsteps = 10;
         worldState.life = 100f;
         worldState.mood = Safe; // o Safe, según el caso
+
+        _actions = CreateActions();
 
         StartCoroutine(RunPlanLoop());
     }

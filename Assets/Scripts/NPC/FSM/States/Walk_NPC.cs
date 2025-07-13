@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using FSM;
 using UnityEngine;
 
@@ -13,16 +14,17 @@ public class Walk_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-       // npc.animator.SetTrigger(AnimNpc.WalkNpc);
+        // npc.animator.SetTrigger(AnimNpc.WalkNpc);
 
-        if (npc.currentNode == null)
-        {
-            Debug.LogWarning("[WALK] El NPC no tiene un nodo actual.");
-            npc.fsm.TransitionTo(npc.idleNpc);
-            return;
-        }
+        npc.currentNode = NodeGenerator.Instance.GetNodes()
+            .Select(go => go.GetComponent<Node>())
+            .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
+            .FirstOrDefault(); // Asigna el nodo más cercano
+        
+        int valueSteps = Random.Range(1, npcGoap.worldState.steps);
 
-        int valueSteps = Random.Range(1, npcGoap.worldState.steps + 1);
+        Debug.Log("El numero de pasos a hacer es de " + $"{valueSteps}");
+
         _movementRoutine = npc.StartCoroutine(WalkFreely(npc.currentNode, valueSteps));
     }
 
@@ -56,15 +58,19 @@ public class Walk_NPC : MonoBaseState
                 break;
         }
 
-        npc.fsm.TransitionTo(npc.idleNpc);
+        npc.fsm.TransitionTo(npc.idleNpc); //TODO: MODIFICAR ESTO
     }
 
     public override Dictionary<string, object> Exit(IState to)
     {
         if (_movementRoutine != null)
             npc.StopCoroutine(_movementRoutine);
+
         return base.Exit(to);
     }
 
-    public override void UpdateLoop() { Debug.Log("Estoy en Walk");}
+    public override void UpdateLoop()
+    {
+        Debug.Log("Estoy en Walk");
+    }
 }
