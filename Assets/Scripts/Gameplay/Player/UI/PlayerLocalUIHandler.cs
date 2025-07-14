@@ -3,6 +3,7 @@ using Fusion;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 /*
 Se suscribe a los eventos del GameManager en Init()
@@ -13,13 +14,15 @@ Expone métodos como SetVictoryPanelActive(bool), SetWaitingPanelActive(bool), e
 */
 public class PlayerLocalUIHandler : MonoBehaviour
 {
-    [Header("PROPERTIES")] public TextMeshProUGUI speedText;
+    [Header("PROPERTIES")] 
+    public TextMeshProUGUI speedText;
     public TextMeshProUGUI killsText;
     public TextMeshProUGUI timerText;
     public Image healthBar;
     public Image nitroBar;
 
-    [Header("PANELS")] public GameObject victoryPanel;
+    [Header("PANELS")] 
+    public GameObject victoryPanel;
     public GameObject defeatPanel;
     public GameObject waitingPanel;
     public GameObject hostDisconnectedPanel;
@@ -27,28 +30,32 @@ public class PlayerLocalUIHandler : MonoBehaviour
     private NetworkCharacterControllerCustom _controller;
     private ModelPlayer _model;
     private LifeHandler _lifeHandler;
+    
+    [Header("BUTTONS")]
+    public Button goToMainMenuButton;
 
     private bool isWinner = false; // flag para UI
-
-
+    
     public void Init(ModelPlayer model, NetworkCharacterControllerCustom characterController, LifeHandler lifeHandler)
     {
         _model = model;
         _controller = characterController;
         _lifeHandler = lifeHandler;
+        
         _lifeHandler.OnLifeUpdate += UpdateHealthUI;
-
         GameManager.OnGameStateChanged += HandleGameStateChanged;
         GameManager.OnTimerChanged += UpdateTimerUI;
         GameManager.OnHostDisconnected += ShowHostDisconnectedPanel;
         GameManager.OnWinnerChanged += HandleWinnerChanged;
-
+        
         // Setear UI inicial según estado actual
         if (GameManager.Instance != null)
         {
             HandleGameStateChanged(GameManager.Instance.CurrentState);
             HandleWinnerChanged(GameManager.Instance.Winner);
         }
+        
+        goToMainMenuButton.onClick.AddListener(ShowHostDisconnectedPanelAndGoToMenu);
         
         // Delay para sincronización de estado al ingresar el Client
         StartCoroutine(DelayedInitialUIRefresh());
@@ -88,6 +95,8 @@ public class PlayerLocalUIHandler : MonoBehaviour
         victoryPanel.SetActive(state == GameState.Ended && isWinner);
         defeatPanel.SetActive(state == GameState.Ended && !isWinner);
         waitingPanel.SetActive(state == GameState.WaitingForPlayers);
+
+        UpdateGoToMainMenuButtonVisibility();
     }
 
     void HandleWinnerChanged(PlayerRef winner)
@@ -124,7 +133,41 @@ public class PlayerLocalUIHandler : MonoBehaviour
         if (GameManager.Instance != null)
             HandleGameStateChanged(GameManager.Instance.CurrentState);
     }
+    
+    private void UpdateGoToMainMenuButtonVisibility()
+    {
+        bool shouldShow =
+            (victoryPanel != null && victoryPanel.activeSelf) ||
+            (defeatPanel != null && defeatPanel.activeSelf) ||
+            (waitingPanel != null && waitingPanel.activeSelf);
 
+        if (goToMainMenuButton != null) goToMainMenuButton.gameObject.SetActive(shouldShow);
+    }
+    
+    public void ShowHostDisconnectedPanelAndGoToMenu()
+    {
+        if (hostDisconnectedPanel != null)
+            hostDisconnectedPanel.SetActive(true);
+
+        // Opcional: desactiva los otros paneles si estuvieran abiertos
+        if (victoryPanel != null) victoryPanel.SetActive(false);
+        if (defeatPanel != null) defeatPanel.SetActive(false);
+        if (waitingPanel != null) waitingPanel.SetActive(false);
+
+        // Desactiva botones interactivos para evitar errores
+        if (goToMainMenuButton != null) goToMainMenuButton.interactable = false;
+
+        UpdateGoToMainMenuButtonVisibility();
+        
+        // Espera 2 segundos y vuelve al MainMenu
+        StartCoroutine(ReturnToMainMenuWithDelay());
+    }
+
+    private IEnumerator ReturnToMainMenuWithDelay()
+    {
+        yield return new WaitForSeconds(2f); // Tiempo a mostrar el panel antes de volver
+        SceneManager.LoadScene("MainMenu");
+    }
 
     void OnDestroy()
     {

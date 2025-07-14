@@ -87,7 +87,7 @@ public class PlayerSpawner : NetworkBehaviour, INetworkRunnerCallbacks
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
-        runner.Shutdown();
+        //runner.Shutdown();
     }
 
     private Transform GetFreeSpawnPoint(PlayerRef player)

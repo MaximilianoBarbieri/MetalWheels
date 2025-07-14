@@ -22,11 +22,8 @@ public class PlayerController : NetworkBehaviour
     public CinemachineVirtualCamera vCamPrefab;
     private CinemachineVirtualCamera myCam;
     
-    [SerializeField] private float jumpCooldown = 2f;
     [SerializeField] private float minCrashForce = 7f;
     [SerializeField] private int crashDamage = 30;
-
-    private float nextJumpTime = 0f;
     
     //UI player
     [SerializeField] private PlayerLocalUIHandler playerLocalUIPrefab;

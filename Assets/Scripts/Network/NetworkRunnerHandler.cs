@@ -100,10 +100,26 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         OnSessionListUpdate(sessionList);
     }
     
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+    {
+        Debug.Log("[NetworkRunnerHandler] OnDisconnectedFromServer: " + reason);
+
+        // Busca el UI Handler local
+        var ui = FindObjectOfType<PlayerLocalUIHandler>();
+        if (ui != null)
+        {
+            ui.ShowHostDisconnectedPanelAndGoToMenu();
+        }
+        else
+        {
+            // Si por algún motivo no existe la UI, vuelve directo al menú
+            SceneManager.LoadScene("MainMenu");
+        }
+    }
+    
     #endregion
     
     #region Unused Runner Callbacks
-    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
