@@ -154,6 +154,9 @@ public class NPCGoap : MonoBehaviour
         if (state.steps >= state.maxsteps)
             return s => s.steps < state.maxsteps; // Meta: haber gastado steps
 
+        if (state.steps == 0)
+            return s => s.steps > 0;
+        
         // 6. Si no hay nada más que hacer, no tengo meta real.
         return s => true;
     }

@@ -20,7 +20,7 @@ public class Walk_NPC : MonoBaseState
             .Select(go => go.GetComponent<Node>())
             .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
             .FirstOrDefault(); // Asigna el nodo más cercano
-        
+
         int valueSteps = Random.Range(1, npcGoap.worldState.steps);
 
         Debug.Log("El numero de pasos a hacer es de " + $"{valueSteps}");
@@ -32,6 +32,7 @@ public class Walk_NPC : MonoBaseState
     {
         Node current = startNode;
         int walkedSteps = 0;
+        npcGoap.worldState.steps = valueSteps;
 
         while (walkedSteps < valueSteps)
         {
@@ -58,7 +59,7 @@ public class Walk_NPC : MonoBaseState
                 break;
         }
 
-        npc.fsm.TransitionTo(npc.idleNpc); //TODO: MODIFICAR ESTO
+        yield break;
     }
 
     public override Dictionary<string, object> Exit(IState to)
@@ -71,6 +72,6 @@ public class Walk_NPC : MonoBaseState
 
     public override void UpdateLoop()
     {
-        Debug.Log("Estoy en Walk");
+        Debug.Log("[Walk]Mi cantidad de pasos disponibles es de: " + $"{npcGoap.worldState.steps}");
     }
 }
