@@ -45,7 +45,7 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     #endregion
 
     
-    #region Join / Create Game
+    #region Join / Create Game / ShutDown Game
 
     public async void CreateGame(string sessionName, string sceneName)
     {
@@ -90,6 +90,16 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
+    private void ShutdownRunner()
+    {
+        if (_currentRunner != null)
+        {
+            _currentRunner.Shutdown();
+            Destroy(_currentRunner.gameObject);
+            _currentRunner = null;
+        }
+    }
+
     #endregion
     
     
@@ -104,16 +114,11 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log("[NetworkRunnerHandler] OnDisconnectedFromServer: " + reason);
 
-        // Busca el UI Handler local
-        var ui = FindObjectOfType<PlayerLocalUIHandler>();
-        if (ui != null)
+        // Asegúrate de que al desconectarse, destruyas correctamente el Runner.
+        if (_currentRunner != null)
         {
-            ui.ShowHostDisconnectedPanelAndGoToMenu();
-        }
-        else
-        {
-            // Si por algún motivo no existe la UI, vuelve directo al menú
-            SceneManager.LoadScene("MainMenu");
+            Destroy(_currentRunner.gameObject);
+            _currentRunner = null;
         }
     }
     

@@ -26,9 +26,13 @@ public class PlayerLocalUIHandler : MonoBehaviour
     public GameObject defeatPanel;
     public GameObject waitingPanel;
     public GameObject hostDisconnectedPanel;
+    
+    [Header("TEXT PANELS")] 
+    public TextMeshProUGUI hostDisconnectedText;
 
-    private NetworkCharacterControllerCustom _controller;
+    private PlayerController _controller;
     private ModelPlayer _model;
+    private NetworkCharacterControllerCustom _networkController;
     private LifeHandler _lifeHandler;
     
     [Header("BUTTONS")]
@@ -36,10 +40,11 @@ public class PlayerLocalUIHandler : MonoBehaviour
 
     private bool isWinner = false; // flag para UI
     
-    public void Init(ModelPlayer model, NetworkCharacterControllerCustom characterController, LifeHandler lifeHandler)
+    public void Init(ModelPlayer model, PlayerController controller, NetworkCharacterControllerCustom characterController, LifeHandler lifeHandler)
     {
         _model = model;
-        _controller = characterController;
+        _controller = controller;
+        _networkController = characterController;
         _lifeHandler = lifeHandler;
         
         _lifeHandler.OnLifeUpdate += UpdateHealthUI;
@@ -55,7 +60,7 @@ public class PlayerLocalUIHandler : MonoBehaviour
             HandleWinnerChanged(GameManager.Instance.Winner);
         }
         
-        goToMainMenuButton.onClick.AddListener(ShowHostDisconnectedPanelAndGoToMenu);
+        goToMainMenuButton.onClick.AddListener(OnGoToMainMenuPressed);
         
         // Delay para sincronización de estado al ingresar el Client
         StartCoroutine(DelayedInitialUIRefresh());
@@ -72,7 +77,7 @@ public class PlayerLocalUIHandler : MonoBehaviour
 
     void Update()
     {
-        speedText.text = $"{_controller.Velocity.magnitude:F1} km/h";
+        speedText.text = $"{_networkController.Velocity.magnitude:F1} km/h";
         killsText.text = $"Kills: {_model.Kills.ToString()}";
         nitroBar.fillAmount = Mathf.Clamp01(_model.CurrentNitro / _model.MaxNitro);
     }
@@ -112,7 +117,7 @@ public class PlayerLocalUIHandler : MonoBehaviour
         timerText.text = Mathf.CeilToInt(t).ToString();
     }
 
-    void ShowHostDisconnectedPanel()
+    private void ShowHostDisconnectedPanel()
     {
         hostDisconnectedPanel.SetActive(true);
     }
@@ -144,29 +149,24 @@ public class PlayerLocalUIHandler : MonoBehaviour
         if (goToMainMenuButton != null) goToMainMenuButton.gameObject.SetActive(shouldShow);
     }
     
-    public void ShowHostDisconnectedPanelAndGoToMenu()
+    private void OnGoToMainMenuPressed()
+    {
+        _controller.OnGoToMainMenuPressed();
+    }
+    
+    public void ShowLocalDisconnectPanel(string message)
     {
         if (hostDisconnectedPanel != null)
+        {
             hostDisconnectedPanel.SetActive(true);
+            hostDisconnectedPanel.GetComponentInChildren<TextMeshProUGUI>().text = message;
+        }
 
-        // Opcional: desactiva los otros paneles si estuvieran abiertos
         if (victoryPanel != null) victoryPanel.SetActive(false);
         if (defeatPanel != null) defeatPanel.SetActive(false);
         if (waitingPanel != null) waitingPanel.SetActive(false);
 
-        // Desactiva botones interactivos para evitar errores
         if (goToMainMenuButton != null) goToMainMenuButton.interactable = false;
-
-        UpdateGoToMainMenuButtonVisibility();
-        
-        // Espera 2 segundos y vuelve al MainMenu
-        StartCoroutine(ReturnToMainMenuWithDelay());
-    }
-
-    private IEnumerator ReturnToMainMenuWithDelay()
-    {
-        yield return new WaitForSeconds(2f); // Tiempo a mostrar el panel antes de volver
-        SceneManager.LoadScene("MainMenu");
     }
 
     void OnDestroy()

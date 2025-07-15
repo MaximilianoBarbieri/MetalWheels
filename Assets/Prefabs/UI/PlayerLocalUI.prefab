@@ -1600,6 +1600,7 @@ MonoBehaviour:
   defeatPanel: {fileID: 2797972215186238211}
   waitingPanel: {fileID: 7684239252173483214}
   hostDisconnectedPanel: {fileID: 7833420989020724234}
+  hostDisconnectedText: {fileID: 3513413969098933031}
   goToMainMenuButton: {fileID: 164227147401250753}
 --- !u!1 &8860707799116577832
 GameObject:
