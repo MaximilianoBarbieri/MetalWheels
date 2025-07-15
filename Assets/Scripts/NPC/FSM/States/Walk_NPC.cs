@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
+using static MoodsNpc;
 using UnityEngine;
 
 public class Walk_NPC : MonoBaseState
@@ -32,7 +33,7 @@ public class Walk_NPC : MonoBaseState
     {
         Node current = startNode;
         int walkedSteps = 0;
-        npcGoap.worldState.steps = valueSteps;
+        //npcGoap.worldState.steps = valueSteps;
 
         while (walkedSteps < valueSteps)
         {
@@ -51,21 +52,28 @@ public class Walk_NPC : MonoBaseState
             }
 
             walkedSteps++;
-            npcGoap.worldState.steps--;
+            valueSteps--;
             current = next;
             npc.currentNode = current;
 
-            if (npcGoap.worldState.steps <= 0)
+            if (valueSteps <= 0)
                 break;
         }
 
-        yield break;
+        npcGoap.worldState.steps = walkedSteps;
+
+        npc.currentInteractable = npc.GetClosestInteractable();
+        npcGoap.worldState.mood = Exploring;
     }
 
     public override Dictionary<string, object> Exit(IState to)
     {
         if (_movementRoutine != null)
             npc.StopCoroutine(_movementRoutine);
+
+
+        Debug.Log("Sali de [Walk]");
+
 
         return base.Exit(to);
     }

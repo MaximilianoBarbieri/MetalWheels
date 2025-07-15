@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
@@ -12,6 +13,7 @@ Lógica GOAP (objetivos, acciones, planificación) (conviene separarlo).*/
 public class NPC : MonoBehaviour
 {
     [HideInInspector] public Node currentNode;
+    public InteractableNPC currentInteractable;
     [HideInInspector] public Animator animator;
 
     [Header("Interacción")]
@@ -93,6 +95,52 @@ public class NPC : MonoBehaviour
     /// <returns></returns>
     public bool HasCarNearby => _carsInRange.Any(car =>
         car != null && Vector3.Distance(transform.position, car.transform.position) < CarDistance);
+    
+    public IEnumerator MoveAlongPath(Node startNode, Node goalNode)
+    {
+        bool finished = false;
+        List<Node> path = null;
+
+        var astar = new AStar<Node>();
+
+        astar.OnPathCompleted += result =>
+        {
+            path = result.ToList();
+            finished = true;
+        };
+
+        astar.OnCantCalculate += () =>
+        {
+            Debug.LogWarning("No se pudo calcular el camino con AStar.");
+            finished = true;
+        };
+
+        yield return StartCoroutine(astar.Run(
+            startNode,
+            n => n == goalNode,
+            n => n.neighbors.Select(neighbor => new WeightedNode<Node>(neighbor, Vector3.Distance(n.transform.position, neighbor.transform.position))),
+            n => Vector3.Distance(n.transform.position, goalNode.transform.position)
+        ));
+
+        while (!finished)
+            yield return null;
+
+        if (path == null) yield break;
+
+        foreach (var node in path)
+        {
+            while (Vector3.Distance(transform.position, node.transform.position) > 0.1f)
+            {
+                Vector3 dir = (node.transform.position - transform.position).normalized;
+                transform.position += dir * speed * Time.deltaTime;
+                transform.forward = Vector3.Lerp(transform.forward, dir, speedRotation * Time.deltaTime);
+                yield return null;
+            }
+
+            currentNode = node;
+        }
+    }
+
 }
 
 #region OldFSM

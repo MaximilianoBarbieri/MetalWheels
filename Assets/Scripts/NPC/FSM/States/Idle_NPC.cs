@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FSM;
 using UnityEngine;
+using static MoodsNpc;
 
 public class Idle_NPC : MonoBaseState
 {
@@ -27,7 +28,8 @@ public class Idle_NPC : MonoBaseState
             StopCoroutine(_recoverStepsRoutine);
 
         Debug.Log("Sali de IDLE");
-        
+
+
         return base.Exit(to);
     }
 
@@ -38,6 +40,8 @@ public class Idle_NPC : MonoBaseState
 
     private IEnumerator RecoverStepsOverTime()
     {
+        npcGoap.worldState.mood = LightRest;
+
         Debug.Log("Entro a corrutina de Steps");
 
         while (npcGoap.worldState.steps < npcGoap.worldState.maxsteps)

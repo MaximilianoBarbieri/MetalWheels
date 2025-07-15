@@ -22,7 +22,7 @@ public static class Generators
             seed = generator(seed);
         }
     }
-    
+
     public static IEnumerable<T> DetectNearby<T>(Vector3 position, GameObject self, float radius) where T : Component
     {
         Collider[] hits = Physics.OverlapSphere(position, radius);
@@ -40,9 +40,11 @@ public static class Generators
 public static class MoodsNpc
 {
     public const string Relaxed = "RelaxedNPC";
+    public const string Curious = "CuriousNPC";
+    public const string LightRest = "LightRestNPC";
+    public const string Exploring = "ExploringNPC";
     public const string Safe = "SafeNPC";
     public const string NotSafe = "NotSafeNPC";
-    public const string Curious = "CuriousNPC";
 }
 
 public static class StatesNpc

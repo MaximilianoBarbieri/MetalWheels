@@ -25,7 +25,7 @@ public class NPCGoap : MonoBehaviour
             worldState = new WorldState();
 
         worldState.steps = 0; // o el valor que quieras
-        worldState.maxsteps = 10;
+        worldState.maxsteps = 5;
         worldState.life = 100f;
         worldState.mood = Safe; // o Safe, según el caso
 
@@ -37,11 +37,14 @@ public class NPCGoap : MonoBehaviour
     private WorldState GetCurrentWorldState()
     {
         var carNearby = npc.HasCarNearby;
-        var interactionType = npc.GetClosestInteractable()?.type ?? InteractionType.OnlyForPath;
 
         // Actualizamos datos dinámicos
+        worldState.interactionType = npc.currentInteractable != null
+            ? npc.currentInteractable.type
+            : InteractionType.OnlyForPath;
+
         worldState.carInRange = carNearby;
-        worldState.interactionType = interactionType;
+        //worldState.interactionType = interactionType;
         worldState.mood = (worldState.mood == NotSafe && !carNearby) ? Safe : worldState.mood;
 
         return worldState;
@@ -54,112 +57,154 @@ public class NPCGoap : MonoBehaviour
             new GoapAction
             {
                 Name = IdleGoapNpc,
-                Precondition = s => !s.carInRange && s.steps == 0,
+                Precondition = s => !s.carInRange && s.steps < s.maxsteps && s.mood != LightRest,
                 Effect = s =>
                 {
                     var ns = s.Clone();
-                    ns.steps = Mathf.Min(ns.steps + 3, ns.maxsteps); // Simula ganancia
+                    ns.mood = LightRest;
+                    ns.steps = ns.maxsteps;
                     return ns;
                 },
                 Execute = () => TransitionToCoroutine(npc.idleNpc),
-                Cost = 4
+                Cost = 3
             },
+
             new GoapAction
             {
                 Name = WalkGoapNpc,
-                Precondition = s => !s.carInRange && s.steps >= s.maxsteps,
+                Precondition = s => !s.carInRange && s.steps == s.maxsteps && s.mood == LightRest,
                 Effect = s =>
                 {
-                    s.steps = 0; // representa que el NPC gastó sus pasos al caminar
-                    return s;
+                    var ns = s.Clone();
+                    ns.steps = 0;
+                    ns.mood = Exploring;
+                    return ns;
                 },
-                Execute = () => (TransitionToCoroutine(npc.walkNpc)),
+                Execute = () => TransitionToCoroutine(npc.walkNpc),
                 Cost = 3
             },
-            new GoapAction
-            {
-                Name = TalkGoapNpc,
-                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Talk && s.mood != Curious,
-                Effect =
-                    s => //QUEDARSE QUIETO Y SIMULAR UNA CONVERSACION CON UN "FALSO" NPC TODO: ESTOS PODRIAN SPAWNEAR LAS "CONVERSACIONES"/"GLOBOS DE TEXTO" COMO UNICA RESPONSABILIDAD
-                    {
-                        var ns = s.Clone();
-                        ns.mood = Curious;
-                        return ns;
-                    },
-                Execute = () => (TransitionToCoroutine(npc.talkNpc)),
-                Cost = 2
-            },
+
             new GoapAction
             {
                 Name = SitdownGoapNpc,
-                Precondition = s => !s.carInRange && s.interactionType == InteractionType.Sit && s.mood != Relaxed,
-                Effect = s => //ME MANTENGO 5 SEGUNDOS, PERO RECUPERO TODOS MIS STEPS + RECUPERO TODA MI STAMINA
+                Precondition = s =>
+                    !s.carInRange && s.steps == s.maxsteps && s.interactionType == InteractionType.Sit &&
+                    s.mood == LightRest,
+                Effect = s =>
                 {
                     var ns = s.Clone();
                     ns.mood = Relaxed;
+                    //ns.steps = ns.maxsteps; // Recuperación completa al sentarse
                     return ns;
                 },
-                Execute = () => (TransitionToCoroutine(npc.sitdownNpc)),
+                Execute = () => TransitionToCoroutine(npc.sitdownNpc),
                 Cost = 2
             },
+
+            new GoapAction
+            {
+                Name = TalkGoapNpc,
+                Precondition = s =>
+                    !s.carInRange && s.steps == s.maxsteps && s.interactionType == InteractionType.Talk &&
+                    s.mood == LightRest,
+                Effect = s =>
+                {
+                    var ns = s.Clone();
+                    ns.mood = Curious;
+                    return ns;
+                },
+                Execute = () => TransitionToCoroutine(npc.talkNpc),
+                Cost = 2
+            },
+
             new GoapAction
             {
                 Name = EscapeGoapNpc,
-                Precondition = s => s.carInRange && s.mood != Safe,
-                Effect =
-                    s => //TODO: DIVIDIR LA ESCENA EN SEGMENTOS, PARA ESCAPAR, DEBO ENCONTRAR UN SEGMENTO DONDE NO HAYA NINGUN VEHICULO 
-                    {
-                        var ns = s.Clone();
-                        ns.mood = Safe;
-                        return ns;
-                    },
-                Execute = () => (TransitionToCoroutine(npc.escapeNpc)),
-                Cost = 1
+                Precondition = s => s.carInRange && s.mood == NotSafe,
+                Effect = s =>
+                {
+                    var ns = s.Clone();
+                    ns.mood = Safe;
+                    return ns;
+                },
+                Execute = () => TransitionToCoroutine(npc.escapeNpc),
+                Cost = 1 // Prioridad alta
             },
+
             new GoapAction
             {
                 Name = DeathGoapNpc,
                 Precondition = s => s.life <= 0f,
                 Effect = s => s.Clone(),
-                Execute = () => (TransitionToCoroutine(npc.deathNpc)),
-                Cost = 0
-            },
+                Execute = () => TransitionToCoroutine(npc.deathNpc),
+                Cost = 0 // Máxima prioridad
+            }
         };
     }
 
     private List<GoapAction> GetAvailableActions() => _actions;
 
+    // private Func<WorldState, bool> SelectGoal(WorldState state)
+    // {
+    //     // 1. Si la vida es 0 o menos, el objetivo es permanecer muerto.
+    //     //    Así el NPC no intentará ninguna acción posterior.
+    //     if (state.life <= 0f)
+    //         return s => s.life <= 0f; // Meta: estar muerto (meta terminal)
+    //
+    //     // 2. Si hay un auto cerca y aún no está a salvo, el objetivo es ponerse a salvo.
+    //     //    Esto fuerza a que escape, ignorando otras acciones hasta estar seguro.
+    //     if (state.carInRange && state.mood == NotSafe)
+    //         return s => s.mood == Safe; // Meta: estar a salvo
+    //
+    //     // 3. Si hay una oportunidad de hablar y aún no habló, el objetivo es completar esa charla.
+    //     if (state.interactionType == InteractionType.Talk && state.mood != Curious)
+    //         return s => s.mood == Curious; // Meta: haber hablado
+    //
+    //     // 4. Si puede sentarse y aún no está sentado, el objetivo es sentarse.
+    //     if (state.interactionType == InteractionType.Sit && state.mood != Relaxed)
+    //         return s => s.mood == Relaxed; // Meta: estar sentado
+    //
+    //     // 5. Meta por defecto: si tengo steps completos, quiero moverme.
+    //     if (state.steps >= state.maxsteps)
+    //         return s => s.steps < state.maxsteps; // Meta: haber gastado steps
+    //
+    //     if (state.steps == 0)
+    //         return s => s.steps > 0;
+    //
+    //     // 6. Si no hay nada más que hacer, no tengo meta real.
+    //     return s => true;
+    // }
+
     private Func<WorldState, bool> SelectGoal(WorldState state)
     {
-        // 1. Si la vida es 0 o menos, el objetivo es permanecer muerto.
-        //    Así el NPC no intentará ninguna acción posterior.
+        // 1. NPC muerto
         if (state.life <= 0f)
-            return s => s.life <= 0f; // Meta: estar muerto (meta terminal)
+            return s => s.life <= 0f;
 
-        // 2. Si hay un auto cerca y aún no está a salvo, el objetivo es ponerse a salvo.
-        //    Esto fuerza a que escape, ignorando otras acciones hasta estar seguro.
-        if (state.carInRange && state.mood == NotSafe)
-            return s => s.mood == Safe; // Meta: estar a salvo
+        // 2. Escape si hay autos cerca
+        if (state.carInRange && state.mood != Safe)
+            return s => s.mood == Safe;
 
-        // 3. Si hay una oportunidad de hablar y aún no habló, el objetivo es completar esa charla.
+        // 3. Charla si no está curioso
         if (state.interactionType == InteractionType.Talk && state.mood != Curious)
-            return s => s.mood == Curious; // Meta: haber hablado
+            return s => s.mood == Curious;
 
-        // 4. Si puede sentarse y aún no está sentado, el objetivo es sentarse.
+        // 4. Sentarse si no está relajado
         if (state.interactionType == InteractionType.Sit && state.mood != Relaxed)
-            return s => s.mood == Relaxed; // Meta: estar sentado
+            return s => s.mood == Relaxed;
 
-        // 5. Meta por defecto: si tengo steps completos, quiero moverme.
-        if (state.steps >= state.maxsteps)
-            return s => s.steps < state.maxsteps; // Meta: haber gastado steps
+        // 5. Si aún no exploró
+        if (state.steps >= state.maxsteps && state.mood != Exploring)
+            return s => s.mood == Exploring;
 
-        if (state.steps == 0)
-            return s => s.steps > 0;
-        
-        // 6. Si no hay nada más que hacer, no tengo meta real.
+        //6. Si tengo que recargar pasos despeus de una accion
+        if (state.steps < state.maxsteps && state.mood != LightRest)
+            return s => s.mood == LightRest && s.steps == s.maxsteps;
+
+        // Por defecto, no hay objetivo real
         return s => true;
     }
+
 
     private IEnumerator RunPlanLoop()
     {

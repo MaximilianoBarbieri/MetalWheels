@@ -3,6 +3,7 @@ using UnityEngine;
 public class InteractableNPC : MonoBehaviour
 {
     public InteractionType type;
+    public Transform sitTarget;
     public Node assignedNode;
 
     private void Start() => NodeGenerator.Instance.Register(this);
