@@ -52,17 +52,16 @@ public class Walk_NPC : MonoBaseState
             }
 
             walkedSteps++;
-            valueSteps--;
             current = next;
             npc.currentNode = current;
-
-            if (valueSteps <= 0)
-                break;
         }
 
-        npcGoap.worldState.steps = walkedSteps;
 
+        Debug.Log("El numero de pasos que me quedan es de " + $"{walkedSteps}");
+
+        npcGoap.worldState.steps = walkedSteps;
         npc.currentInteractable = npc.GetClosestInteractable();
+
         npcGoap.worldState.mood = Exploring;
     }
 
@@ -80,6 +79,5 @@ public class Walk_NPC : MonoBaseState
 
     public override void UpdateLoop()
     {
-        Debug.Log("[Walk]Mi cantidad de pasos disponibles es de: " + $"{npcGoap.worldState.steps}");
     }
 }
