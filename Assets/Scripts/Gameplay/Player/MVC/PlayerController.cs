@@ -69,7 +69,7 @@ public class PlayerController : NetworkBehaviour
             Debug.Log("PlayerController -> Model inicializado antes de ejecutar global canvas: " + _model.MaxHealth);
             Canvas globalCanvas = GameObject.Find("Canvas_LocalUI").GetComponent<Canvas>();
             var uiInstance = Instantiate(playerLocalUIPrefab, globalCanvas.transform);
-            uiInstance.Init(_model,this, _myCharacterController, _myLifeHandler);
+            uiInstance.Init(_model, _myCharacterController, _myLifeHandler);
             
             // Forzar update
             _myLifeHandler?.UpdateUI();
@@ -143,58 +143,6 @@ public class PlayerController : NetworkBehaviour
         }
 
     }
-
-    #region RPC Methods
-
-    // Nuevo método llamado desde el botón de la UI local:
-    public void OnGoToMainMenuPressed()
-    {
-        if (Runner.IsServer)
-            RPC_ShowHostDisconnectedPanel();
-        else
-        {
-            FindObjectOfType<PlayerLocalUIHandler>().ShowLocalDisconnectPanel("Disconnecting");
-            StartCoroutine(DisconnectAfterDelay());
-        }
-    }
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_ShowHostDisconnectedPanel()
-    {
-        var uiHandler = FindObjectOfType<PlayerLocalUIHandler>();
-        if(uiHandler != null)
-        {
-            string message = Runner.IsServer ? "Disconnecting" : "Host disconnected going to main menu";
-            uiHandler.ShowLocalDisconnectPanel(message);
-        }
-        StartCoroutine(ReturnAllPlayersToMainMenuWithDelay());
-    }
-
-    private IEnumerator ReturnAllPlayersToMainMenuWithDelay()
-    {
-        yield return new WaitForSeconds(2f);
-        // Destruye la UI Local antes de cambiar de escena
-        var localUI = FindObjectOfType<PlayerLocalUIHandler>();
-        if(localUI != null) Destroy(localUI.gameObject);
-
-        if (Runner.IsServer)
-            Runner.Shutdown();
-
-        SceneManager.LoadScene("MainMenu");
-    }
-
-    private IEnumerator DisconnectAfterDelay()
-    {
-        yield return new WaitForSeconds(2f);
-        // Destruye la UI Local antes de cambiar de escena
-        var localUI = FindObjectOfType<PlayerLocalUIHandler>();
-        if(localUI != null) Destroy(localUI.gameObject);
-
-        Runner.Disconnect(Runner.LocalPlayer);
-        SceneManager.LoadScene("MainMenu");
-    }
-
-    #endregion
     
     void OnDestroy()
     {

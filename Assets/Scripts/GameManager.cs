@@ -1,7 +1,9 @@
 using Fusion;
 using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum GameState
 {
@@ -104,4 +106,72 @@ public class GameManager : NetworkBehaviour
     {
         OnHostDisconnected?.Invoke();
     }
+
+    #region SessionManager
+
+    public void OnPlayerRequestedExit()
+    {
+        if (Runner.IsServer)
+            RPC_ShowDisconnectPanelForAll();
+        else
+            ShowLocalDisconnectAndExit();
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    void RPC_ShowDisconnectPanelForAll()
+    {
+        string message = Runner.IsServer ? "Disconnecting" : "Host disconnected going to main menu";
+
+        PlayerLocalUIHandler ui = FindObjectOfType<PlayerLocalUIHandler>();
+        if (ui != null)
+            ui.ShowLocalDisconnectPanel(message);
+
+        StartCoroutine(ReturnToMainMenuDelayed());
+    }
+
+    void ShowLocalDisconnectAndExit()
+    {
+        PlayerLocalUIHandler ui = FindObjectOfType<PlayerLocalUIHandler>();
+        if (ui != null)
+            ui.ShowLocalDisconnectPanel("Disconnecting");
+
+        StartCoroutine(DisconnectDelayed());
+    }
+
+    IEnumerator ReturnToMainMenuDelayed()
+    {
+        yield return new WaitForSeconds(2f);
+        CleanupAndReturn();
+    }
+
+    IEnumerator DisconnectDelayed()
+    {
+        yield return new WaitForSeconds(2f);
+        if(Runner != null)
+            Runner.Disconnect(Runner.LocalPlayer);
+
+        CleanupAndReturn();
+    }
+
+    void CleanupAndReturn()
+    {
+        // Destruir UI Local
+        var ui = FindObjectOfType<PlayerLocalUIHandler>();
+        if (ui != null) Destroy(ui.gameObject);
+
+        // Destruir CinemachineVirtualCamera local
+        var cinemachineCam = FindObjectOfType<Cinemachine.CinemachineVirtualCamera>();
+        if (cinemachineCam != null) Destroy(cinemachineCam.gameObject);
+
+        // Destruir UI global (PlayerGlobalUIHandler) si existe
+        var globalUI = FindObjectOfType<PlayerGlobalUIHandler>();
+        if (globalUI != null) Destroy(globalUI.gameObject);
+
+        if (Runner.IsServer)
+            Runner.Shutdown();
+
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    #endregion
 }

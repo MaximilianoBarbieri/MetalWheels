@@ -40,10 +40,9 @@ public class PlayerLocalUIHandler : MonoBehaviour
 
     private bool isWinner = false; // flag para UI
     
-    public void Init(ModelPlayer model, PlayerController controller, NetworkCharacterControllerCustom characterController, LifeHandler lifeHandler)
+    public void Init(ModelPlayer model, NetworkCharacterControllerCustom characterController, LifeHandler lifeHandler)
     {
         _model = model;
-        _controller = controller;
         _networkController = characterController;
         _lifeHandler = lifeHandler;
         
@@ -151,7 +150,7 @@ public class PlayerLocalUIHandler : MonoBehaviour
     
     private void OnGoToMainMenuPressed()
     {
-        _controller.OnGoToMainMenuPressed();
+        GameManager.Instance.OnPlayerRequestedExit();
     }
     
     public void ShowLocalDisconnectPanel(string message)
