@@ -191,8 +191,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24968a596e977814183810c14effa904, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _force: 80
-  _damage: 30
+  _force: 100
+  _damage: 50
   _specialType: 1
   _impactParticles: {fileID: 0}
   _fireEffectPrefab: {fileID: 0}

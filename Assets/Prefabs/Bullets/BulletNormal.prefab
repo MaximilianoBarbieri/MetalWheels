@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _force: 100
-  _damage: 10
+  _damage: 25
   _specialType: 0
   _impactParticles: {fileID: 0}
   _fireEffectPrefab: {fileID: 0}

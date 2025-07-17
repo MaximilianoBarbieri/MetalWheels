@@ -71,7 +71,12 @@ public class Bullet : NetworkBehaviour
                     model.Stun(2f); // 2 segundos de stun
                 }
 
-                // Efecto FIRE (puedes sumar lógica de quemadura aquí)
+                // Efecto Fire
+                if (_specialType == ModelPlayer.SpecialType.Fire)
+                {
+                    var model = lifeHandler.GetComponent<ModelPlayer>();
+                    model.Burn(3f, 1f, OwnerPlayerRef);
+                }
             }
 
             PlayImpactFX();

@@ -11,11 +11,23 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public SpecialType SpecialAmmo { get; private set; }
     [Networked] public bool IsDead { get; private set; }
     [Networked] public float RespawnTimer { get; private set; }
-    [Networked] public bool IsStunned { get; private set; }
     [Networked] public float StunTimer { get; private set; }
+    [Networked] public bool IsStunned { get; private set; }
+    [Networked] public bool IsBurning { get; private set; }
+    [Networked] public float BurnTimer { get; private set; }
+    [Networked] public float BurnTickTimer { get; private set; }
+    [Networked] private PlayerRef BurnAttacker { get; set; }
     [Networked] public int CarType { get; set; }
 
+    private LifeHandler _lifeHandler;
+
+
     public enum SpecialType { None, Stun, Fire }
+    
+    public override void Spawned()
+    {
+        _lifeHandler = GetComponent<LifeHandler>();
+    }
     
     public void InitStats(int carType)
     {
@@ -31,6 +43,7 @@ public class ModelPlayer : NetworkBehaviour
     public void UpdateStats(float deltaTime)
     {
         UpdateStun(deltaTime);
+        UpdateBurn(deltaTime);
     }
 
     public bool ConsumeNitro(float amount)
@@ -105,6 +118,8 @@ public class ModelPlayer : NetworkBehaviour
         transform.position = pos;
         transform.rotation = rot;
         IsDead = false;
+        IsStunned = false;
+        IsBurning = false;
         RespawnTimer = 0f;
         SpecialAmmo = SpecialType.None;
     }
@@ -119,6 +134,14 @@ public class ModelPlayer : NetworkBehaviour
         IsStunned = true;
         StunTimer = duration;
     }
+    
+    public void Burn(float duration, float tickInterval, PlayerRef attacker)
+    {
+        IsBurning = true;
+        BurnTimer = duration;
+        BurnTickTimer = tickInterval;
+        BurnAttacker = attacker;
+    }
 
     private void UpdateStun(float deltaTime)
     {
@@ -129,6 +152,30 @@ public class ModelPlayer : NetworkBehaviour
         {
             IsStunned = false;
             StunTimer = 0f;
+        }
+    }
+    
+    private void UpdateBurn(float deltaTime)
+    {
+        if (!IsBurning) return;
+
+        BurnTimer -= deltaTime;
+        BurnTickTimer -= deltaTime;
+
+        if (BurnTickTimer <= 0f)
+        {
+            if (_lifeHandler != null)
+            {
+                _lifeHandler.ModifyLife(-5, BurnAttacker); // Usamos LifeHandler aquí
+            }
+
+            BurnTickTimer = 1f;
+        }
+
+        if (BurnTimer <= 0f)
+        {
+            IsBurning = false;
+            BurnTimer = 0f;
         }
     }
 }
