@@ -172,15 +172,12 @@ public class ModelPlayer : NetworkBehaviour
             {
                 _lifeHandler.ModifyLife(-5, BurnAttacker); // Usamos LifeHandler aquí
             }
-
             BurnTickTimer = 1f;
         }
 
-        if (BurnTimer <= 0f)
-        {
-            IsBurning = false;
-            BurnTimer = 0f;
-        }
+        if (!(BurnTimer <= 0f)) return;
+        IsBurning = false;
+        BurnTimer = 0f;
     }
     
     private void OnNitroChanged()

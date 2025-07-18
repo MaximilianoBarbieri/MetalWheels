@@ -8,6 +8,7 @@ public class ViewPlayer : MonoBehaviour
     [SerializeField] private GameObject nitroFX;
     [SerializeField] private GameObject damageFX;
     [SerializeField] private GameObject fireFX;
+    [SerializeField] private GameObject burnFX;
 
     private ModelPlayer _model;
     private LifeHandler _lifeHandler;
@@ -44,21 +45,14 @@ public class ViewPlayer : MonoBehaviour
         // FX de Stun (activo mientras IsStunned)
         if (stunFX != null)
             stunFX.SetActive(_model != null && _model.IsStunned);
+        
+        // FX de Burn (activo mientras IsBurning)
+        if (burnFX != null)
+            burnFX.SetActive(_model != null && _model.IsBurning);
 
         // FX de Nitro (activo mientras se usa nitro)
         if (nitroFX != null)
             nitroFX.SetActive(_model != null && _model.IsNitroActive);
-
-    }
-
-    public void PlayStunFX()
-    {
-        if (stunFX) stunFX.SetActive(true);
-    }
-
-    public void PlayNitroFX()
-    {
-        if (nitroFX) nitroFX.SetActive(true);
     }
 
     public void PlayDamageFX()

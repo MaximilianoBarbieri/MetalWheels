@@ -68,7 +68,7 @@ public class Bullet : NetworkBehaviour
                 if (_specialType == ModelPlayer.SpecialType.Stun)
                 {
                     var model = lifeHandler.GetComponent<ModelPlayer>();
-                    model.Stun(2f); // 2 segundos de stun
+                    model.Stun(3f); // 3 segundos de stun
                 }
 
                 // Efecto Fire

@@ -50,7 +50,7 @@ ParticleSystem:
   emitterVelocityMode: 0
   looping: 1
   prewarm: 0
-  playOnAwake: 0
+  playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -24477,10 +24477,10 @@ MonoBehaviour:
   _SpecialAmmo: 0
   _IsDead: 0
   _RespawnTimer: 1
-  _StunTimer: 1
+  _StunTimer: 3
   _IsStunned: 0
   _IsBurning: 0
-  _BurnTimer: 0
+  _BurnTimer: 3
   _BurnTickTimer: 0
   _CarType: 0
   _IsNitroActive: 0
@@ -24516,6 +24516,7 @@ MonoBehaviour:
   nitroFX: {fileID: 5342546242326835550}
   damageFX: {fileID: 252639226197240010}
   fireFX: {fileID: 3239685215004098720}
+  burnFX: {fileID: 223736783126337688}
 --- !u!114 &-6260556829295157084
 MonoBehaviour:
   m_ObjectHideFlags: 0
