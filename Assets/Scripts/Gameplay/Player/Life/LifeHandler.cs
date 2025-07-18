@@ -44,7 +44,9 @@ public class LifeHandler : NetworkBehaviour
         _model.ModifyLife(delta, attacker);
         CurrentLife = _model.CurrentHealth;
         
-        if (delta < 0) OnTakeDamageFX?.Invoke();
+        if (delta < 0) {
+            _model.DamageFXCounter++;
+        }
     }
 
     void OnLifeChanged()

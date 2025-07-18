@@ -18,11 +18,15 @@ public class ModelPlayer : NetworkBehaviour
     [Networked] public float BurnTickTimer { get; private set; }
     [Networked] private PlayerRef BurnAttacker { get; set; }
     [Networked] public int CarType { get; set; }
-
-    private LifeHandler _lifeHandler;
-
-
     public enum SpecialType { None, Stun, Fire }
+    
+    private LifeHandler _lifeHandler;
+    
+    [Networked, OnChangedRender(nameof(OnNitroChanged))]
+    public bool IsNitroActive { get; set; }
+    [Networked, OnChangedRender(nameof(OnDamageFXChanged))]
+    public int DamageFXCounter { get; set; }
+
     
     public override void Spawned()
     {
@@ -177,5 +181,16 @@ public class ModelPlayer : NetworkBehaviour
             IsBurning = false;
             BurnTimer = 0f;
         }
+    }
+    
+    private void OnNitroChanged()
+    {
+        // Vacío si usás Update en ViewPlayer, o podés llamar FX directo acá
+    }
+
+    private void OnDamageFXChanged()
+    {
+        var view = GetComponent<ViewPlayer>();
+        if (view != null) view.PlayDamageFX();
     }
 }
