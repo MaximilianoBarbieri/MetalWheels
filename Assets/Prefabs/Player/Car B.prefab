@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Car B
       objectReference: {fileID: 0}
+    - target: {fileID: 1485907959334850585, guid: 7a6216ca517b8884bbdc86ba16393f7a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.032
+      objectReference: {fileID: 0}
     - target: {fileID: 3427828105045237455, guid: 7a6216ca517b8884bbdc86ba16393f7a, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0.688
@@ -66,6 +70,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4103639936176732113, guid: 7a6216ca517b8884bbdc86ba16393f7a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5554702516388890265, guid: 7a6216ca517b8884bbdc86ba16393f7a, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7068761983869914248, guid: 7a6216ca517b8884bbdc86ba16393f7a, type: 3}

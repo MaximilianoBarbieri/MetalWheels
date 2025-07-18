@@ -6,7 +6,7 @@ public class PlayerGlobalUIHandler : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI nicknameText;
     [SerializeField] private Image healthBar;      // Image tipo “Fill”
-    [SerializeField] private Vector3 offset = new(0f, 2f, 0f);
+    [SerializeField] private Vector3 offset = new(0f, 6f, 0f);
 
     private Camera _cam;
     private Transform _target;
