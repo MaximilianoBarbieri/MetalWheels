@@ -12,7 +12,8 @@ public class LifeHandler : NetworkBehaviour
 
     private ModelPlayer _model;
     private PlayerGlobalUIHandler _globalUI;
-
+    
+    public event Action OnTakeDamageFX = delegate { };
     public event Action<float> OnLifeUpdate = delegate { };
     public event Action OnRespawn = delegate { };
     public event Action OnDead = delegate { };
@@ -42,6 +43,8 @@ public class LifeHandler : NetworkBehaviour
         if (_model.IsDead) return;
         _model.ModifyLife(delta, attacker);
         CurrentLife = _model.CurrentHealth;
+        
+        if (delta < 0) OnTakeDamageFX?.Invoke();
     }
 
     void OnLifeChanged()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Cinemachine;
 using Fusion;
@@ -23,9 +24,11 @@ public class PlayerController : NetworkBehaviour
 
     public CinemachineVirtualCamera vCamPrefab;
     private CinemachineVirtualCamera myCam;
-    
-    [SerializeField] private float minCrashForce = 7f;
-    [SerializeField] private int crashDamage = 30;
+
+    private bool _lastNitroState = false; // Variable privada para trackear el estado anterior
+
+    /*[SerializeField] private float minCrashForce = 7f;
+    [SerializeField] private int crashDamage = 30;*/
     
     //UI player
     [SerializeField] private PlayerLocalUIHandler playerLocalUIPrefab;
@@ -110,7 +113,14 @@ public class PlayerController : NetworkBehaviour
                 maxSpeed *= 2f;
             }
         }
-
+        
+        // --- DETECCIÓN DE CAMBIO EN NITRO---
+        if (usingNitro != _lastNitroState)
+        {
+            NitroEvents.OnNitroStateChanged?.Invoke(_model, usingNitro);
+            _lastNitroState = usingNitro;
+        }
+        
         // Llama a Move pasando los valores correctos
         _myCharacterController.Move(moveDirection, acceleration, maxSpeed);
         
@@ -178,4 +188,9 @@ public class PlayerController : NetworkBehaviour
             }
         }
     }*/
+}
+
+public static class NitroEvents
+{
+    public static Action<ModelPlayer, bool> OnNitroStateChanged = delegate { };
 }

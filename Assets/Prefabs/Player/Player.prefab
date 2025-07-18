@@ -19625,6 +19625,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   carRenderer: {fileID: 0}
   stunFX: {fileID: 7186331031673400340}
+  nitroFX: {fileID: 5342546242326835550}
   damageFX: {fileID: 252639226197240010}
   fireFX: {fileID: 3239685215004098720}
 --- !u!114 &-6260556829295157084

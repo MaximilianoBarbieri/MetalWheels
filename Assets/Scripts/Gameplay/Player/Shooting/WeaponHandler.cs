@@ -1,3 +1,4 @@
+using System;
 using Fusion;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ public class WeaponHandler : NetworkBehaviour
     [SerializeField] private float fireCooldown = 1f; // 1 segundo para fire
 
     [Networked] NetworkBool _spawnedBullet { get; set; }
+    public event Action OnShoot = delegate { };
+
 
     private ChangeDetector _changeDetector;
 
@@ -51,6 +54,7 @@ public class WeaponHandler : NetworkBehaviour
         }
 
         _nextFireTimeNormal = Runner.SimulationTime + fireCooldown;
+        OnShoot?.Invoke(); // NOTIFICAR VIEWPLAYER
     }
 
     public void FireSpecial(ModelPlayer.SpecialType specialType)
@@ -70,6 +74,7 @@ public class WeaponHandler : NetworkBehaviour
         {
             bullet.SetOwner(Object.InputAuthority);
         }
+        OnShoot?.Invoke(); // NOTIFICAR VIEWPLAYER
     }
 
     void RemoteParticles()
