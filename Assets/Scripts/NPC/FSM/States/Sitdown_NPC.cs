@@ -13,17 +13,20 @@ public class Sitdown_NPC : MonoBaseState
 
     public override IState ProcessInput()
     {
-        Debug.Log("[Sitdown]");
+        //   Debug.Log("[Sitdown]");
 
         return this;
     }
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        //npc.animator.SetTrigger(AnimNpc.SitdownNpc);
+        npc.animator.SetTrigger(AnimNpc.SitdownNpc);
+
+        npcGoap.worldState.mood = MoodsNpc.Relaxed;
 
         if (npc.currentInteractable != null)
             _sitCoroutine = StartCoroutine(SitRoutine(npc.currentInteractable));
+        //_sitCoroutine = npc.RunInterruptibleRoutine(SitRoutine(npc.currentInteractable));
     }
 
     public override Dictionary<string, object> Exit(IState to)
@@ -34,18 +37,21 @@ public class Sitdown_NPC : MonoBaseState
             StopCoroutine(_movementCoroutine);
         }
 
+        npc.currentInteractable = null;
+
         return base.Exit(to);
     }
 
     public override void UpdateLoop()
     {
+        Debug.Log("[Sitdown]");
     }
 
     private IEnumerator SitRoutine(InteractableNPC interactable)
     {
         npc.currentInteractable = null;
 
-        yield return _movementCoroutine = StartCoroutine(npc.MoveAlongPath(npc.currentNode, interactable.assignedNode));
+        yield return _movementCoroutine = StartCoroutine(npc.MoveAlongPath(npc.CurrentNode, interactable.assignedNode));
 
         Vector3 target = interactable.sitTarget.position;
         target.y = npc.transform.position.y;
@@ -62,8 +68,8 @@ public class Sitdown_NPC : MonoBaseState
 
         npcGoap.worldState.steps = npcGoap.worldState.maxsteps - 1;
 
-        npcGoap.worldState.mood = MoodsNpc.Relaxed;
+        npcGoap.worldState.mood = MoodsNpc.Waiting;
 
-        Debug.Log("Finalizo corrutina [Sit]");
+        //  Debug.Log("Finalizo corrutina [Sit]");
     }
 }

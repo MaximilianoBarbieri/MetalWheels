@@ -15,25 +15,20 @@ public class Walk_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        // npc.animator.SetTrigger(AnimNpc.WalkNpc);
+        npcGoap.worldState.mood = Exploring;
 
-        npc.currentNode = NodeGenerator.Instance.GetNodes()
-            .Select(go => go.GetComponent<Node>())
-            .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
-            .FirstOrDefault(); // Asigna el nodo más cercano
+        npc.animator.SetTrigger(AnimNpc.WalkNpc);
 
         int valueSteps = Random.Range(1, npcGoap.worldState.steps);
 
-        Debug.Log("El numero de pasos a hacer es de " + $"{valueSteps}");
-
-        _movementRoutine = npc.StartCoroutine(WalkFreely(npc.currentNode, valueSteps));
+        //  Debug.Log("El numero de pasos a hacer es de " + $"{valueSteps}");
+        _movementRoutine = StartCoroutine(WalkFreely(npc.CurrentNode, valueSteps));
     }
 
     private IEnumerator WalkFreely(Node startNode, int valueSteps)
     {
         Node current = startNode;
         int walkedSteps = 0;
-        //npcGoap.worldState.steps = valueSteps;
 
         while (walkedSteps < valueSteps)
         {
@@ -53,31 +48,28 @@ public class Walk_NPC : MonoBaseState
 
             walkedSteps++;
             current = next;
-            npc.currentNode = current;
+            npc.CurrentNode = current;
         }
 
+        // Debug.Log("El numero de pasos que me quedan es de " + $"{walkedSteps}");
 
-        Debug.Log("El numero de pasos que me quedan es de " + $"{walkedSteps}");
-
+        npc.CurrentNode = null;
         npcGoap.worldState.steps = walkedSteps;
         npc.currentInteractable = npc.GetClosestInteractable();
 
-        npcGoap.worldState.mood = Exploring;
+        npcGoap.worldState.mood = Waiting;
     }
 
     public override Dictionary<string, object> Exit(IState to)
     {
         if (_movementRoutine != null)
-            npc.StopCoroutine(_movementRoutine);
-
-
-        Debug.Log("Sali de [Walk]");
-
+            StopCoroutine(_movementRoutine);
 
         return base.Exit(to);
     }
 
     public override void UpdateLoop()
     {
+        Debug.Log("[Walk]");
     }
 }

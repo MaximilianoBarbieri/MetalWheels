@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,20 +6,32 @@ using UnityEngine;
 
 public class NodeGenerator : MonoBehaviour
 {
-    [Header("Tamaño de la grilla (X-Z)")] public Vector2Int gridSize = new Vector2Int(20, 20);
+    [Header("Tamaño de la grilla (X-Z)")] [SerializeField]
+    private Vector2Int gridSize;
 
-    [Header("Espaciado entre nodos")] public int nodeSpacing;
+    [Header("Tamaño para la zona segura (X-Z)")] [SerializeField]
+    private int segmentX = 5;
 
-    [Header("Prefab del nodo")] public GameObject nodePrefab;
+    [SerializeField] private int segmentZ = 4;
 
-    [Header("Generación Lazy")] public int nodesPerFrame = 10;
+    [Header("Espaciado entre nodos")] [SerializeField]
+    private int nodeSpacing;
+
+    [Header("Prefab del nodo")] [SerializeField]
+    private GameObject nodePrefab;
+
+    [Header("Generación Lazy")] [SerializeField]
+    private int nodesPerFrame;
 
     [Header("Lista de interactuables en la escena")] [SerializeField]
-    private List<InteractableNPC> _interactables;
+    private List<InteractableNPC> interactables;
 
+    [Header("Lista de zonas seguras")] public List<SafeZone> zones = new();
+
+    private Action _onGridCreated;
     private List<GameObject> _nodes;
     private Coroutine _generationRoutine;
-    public bool IsReady => _nodes != null && _nodes.Count == gridSize.x * gridSize.y;
+    private bool IsReady => _nodes != null && _nodes.Count == gridSize.x * gridSize.y;
 
     public static NodeGenerator Instance { get; private set; }
 
@@ -67,24 +80,55 @@ public class NodeGenerator : MonoBehaviour
         Debug.Log($"[Grid] Generación completada: {_nodes.Count} nodos.");
         _generationRoutine = null;
 
-        DetectAllNeighbors(nodeSpacing);
+        _onGridCreated?.Invoke();
     }
 
-    private void DetectAllNeighbors(int distance)
-    {
-        foreach (var pn in _nodes.Select(node => node.GetComponent<Node>()).Where(pn => pn != null))
-            pn.DetectNeighbors(distance);
-
-        ActivateInteractable();
-    }
+    private void DetectAllNeighbors(int distance) => _nodes.Select(n => n.GetComponent<Node>())
+        .Where(n => n != null).ToList()
+        .ForEach(n => n.DetectNeighbors(distance));
 
     public void Register(InteractableNPC npc)
     {
-        if (!_interactables.Contains(npc))
-            _interactables.Add(npc);
+        if (!interactables.Contains(npc))
+            interactables.Add(npc);
     }
 
-    private void ActivateInteractable() => _interactables.ToList().ForEach(i => i.AssignClosestNode(2f));
+    private void ActivateInteractable() => interactables.ToList()
+        .ForEach(i => i.AssignClosestNode(2f));
+
+    private void GenerateSafeZones()
+    {
+        zones.Clear();
+        int w = gridSize.x / segmentX;
+        int h = gridSize.y / segmentZ;
+
+        foreach (var node in _nodes.Select(n => n.GetComponent<Node>()))
+        {
+            int xIndex = Mathf.FloorToInt((node.transform.position.x - transform.position.x) / (w * nodeSpacing));
+            int zIndex = Mathf.FloorToInt((node.transform.position.z - transform.position.z) / (h * nodeSpacing));
+
+            xIndex = Mathf.Clamp(xIndex, 0, segmentX - 1);
+            zIndex = Mathf.Clamp(zIndex, 0, segmentZ - 1);
+
+            Vector2Int zoneIndex = new(xIndex, zIndex);
+
+            var zone = zones.FirstOrDefault(z => z.segmentIndex == zoneIndex);
+            if (zone == null)
+            {
+                zone = new SafeZone { segmentIndex = zoneIndex };
+                zones.Add(zone);
+            }
+
+            zone.nodes.Add(node);
+        }
+
+        Debug.Log($"[Zonas] Total generadas: {zones.Count}");
+    }
+
+    public SafeZone GetZoneForNode(Node node)
+    {
+        return zones.FirstOrDefault(z => z.nodes.Contains(node));
+    }
 
     public void ClearGrid()
     {
@@ -105,4 +149,49 @@ public class NodeGenerator : MonoBehaviour
         Vector3 size = new Vector3(gridSize.x * nodeSpacing, 0.1f, gridSize.y * nodeSpacing);
         Gizmos.DrawWireCube(transform.position + size / 2f, size);
     }
+
+    private void OnDrawGizmos()
+    {
+        if (zones != null && zones.Count > 0)
+        {
+            foreach (var zone in zones)
+            {
+                Gizmos.color = zone.IsSafe ? new Color(0f, 1f, 0f, 0.25f) : new Color(1f, 0f, 0f, 0.25f);
+                Vector3 zoneSize = new Vector3(
+                    (gridSize.x / segmentX) * nodeSpacing,
+                    0.1f,
+                    (gridSize.y / segmentZ) * nodeSpacing
+                );
+                Gizmos.DrawCube(zone.Center + Vector3.up * 0.1f, zoneSize);
+            }
+        }
+    }
+
+    private void OnEnable()
+    {
+        _onGridCreated += ActivateInteractable;
+        _onGridCreated += () => DetectAllNeighbors(nodeSpacing);
+        ;
+        _onGridCreated += GenerateSafeZones;
+    }
+
+    private void OnDisable()
+    {
+        _onGridCreated -= ActivateInteractable;
+        _onGridCreated -= () => DetectAllNeighbors(nodeSpacing);
+        ;
+        _onGridCreated -= GenerateSafeZones;
+    }
+}
+
+public class SafeZone
+{
+    public List<Node> nodes = new();
+    public Vector2Int segmentIndex;
+
+    public bool IsSafe => nodes.All(n => !n.hasCar);
+
+    public Vector3 Center => nodes.Count == 0
+        ? Vector3.zero
+        : nodes.Select(n => n.transform.position).Aggregate(Vector3.zero, (acc, pos) => acc + pos) / nodes.Count;
 }

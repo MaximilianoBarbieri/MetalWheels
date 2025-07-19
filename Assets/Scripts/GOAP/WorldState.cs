@@ -1,11 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using FSM;
-using static MoodsNpc;
-using static GoapActionName;
-using UnityEngine;
 
 public class WorldState
 {
@@ -29,11 +22,14 @@ public class WorldState
     {
         return (WorldState)this.MemberwiseClone(); // copia superficial
     }
+
+    public bool IsMoodOneOf(params string[] validMoods)
+    {
+        return validMoods.Contains(mood);
+    }
+
+    public bool IsMoodNot(params string[] moods)
+    {
+        return !moods.Contains(mood);
+    }
 }
-
-
-//public bool hasTalked;
-//public bool isSeated;
-//public bool isSafe;
-
-//public float stamina; //OPCIONAL -> Cuando escapa no gastara pasos, pero si stamina [Como efecto, se volvera mas lento]

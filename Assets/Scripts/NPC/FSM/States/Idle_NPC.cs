@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FSM;
 using UnityEngine;
+using static AnimNpc;
 using static MoodsNpc;
 
 public class Idle_NPC : MonoBaseState
@@ -18,37 +19,32 @@ public class Idle_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        //npc.animator.SetTrigger(AnimNpc.IdleNpc);
-        _recoverStepsRoutine = npc.StartCoroutine(RecoverStepsOverTime());
+        npc.animator.SetTrigger(IdleNpc);
+
+        npcGoap.worldState.mood = LightRest;
+        _recoverStepsRoutine = StartCoroutine(RecoverStepsOverTime());
     }
 
     public override Dictionary<string, object> Exit(IState to)
     {
-        if (_recoverStepsRoutine != null)
-            StopCoroutine(_recoverStepsRoutine);
-
-        Debug.Log("Sali de IDLE");
-
+        if (_recoverStepsRoutine != null) StopCoroutine(_recoverStepsRoutine);
 
         return base.Exit(to);
     }
 
     public override void UpdateLoop()
     {
-        Debug.Log("Estoy en Idle");
     }
 
     private IEnumerator RecoverStepsOverTime()
     {
-        npcGoap.worldState.mood = LightRest;
-
         Debug.Log("Entro a corrutina de Steps");
 
         while (npcGoap.worldState.steps < npcGoap.worldState.maxsteps)
         {
             npcGoap.worldState.steps++;
-            Debug.Log("Se sumo un step, ahora tus steps son:" + $"{npcGoap.worldState.steps}");
-            yield return new WaitForSeconds(1f);
+            //Debug.Log("Se sumo un step, ahora tus steps son:" + $"{npcGoap.worldState.steps}");
+            yield return new WaitForSeconds(2);
         }
     }
 }

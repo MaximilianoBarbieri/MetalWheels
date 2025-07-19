@@ -1,59 +1,60 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
-using static StatesNpc;
 using UnityEngine;
 
-/*Gestión de colisiones y estados cercanos (correcto aquí).
-FSM para manejar los estados específicos del NPC (Idle, Walk, etc.) (correcto aquí).
-
-Lógica GOAP (objetivos, acciones, planificación) (conviene separarlo).*/
 public class NPC : MonoBehaviour
 {
-    [HideInInspector] public Node currentNode;
-    public InteractableNPC currentInteractable;
-    [HideInInspector] public Animator animator;
+    private Node _currentNode;
 
-    [Header("Interacción")]
-    //public float interactionRange = 2f;
+    public Node CurrentNode
+    {
+        get
+        {
+            if (_currentNode == null)
+            {
+                _currentNode = NodeGenerator.Instance.GetNodes()
+                    .Select(go => go.GetComponent<Node>())
+                    .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
+                    .FirstOrDefault();
+            }
+
+            return _currentNode;
+        }
+        set => _currentNode = value;
+    }
+
+    public Animator animator => GetComponent<Animator>();
+
+    [Header("Interacción")] [SerializeField]
+    private List<CharacterController> _carsInRange = new();
+
+    public InteractableNPC currentInteractable;
+
     private HashSet<InteractableNPC> _interactablesInRange = new();
 
-    private HashSet<CharacterController> _carsInRange = new();
-
-    private const int CarDistance = 5;
-    private float _life;
-
-    //public Transform target;
-    public float speed;
+    [Header("Parametros")] public float speed;
     public float speedRotation;
 
     public FiniteStateMachine fsm;
 
     [SerializeField] internal Idle_NPC idleNpc;
     [SerializeField] internal Walk_NPC walkNpc;
-    [SerializeField] internal Escape_NPC escapeNpc;
-    [SerializeField] internal Talk_NPC talkNpc;
     [SerializeField] internal Sitdown_NPC sitdownNpc;
+    [SerializeField] internal Talk_NPC talkNpc;
+    [SerializeField] internal Escape_NPC escapeNpc;
     [SerializeField] internal Death_NPC deathNpc;
 
     private void Start()
     {
         fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
-
-        // Seguridad por si algún estado no está asignado
-        if (idleNpc == null) Debug.LogError("[NPC] Estado Idle no asignado.");
-        if (walkNpc == null) Debug.LogWarning("[NPC] Estado Walk no asignado.");
-        if (escapeNpc == null) Debug.LogWarning("[NPC] Estado Escape no asignado.");
-
         fsm.Active = true;
-        fsm.TransitionTo(idleNpc);
     }
 
     private void Update() => fsm.Update(); // Llama al estado actual (solo UpdateLoop y ProcessInput)
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
         {
@@ -62,7 +63,10 @@ public class NPC : MonoBehaviour
         }
 
         if (other.gameObject.TryGetComponent<CharacterController>(out var car))
-            _carsInRange.Add(car);
+        {
+            if (!_carsInRange.Contains(car))
+                _carsInRange.Add(car);
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -77,27 +81,44 @@ public class NPC : MonoBehaviour
             _carsInRange.Remove(car);
     }
 
+    // public Node GetCurrentNode() => NodeGenerator.Instance.GetNodes()
+    //     .Select(go => go.GetComponent<Node>())
+    //     .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
+    //     .FirstOrDefault(); // Asigna el nodo más cercano
+
     /// <summary>
     /// Devuelve el interactable mas cercano al NPC basandose en su distancia
     /// </summary>
     /// <returns></returns>
-    public InteractableNPC GetClosestInteractable()
-    {
-        return _interactablesInRange
+    public InteractableNPC GetClosestInteractable() =>
+        _interactablesInRange
             .Where(obj => obj != null)
             .OrderBy(obj => Vector3.Distance(transform.position, obj.transform.position))
             .FirstOrDefault();
-    }
 
     /// <summary>
     /// Verifica si hay algun vehiculo cerca del NPC, basandose en su CarDistance
     /// </summary>
     /// <returns></returns>
-    public bool HasCarNearby => _carsInRange.Any(car =>
-        car != null && Vector3.Distance(transform.position, car.transform.position) < CarDistance);
-    
+    public CharacterController ClosestCar() =>
+        _carsInRange
+            .Where(car => car != null)
+            .OrderBy(car => Vector3.Distance(transform.position, car.transform.position))
+            .FirstOrDefault();
+
+    public List<Node> debugPath;
+
+
+    /// <summary>
+    /// Movimiento por AStar
+    /// </summary>
+    /// <param name="startNode"></param>
+    /// <param name="goalNode"></param>
+    /// <returns></returns>
     public IEnumerator MoveAlongPath(Node startNode, Node goalNode)
     {
+        Debug.Log("----------- MoveAlongPath -----------");
+
         bool finished = false;
         List<Node> path = null;
 
@@ -106,6 +127,7 @@ public class NPC : MonoBehaviour
         astar.OnPathCompleted += result =>
         {
             path = result.ToList();
+            debugPath = path;
             finished = true;
         };
 
@@ -118,7 +140,8 @@ public class NPC : MonoBehaviour
         yield return StartCoroutine(astar.Run(
             startNode,
             n => n == goalNode,
-            n => n.neighbors.Select(neighbor => new WeightedNode<Node>(neighbor, Vector3.Distance(n.transform.position, neighbor.transform.position))),
+            n => n.neighbors.Select(neighbor =>
+                new WeightedNode<Node>(neighbor, Vector3.Distance(n.transform.position, neighbor.transform.position))),
             n => Vector3.Distance(n.transform.position, goalNode.transform.position)
         ));
 
@@ -126,6 +149,7 @@ public class NPC : MonoBehaviour
             yield return null;
 
         if (path == null) yield break;
+
 
         foreach (var node in path)
         {
@@ -137,12 +161,33 @@ public class NPC : MonoBehaviour
                 yield return null;
             }
 
-            currentNode = node;
+            CurrentNode = node;
         }
     }
 
+    /// <summary>
+    /// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
+    /// </summary>
+    /// <param name="life"></param>
+    /// <param name="value"></param>
+    public void ModifyLife(float life, int value) => life += value;
+
+    private void OnDrawGizmos()
+    {
+        if (debugPath == null || debugPath.Count == 0) return;
+
+        Gizmos.color = Color.green;
+
+        for (int i = 0; i < debugPath.Count - 1; i++)
+        {
+            if (debugPath[i] != null && debugPath[i + 1] != null)
+                Gizmos.DrawLine(debugPath[i].transform.position, debugPath[i + 1].transform.position);
+        }
+
+        foreach (var node in debugPath)
+        {
+            if (node != null)
+                Gizmos.DrawSphere(node.transform.position, 0.2f);
+        }
+    }
 }
-
-#region OldFSM
-
-#endregion

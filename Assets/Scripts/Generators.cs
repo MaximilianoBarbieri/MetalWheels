@@ -37,14 +37,16 @@ public static class Generators
     }
 }
 
-public static class MoodsNpc
+public class MoodsNpc
 {
     public const string Relaxed = "RelaxedNPC";
+    public const string Waiting = "WaitingNPC";
     public const string Curious = "CuriousNPC";
     public const string LightRest = "LightRestNPC";
     public const string Exploring = "ExploringNPC";
-    public const string Safe = "SafeNPC";
+   // public const string Safe = "SafeNPC";
     public const string NotSafe = "NotSafeNPC";
+    public const string Dying = "DyingNPC";
 }
 
 public static class StatesNpc
@@ -76,7 +78,6 @@ public static class GoapActionName
     public const string SitdownGoapNpc = "Sitdown";
     public const string DeathGoapNpc = "Death";
 }
-
 public enum InteractionType
 {
     Talk,

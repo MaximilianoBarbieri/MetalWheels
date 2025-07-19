@@ -100,7 +100,7 @@ namespace FSM {
             var previousState = CurrentState;
             var transitionParameters = CurrentState.Exit(nextState);
 
-            Debug.Log($"Transitioning from {CurrentState.Name} to {nextState.Name}");
+//            Debug.Log($"Transitioning from {CurrentState.Name} to {nextState.Name}");
 
             CurrentState = nextState;
             CurrentState.Enter(previousState, transitionParameters);
