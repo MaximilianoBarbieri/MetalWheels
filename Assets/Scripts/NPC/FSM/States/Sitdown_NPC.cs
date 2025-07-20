@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FSM;
+using static MoodsNpc;
 using UnityEngine;
 
 public class Sitdown_NPC : MonoBaseState
@@ -9,12 +10,10 @@ public class Sitdown_NPC : MonoBaseState
     [SerializeField] private NPCGoap npcGoap;
 
     private Coroutine _sitCoroutine;
-    private Coroutine _movementCoroutine;
+    private Coroutine _movementRoutine;
 
     public override IState ProcessInput()
     {
-        //   Debug.Log("[Sitdown]");
-
         return this;
     }
 
@@ -22,20 +21,17 @@ public class Sitdown_NPC : MonoBaseState
     {
         npc.animator.SetTrigger(AnimNpc.SitdownNpc);
 
-        npcGoap.worldState.mood = MoodsNpc.Relaxed;
+        npcGoap.worldState.Mood = Relaxed;
+        npcGoap.worldState.UpdateSpeedByMood();
 
         if (npc.currentInteractable != null)
             _sitCoroutine = StartCoroutine(SitRoutine(npc.currentInteractable));
-        //_sitCoroutine = npc.RunInterruptibleRoutine(SitRoutine(npc.currentInteractable));
     }
 
     public override Dictionary<string, object> Exit(IState to)
     {
-        if (_sitCoroutine != null || _movementCoroutine != null)
-        {
-            StopCoroutine(_sitCoroutine);
-            StopCoroutine(_movementCoroutine);
-        }
+        StopCoroutine(_sitCoroutine);
+        StopCoroutine(_movementRoutine);
 
         npc.currentInteractable = null;
 
@@ -51,7 +47,9 @@ public class Sitdown_NPC : MonoBaseState
     {
         npc.currentInteractable = null;
 
-        yield return _movementCoroutine = StartCoroutine(npc.MoveAlongPath(npc.CurrentNode, interactable.assignedNode));
+        yield return _movementRoutine = StartCoroutine(npc.MoveTo(interactable.assignedNode, 
+            npcGoap.worldState.Speed, 
+            npcGoap.worldState.SpeedRotation));
 
         Vector3 target = interactable.sitTarget.position;
         target.y = npc.transform.position.y;
@@ -59,17 +57,15 @@ public class Sitdown_NPC : MonoBaseState
         while (Vector3.Distance(npc.transform.position, target) > 0.05f)
         {
             Vector3 dir = (target - npc.transform.position).normalized;
-            npc.transform.position += dir * npc.speed * Time.deltaTime;
-            npc.transform.forward = Vector3.Lerp(npc.transform.forward, dir, npc.speedRotation * Time.deltaTime);
+            npc.transform.position += dir * npcGoap.worldState.Speed * Time.deltaTime;
+            npc.transform.forward = Vector3.Lerp(npc.transform.forward, dir, npcGoap.worldState.SpeedRotation * Time.deltaTime);
             yield return null;
         }
 
         yield return new WaitForSeconds(5f);
 
-        npcGoap.worldState.steps = npcGoap.worldState.maxsteps - 1;
+        npcGoap.worldState.Steps = npcGoap.worldState.MaxSteps - 1;
 
-        npcGoap.worldState.mood = MoodsNpc.Waiting;
-
-        //  Debug.Log("Finalizo corrutina [Sit]");
+        npcGoap.worldState.Mood = Waiting;
     }
 }

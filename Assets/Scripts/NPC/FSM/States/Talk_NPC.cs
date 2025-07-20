@@ -21,7 +21,8 @@ public class Talk_NPC : MonoBaseState
     {
         npc.animator.SetTrigger(AnimNpc.WalkNpc);
 
-        npcGoap.worldState.mood = MoodsNpc.Curious;
+        npcGoap.worldState.Mood = MoodsNpc.Curious;
+        npcGoap.worldState.UpdateSpeedByMood();
 
         if (npc.currentInteractable != null)
             _talkCoroutine = StartCoroutine(TalkRoutine(npc.currentInteractable));
@@ -32,8 +33,7 @@ public class Talk_NPC : MonoBaseState
         if (_talkCoroutine != null)
             StopCoroutine(_talkCoroutine);
 
-        if (_movementRoutine != null)
-            StopCoroutine(_movementRoutine);
+        StopCoroutine(_movementRoutine);
 
         npc.currentInteractable = null;
 
@@ -46,8 +46,10 @@ public class Talk_NPC : MonoBaseState
     }
 
     private IEnumerator TalkRoutine(InteractableNPC interactable)
-    {        
-        yield return _movementRoutine = StartCoroutine(npc.MoveAlongPath(npc.CurrentNode, interactable.assignedNode));
+    {
+        yield return _movementRoutine = StartCoroutine(npc.MoveTo(interactable.assignedNode, 
+            npcGoap.worldState.Speed, 
+            npcGoap.worldState.SpeedRotation));
 
         Vector3 dir = (interactable.transform.position - npc.transform.position);
         dir.y = 0;
@@ -57,7 +59,7 @@ public class Talk_NPC : MonoBaseState
 
         yield return new WaitForSeconds(5f);
 
-        npcGoap.worldState.mood = MoodsNpc.Waiting;
+        npcGoap.worldState.Mood = MoodsNpc.Waiting;
         npc.currentInteractable = null;
     }
 }

@@ -1,22 +1,38 @@
+using System.Collections.Generic;
 using System.Linq;
 
 public class WorldState
 {
-    // La vida del NPC
-    public float life;
+    public float Life;
+    
+    public string Mood;
+    
+    public bool CarInRange;
+    
+    public int Steps;
+    public int MaxSteps;
+    
+    public float Speed;
+    public float SpeedRotation;
+    
+    public InteractionType? InteractionType;
 
-    // Cantidad de pasos disponibles, cada step es un nodo mas que puede moverse, si no tiene mas, pasa a IDLE por cansancio
-    public int steps;
-    public int maxsteps;
+    private readonly Dictionary<string, float> _moodSpeeds = new()
+    {
+        { MoodsNpc.Waiting,         0f },
+        { MoodsNpc.LightRest,       0f },
+        { MoodsNpc.Exploring,       1.5f },
+        { MoodsNpc.Relaxed,         2f },
+        { MoodsNpc.Curious,         0.5f },
+        { MoodsNpc.NotSafe,         6f },
+        { MoodsNpc.Dying,           0f }
+    };
 
-    // Auto cerca, prioridad sobrevivir
-    public bool carInRange;
-
-    // "Calmado", "Asustado", "Curioso", etc.
-    public string mood;
-
-    // Para saber como interactuar con los objetos.
-    public InteractionType? interactionType;
+    public void UpdateSpeedByMood()
+    {
+        if (_moodSpeeds.TryGetValue(Mood, out float newSpeed))
+            Speed = newSpeed;
+    }
 
     public WorldState Clone()
     {
@@ -25,11 +41,11 @@ public class WorldState
 
     public bool IsMoodOneOf(params string[] validMoods)
     {
-        return validMoods.Contains(mood);
+        return validMoods.Contains(Mood);
     }
 
     public bool IsMoodNot(params string[] moods)
     {
-        return !moods.Contains(mood);
+        return !moods.Contains(Mood);
     }
 }

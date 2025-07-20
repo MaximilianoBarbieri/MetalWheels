@@ -18,7 +18,9 @@ public class Death_NPC : MonoBaseState
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
         npc.animator.SetTrigger(AnimNpc.DeathNpc);
-        npcGoap.worldState.mood = Dying;
+        
+        npcGoap.worldState.Mood = Dying;
+        npcGoap.worldState.UpdateSpeedByMood();
 
         _deathRoutine = StartCoroutine(DeathSequence());
     }

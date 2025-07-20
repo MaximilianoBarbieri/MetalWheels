@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,36 +7,13 @@ using UnityEngine;
 
 public class NPC : MonoBehaviour
 {
-    private Node _currentNode;
-
-    public Node CurrentNode
-    {
-        get
-        {
-            if (_currentNode == null)
-            {
-                _currentNode = NodeGenerator.Instance.GetNodes()
-                    .Select(go => go.GetComponent<Node>())
-                    .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
-                    .FirstOrDefault();
-            }
-
-            return _currentNode;
-        }
-        set => _currentNode = value;
-    }
-
+    public Node CurrentNode => GetCurrentNode();
     public Animator animator => GetComponent<Animator>();
 
-    [Header("Interacción")] [SerializeField]
+    [Header("Interacción")] public InteractableNPC currentInteractable;
+
     private List<CharacterController> _carsInRange = new();
-
-    public InteractableNPC currentInteractable;
-
     private HashSet<InteractableNPC> _interactablesInRange = new();
-
-    [Header("Parametros")] public float speed;
-    public float speedRotation;
 
     public FiniteStateMachine fsm;
 
@@ -81,13 +59,23 @@ public class NPC : MonoBehaviour
             _carsInRange.Remove(car);
     }
 
-    // public Node GetCurrentNode() => NodeGenerator.Instance.GetNodes()
-    //     .Select(go => go.GetComponent<Node>())
-    //     .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
-    //     .FirstOrDefault(); // Asigna el nodo más cercano
+    /// <summary>
+    /// Devuelve el nodo mas cercano
+    /// </summary>
+    /// <returns></returns>
+    private Node GetCurrentNode()
+    {
+        var colliders = Physics.OverlapSphere(transform.position, 5f);
+
+        return colliders
+            .Select(c => c.GetComponent<Node>())
+            .Where(n => n != null)
+            .OrderBy(n => Vector3.Distance(transform.position, n.transform.position))
+            .FirstOrDefault();
+    }
 
     /// <summary>
-    /// Devuelve el interactable mas cercano al NPC basandose en su distancia
+    /// Devuelve el interactable mas cercano
     /// </summary>
     /// <returns></returns>
     public InteractableNPC GetClosestInteractable() =>
@@ -97,59 +85,46 @@ public class NPC : MonoBehaviour
             .FirstOrDefault();
 
     /// <summary>
-    /// Verifica si hay algun vehiculo cerca del NPC, basandose en su CarDistance
+    /// Devuelve el vehiculo mas cercano
     /// </summary>
     /// <returns></returns>
-    public CharacterController ClosestCar() =>
+    private CharacterController ClosestCar() =>
         _carsInRange
             .Where(car => car != null)
             .OrderBy(car => Vector3.Distance(transform.position, car.transform.position))
-            .FirstOrDefault();
-
-    public List<Node> debugPath;
-
+            .FirstOrDefault(); //Metodo auxiliar, por si necesito este obj
 
     /// <summary>
-    /// Movimiento por AStar
+    /// Generacion del camino para AStart
     /// </summary>
     /// <param name="startNode"></param>
     /// <param name="goalNode"></param>
     /// <returns></returns>
-    public IEnumerator MoveAlongPath(Node startNode, Node goalNode)
+    private IEnumerator GeneratePath(Node start, Node goal, Action<List<Node>> onPathFound)
     {
-        Debug.Log("----------- MoveAlongPath -----------");
+        List<Node> result = null;
 
-        bool finished = false;
-        List<Node> path = null;
+        yield return AStar.CalculatePath(
+            start,
+            node => node == goal,
+            node => node.neighbors.Select(n => new WeightedNode<Node>(n, 1f)),
+            node => Vector3.Distance(node.transform.position, goal.transform.position),
+            onComplete: path => result = path,
+            onFail: () => Debug.LogWarning("NPC no encontró camino")
+        );
 
-        var astar = new AStar<Node>();
+        onPathFound?.Invoke(result);
+    }
 
-        astar.OnPathCompleted += result =>
-        {
-            path = result.ToList();
-            debugPath = path;
-            finished = true;
-        };
-
-        astar.OnCantCalculate += () =>
-        {
-            Debug.LogWarning("No se pudo calcular el camino con AStar.");
-            finished = true;
-        };
-
-        yield return StartCoroutine(astar.Run(
-            startNode,
-            n => n == goalNode,
-            n => n.neighbors.Select(neighbor =>
-                new WeightedNode<Node>(neighbor, Vector3.Distance(n.transform.position, neighbor.transform.position))),
-            n => Vector3.Distance(n.transform.position, goalNode.transform.position)
-        ));
-
-        while (!finished)
-            yield return null;
-
-        if (path == null) yield break;
-
+    /// <summary>
+    /// Recorro el camino de AStar
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    private IEnumerator FollowPath(List<Node> path, float speed,float speedRotation, Action<int> onStep = null)
+    {
+        if (path == null || path.Count == 0)
+            yield break;
 
         foreach (var node in path)
         {
@@ -161,8 +136,22 @@ public class NPC : MonoBehaviour
                 yield return null;
             }
 
-            CurrentNode = node;
+            onStep?.Invoke(1); // 🔁 le avisás que hiciste un paso
         }
+    }
+
+
+    /// <summary>
+    /// Corrutina optimizada para ejecutar la busqueda del camino + recorrerlo
+    /// </summary>
+    /// <param name="target"></param>
+    /// <returns></returns>
+    public IEnumerator MoveTo(Node target, float speed,float speedRotation, Action<int> onStep = null)
+    {
+        List<Node> path = null;
+        yield return GeneratePath(CurrentNode, target, result => path = result);
+
+        yield return FollowPath(path, speed, speedRotation, onStep);
     }
 
     /// <summary>
@@ -171,23 +160,4 @@ public class NPC : MonoBehaviour
     /// <param name="life"></param>
     /// <param name="value"></param>
     public void ModifyLife(float life, int value) => life += value;
-
-    private void OnDrawGizmos()
-    {
-        if (debugPath == null || debugPath.Count == 0) return;
-
-        Gizmos.color = Color.green;
-
-        for (int i = 0; i < debugPath.Count - 1; i++)
-        {
-            if (debugPath[i] != null && debugPath[i + 1] != null)
-                Gizmos.DrawLine(debugPath[i].transform.position, debugPath[i + 1].transform.position);
-        }
-
-        foreach (var node in debugPath)
-        {
-            if (node != null)
-                Gizmos.DrawSphere(node.transform.position, 0.2f);
-        }
-    }
 }

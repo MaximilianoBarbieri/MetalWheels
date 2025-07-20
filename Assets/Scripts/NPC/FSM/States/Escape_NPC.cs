@@ -10,82 +10,99 @@ public class Escape_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
 
-    private Coroutine _escapeRoutine;
-    private Coroutine _moveRoutine;
-
-    [SerializeField] private Node _targetNode;
-    private CharacterController _currentCar;
+    private Node targetNode;
+    private Coroutine escapeRoutine;
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
         Debug.Log("Enter [Escape]");
-
         npc.animator.SetTrigger(AnimNpc.EscapeNpc);
-        npcGoap.worldState.mood = NotSafe;
 
-        var currentZone = NodeGenerator.Instance.GetZoneForNode(npc.CurrentNode);
+        npcGoap.worldState.Mood = NotSafe;
+        npcGoap.worldState.UpdateSpeedByMood();
 
-        if (currentZone == null || currentZone.IsSafe)
+        targetNode = FindSafeNeighborZoneNode(npc.CurrentNode);
+
+        if (targetNode == null)
         {
-            Debug.Log("[Escape] Zona ya segura. No hace falta escapar.");
-            npcGoap.worldState.mood = Waiting;
+            Debug.LogWarning("[Escape] No hay zona vecina segura disponible.");
+            npcGoap.worldState.Mood = Waiting;
             return;
         }
 
-        _targetNode = FindEscapeNode(npc.CurrentNode);
-
-        _escapeRoutine = StartCoroutine(EscapeRoutine());
-    }
-
-    public override IState ProcessInput()
-    {
-        return this;
-    }
-
-    private IEnumerator EscapeRoutine()
-    {
-        yield return _moveRoutine = StartCoroutine(npc.MoveAlongPath(npc.CurrentNode, _targetNode));
+        escapeRoutine = StartCoroutine(EscapeRoutine(targetNode));
     }
 
     public override void UpdateLoop()
     {
-        if (!npcGoap.worldState.carInRange)
+        if (!npcGoap.worldState.CarInRange && escapeRoutine != null)
         {
-            npcGoap.worldState.mood = Waiting;
-
-            Debug.Log("[Escape] Ya no hay coche cerca. Cancelando Escape.");
+            StopEscape();
+            npcGoap.worldState.Mood = Waiting;
+            Debug.Log("[Escape] Ya no hay coche cerca.");
         }
     }
 
     public override Dictionary<string, object> Exit(IState to)
     {
-        StopCoroutine(_moveRoutine);
-        StopCoroutine(_escapeRoutine);
-
-        _moveRoutine = null;
-        _escapeRoutine = null;
-
+        StopEscape();
         return base.Exit(to);
     }
 
-    private Node FindEscapeNode(Node currentNode)
+    public override IState ProcessInput() => this;
+
+    private void StopEscape()
     {
-        var currentPos = currentNode.transform.position;
+        if (escapeRoutine != null)
+        {
+            StopCoroutine(escapeRoutine);
+            escapeRoutine = null;
+        }
+    }
 
-        var safeZones = NodeGenerator.Instance.zones.Where(z => z.IsSafe);
+    private Node FindSafeNeighborZoneNode(Node currentNode)
+    {
+        var currentZone = NodeGenerator.Instance.GetZoneForNode(currentNode);
+        if (currentZone == null) return null;
 
-        return safeZones
+        var safeZones = currentZone.neighbors.Where(z => z.IsSafe);
+
+        var candidates = safeZones
             .SelectMany(z => z.nodes)
-            .Where(n => n.neighbors != null && n.neighbors.Count > 0)
+            .Where(n => n.neighbors.Any(nb => currentZone.nodes.Contains(nb))) // frontera
+            .ToList();
+
+        if (candidates.Count == 0) return null;
+
+        return candidates
             .OrderByDescending(n =>
             {
-                Vector3 dirToNode = (n.transform.position - currentPos).normalized;
-                Vector3 opposite = -npc.transform.forward; // suponemos que el NPC mira al auto
+                Vector3 dirToNode = (n.transform.position - currentNode.transform.position).normalized;
+                Vector3 opposite = -npc.transform.forward;
                 float dirScore = Vector3.Dot(dirToNode, opposite);
-                float distScore = Vector3.Distance(n.transform.position, currentPos);
+                float distScore = Vector3.Distance(n.transform.position, currentNode.transform.position);
                 return dirScore * 0.6f + distScore * 0.4f;
             })
             .FirstOrDefault();
     }
 
+    private IEnumerator EscapeRoutine(Node destination)
+    {
+        yield return npc.MoveTo(destination,
+            npcGoap.worldState.Speed,
+            npcGoap.worldState.SpeedRotation);
+
+        // Reevaluar si sigue en peligro
+        if (npcGoap.worldState.CarInRange)
+        {
+            var newTarget = FindSafeNeighborZoneNode(npc.CurrentNode);
+            if (newTarget != null && newTarget != destination)
+            {
+                escapeRoutine = StartCoroutine(EscapeRoutine(newTarget));
+                yield break;
+            }
+        }
+
+        npcGoap.worldState.Mood = Waiting;
+    }
 }

@@ -19,7 +19,7 @@ public class NPCGoapEditor : Editor
         if (npc != null)
         {
             // Mostrar barra de vida
-            float life = goap.worldState.life;
+            float life = goap.worldState.Life;
             float lifePercent = Mathf.Clamp01(life / 100f);
             EditorGUILayout.LabelField("Vida actual: " + life);
             Rect rect = GUILayoutUtility.GetRect(100, 20);
@@ -39,9 +39,9 @@ public class NPCGoapEditor : Editor
             damage = EditorGUILayout.FloatField("Cantidad de daño", damage);
             if (GUILayout.Button("Aplicar daño al NPC"))
             {
-                goap.worldState.life -= damage;
-                goap.worldState.life = Mathf.Max(0f, goap.worldState.life); // evitar negativos
-                Debug.Log($"Se aplicaron {damage} puntos de daño. Vida actual: {goap.worldState.life}");
+                goap.worldState.Life -= damage;
+                goap.worldState.Life = Mathf.Max(0f, goap.worldState.Life); // evitar negativos
+                Debug.Log($"Se aplicaron {damage} puntos de daño. Vida actual: {goap.worldState.Life}");
             }
         }
         else

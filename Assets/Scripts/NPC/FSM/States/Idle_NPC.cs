@@ -21,7 +21,9 @@ public class Idle_NPC : MonoBaseState
     {
         npc.animator.SetTrigger(IdleNpc);
 
-        npcGoap.worldState.mood = LightRest;
+        npcGoap.worldState.Mood = LightRest;
+        npcGoap.worldState.UpdateSpeedByMood();
+
         _recoverStepsRoutine = StartCoroutine(RecoverStepsOverTime());
     }
 
@@ -40,9 +42,9 @@ public class Idle_NPC : MonoBaseState
     {
         Debug.Log("Entro a corrutina de Steps");
 
-        while (npcGoap.worldState.steps < npcGoap.worldState.maxsteps)
+        while (npcGoap.worldState.Steps < npcGoap.worldState.MaxSteps)
         {
-            npcGoap.worldState.steps++;
+            npcGoap.worldState.Steps++;
             //Debug.Log("Se sumo un step, ahora tus steps son:" + $"{npcGoap.worldState.steps}");
             yield return new WaitForSeconds(2);
         }

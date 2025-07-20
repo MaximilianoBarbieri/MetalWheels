@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 
-public class AStar<T>
+public static class AStar
 {
-    public event Action<IEnumerable<T>> OnPathCompleted;
-    public event Action OnCantCalculate;
-
-    public IEnumerator Run(
+    public static IEnumerator CalculatePath<T>(
         T start,
         Func<T, bool> isGoal,
         Func<T, IEnumerable<WeightedNode<T>>> explode,
         Func<T, float> getHeuristic,
-        Func<bool> cancelCondition = null // <- Nuevo parámetro opcional
-    )
+        Action<List<T>> onComplete,
+        Action onFail = null,
+        Func<bool> cancelCondition = null)
     {
         var queue = new PriorityQueue<T>();
         var distances = new Dictionary<T, float>();
@@ -24,7 +22,7 @@ public class AStar<T>
         distances[start] = 0;
         queue.Enqueue(new WeightedNode<T>(start, 0));
 
-        var stopwatch = new Stopwatch();
+        var stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();
 
         while (!queue.IsEmpty)
@@ -32,6 +30,7 @@ public class AStar<T>
             if (cancelCondition != null && cancelCondition())
             {
                 UnityEngine.Debug.LogWarning("A* cancelado externamente.");
+                onFail?.Invoke();
                 yield break;
             }
 
@@ -40,36 +39,23 @@ public class AStar<T>
 
             if (isGoal(dequeued.Element))
             {
-                var path = CommonUtils.CreatePath(parents, dequeued.Element);
-                OnPathCompleted?.Invoke(path);
+                var path = CommonUtils.CreatePath(parents, dequeued.Element).ToList();
+                onComplete?.Invoke(path);
                 yield break;
             }
 
-            var toEnqueue = explode(dequeued.Element);
-
-            foreach (var transition in toEnqueue)
+            foreach (var transition in explode(dequeued.Element))
             {
-                if (cancelCondition != null && cancelCondition())
+                var neighbor = transition.Element;
+                var cost = transition.Weight;
+                var newDistance = distances[dequeued.Element] + cost;
+
+                if (!visited.Contains(neighbor) && (!distances.ContainsKey(neighbor) || distances[neighbor] > newDistance))
                 {
-                    UnityEngine.Debug.LogWarning("A* cancelado durante expansión de nodos.");
-                    yield break;
-                }
-
-                var neighbour = transition.Element;
-                var neighbourToDequeuedDistance = transition.Weight;
-
-                var startToNeighbourDistance =
-                    distances.ContainsKey(neighbour) ? distances[neighbour] : float.MaxValue;
-                var startToDequeuedDistance = distances[dequeued.Element];
-
-                var newDistance = startToDequeuedDistance + neighbourToDequeuedDistance;
-
-                if (!visited.Contains(neighbour) && startToNeighbourDistance > newDistance)
-                {
-                    distances[neighbour] = newDistance;
-                    parents[neighbour] = dequeued.Element;
-
-                    queue.Enqueue(new WeightedNode<T>(neighbour, newDistance + getHeuristic(neighbour)));
+                    distances[neighbor] = newDistance;
+                    parents[neighbor] = dequeued.Element;
+                    float priority = newDistance + getHeuristic(neighbor);
+                    queue.Enqueue(new WeightedNode<T>(neighbor, priority));
                 }
 
                 if (stopwatch.ElapsedMilliseconds < 1f / 60f)
@@ -80,6 +66,6 @@ public class AStar<T>
             }
         }
 
-        OnCantCalculate?.Invoke();
+        onFail?.Invoke();
     }
 }

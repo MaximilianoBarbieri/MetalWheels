@@ -55507,7 +55507,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   npc: {fileID: 1987843147}
   npcGoap: {fileID: 1987843148}
-  _targetNode: {fileID: 0}
 --- !u!1 &1672573453 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6967805395330829997, guid: 9a2cc7ad1a225a5419653f6000df779b, type: 3}
@@ -65631,17 +65630,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1eed2d46e1e8394286ef0f3e64c8306, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _carsInRange: []
   currentInteractable: {fileID: 0}
-  speed: 2
-  speedRotation: 10
   idleNpc: {fileID: 349195761}
   walkNpc: {fileID: 2010992314}
   sitdownNpc: {fileID: 1345337645}
   talkNpc: {fileID: 199907170}
   escapeNpc: {fileID: 1672485841}
   deathNpc: {fileID: 452442036}
-  debugPath: []
 --- !u!114 &1987843148
 MonoBehaviour:
   m_ObjectHideFlags: 0

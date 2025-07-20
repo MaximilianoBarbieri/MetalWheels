@@ -43,10 +43,24 @@ public class MoodsNpc
     public const string Waiting = "WaitingNPC";
     public const string Curious = "CuriousNPC";
     public const string LightRest = "LightRestNPC";
+
     public const string Exploring = "ExploringNPC";
-   // public const string Safe = "SafeNPC";
+
+    // public const string Safe = "SafeNPC";
     public const string NotSafe = "NotSafeNPC";
     public const string Dying = "DyingNPC";
+}
+
+public class SpeedsNPC
+{
+    public Dictionary<String, float> moodSpeeds = new()
+    {
+        { MoodsNpc.Exploring, 5f },
+        { MoodsNpc.Relaxed, 6f },
+        { MoodsNpc.Curious, 4f },
+        { MoodsNpc.NotSafe, 8f },
+        
+    };
 }
 
 public static class StatesNpc
@@ -78,6 +92,7 @@ public static class GoapActionName
     public const string SitdownGoapNpc = "Sitdown";
     public const string DeathGoapNpc = "Death";
 }
+
 public enum InteractionType
 {
     Talk,

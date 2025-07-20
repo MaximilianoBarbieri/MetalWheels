@@ -123,6 +123,8 @@ public class NodeGenerator : MonoBehaviour
         }
 
         Debug.Log($"[Zonas] Total generadas: {zones.Count}");
+
+        DetectZoneNeighbors();
     }
 
     public SafeZone GetZoneForNode(Node node)
@@ -130,6 +132,28 @@ public class NodeGenerator : MonoBehaviour
         return zones.FirstOrDefault(z => z.nodes.Contains(node));
     }
 
+    private void DetectZoneNeighbors()
+    {
+        foreach (var zone in zones)
+        {
+            zone.neighbors.Clear();
+
+            foreach (var otherZone in zones)
+            {
+                if (zone == otherZone) continue;
+
+                bool areNeighbors = zone.nodes.Any(node =>
+                    node.neighbors.Any(n => otherZone.nodes.Contains(n)));
+
+                if (areNeighbors)
+                    zone.neighbors.Add(otherZone);
+            }
+        }
+
+        Debug.Log("[Zonas] Vecinas asignadas.");
+    }
+
+    
     public void ClearGrid()
     {
         if (_nodes == null) return;
@@ -188,6 +212,7 @@ public class SafeZone
 {
     public List<Node> nodes = new();
     public Vector2Int segmentIndex;
+    public List<SafeZone> neighbors = new();
 
     public bool IsSafe => nodes.All(n => !n.hasCar);
 
