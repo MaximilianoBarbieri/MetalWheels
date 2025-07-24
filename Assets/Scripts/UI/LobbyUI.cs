@@ -1,74 +1,76 @@
-using System.Linq;
-using Fusion;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
 
 public class LobbyUI : MonoBehaviour
 {
-    public GameObject nicknamePanel, selectCarPanel, roomPanel;
-    public TMP_InputField nicknameInput;
-    public Button startGameButton;
-    public Button continueButton;
-    public Button backButton;
-    public TMP_Text connectedPlayersText;
-    
-    [SerializeField] private GameObject highlightA;
-    [SerializeField] private GameObject highlightB;
-    private int selectedCar = -1;
-    
-    private NetworkRunner runner;
+    [Header("NetworkRunnerHandler")]
+    [SerializeField] private NetworkRunnerHandler _networkHandler;
 
+    [Header("Panels")]
+    [SerializeField] private GameObject _initialPanel;
+    [SerializeField] private GameObject _sessionPanel;
+    [SerializeField] private GameObject _hostPanel;
+    [SerializeField] private GameObject _statusPanel;
+    
+    [Header("Texts")]
+    [SerializeField] private TMP_Text _statusText;
+    
+    [Header("InputFields")]
+    [SerializeField] private TMP_InputField _nicknameInput;
+    [SerializeField] private TMP_InputField _hostSessionNameInput;
+    
+    [Header("Buttons")]
+    [SerializeField] private Button _carA;
+    [SerializeField] private Button _carB;
+    [SerializeField] private Button _backBTN; //botone de volver hacia atras.
+    [SerializeField] private Button _joinLobbyBTN; //me lleva al panel con lista de salas
+    [SerializeField] private Button _goToHostPanelBTN;//me lleva al panel para ponerle nombre a mi sala
+    [SerializeField] private Button _hostBTN;//btn para terminar de crear una sala (donde soy host)
+    
     private void Start()
     {
-        runner = FindObjectOfType<NetworkRunner>();
-        ShowPanel(nicknamePanel);
-        InvokeRepeating(nameof(UpdatePlayerCount), 0.5f, 1f);
+        _joinLobbyBTN.onClick.AddListener(Btn_JoinLobby);
+        _goToHostPanelBTN.onClick.AddListener(Btn_ShowHostPanel);
+        _hostBTN.onClick.AddListener(Btn_CreateGameSession);
+
+        _networkHandler.OnJoinedLobby += () =>
+        {
+            _statusPanel.SetActive(false);
+            _sessionPanel.SetActive(true);
+        };
+        _carA.onClick.AddListener(() => PlayerData.CarSelected = 0);
+        _carB.onClick.AddListener(() => PlayerData.CarSelected = 1);
     }
     
-    private void UpdatePlayerCount()
+    void Btn_JoinLobby()
     {
-        if (runner != null)
-        {
-            UpdateConnectedPlayers(runner.ActivePlayers.Count());
-        }
-    }
-
-    private void ShowPanel(GameObject panelToShow)
-    {
-        nicknamePanel.SetActive(false);
-        selectCarPanel.SetActive(false);
-        roomPanel.SetActive(false);
-
-        panelToShow.SetActive(true);
+        _networkHandler.JoinLobby();
         
-        // Mostrar botones según panel activo
-        continueButton.gameObject.SetActive(panelToShow == nicknamePanel || panelToShow == selectCarPanel);
-        backButton.gameObject.SetActive(true);
-        startGameButton.gameObject.SetActive(panelToShow == roomPanel);
+        PlayerData.Nickname = _nicknameInput.text;
+        
+        ShowPanel(_statusPanel);
+        _statusText.text = "Joining Lobby...";
     }
-
-    public void OnContinue()
+    
+    void Btn_ShowHostPanel()
     {
-        if (nicknamePanel.activeSelf)
-        {
-            if (!string.IsNullOrEmpty(nicknameInput.text))
-            {
-                PlayerData.Nickname = nicknameInput.text;
-                ShowPanel(selectCarPanel);
-            }
-        }
-        else if (selectCarPanel.activeSelf)
-        {
-            // Esperamos que se haya seleccionado un auto antes
-            ShowPanel(roomPanel);
-        }
+        _sessionPanel.SetActive(false);
+        _hostPanel.SetActive(true);
     }
-
-    public void OnBack()
+    
+    void Btn_CreateGameSession()
     {
-        if (roomPanel.activeSelf)
+        _hostBTN.interactable = false;
+        _networkHandler.CreateGame(_hostSessionNameInput.text, "Gameplay");
+    }
+    
+    private void Btn_Back()
+    {
+        //TODO: hacer algo parecido a esto que tenia
+        //ir del panel actual al anterior, en caso de no haber mas paneles volver a la scene "MainMenu"
+        //tener en cuenta que hay un panel que crea una sala, si se vuelve atras en ese panel borrar la sala creada (de ser necesario)
+        /*if (roomPanel.activeSelf)
         {
             ShowPanel(selectCarPanel);
         }
@@ -79,10 +81,12 @@ public class LobbyUI : MonoBehaviour
         else if (nicknamePanel.activeSelf)
         {
             SceneManager.LoadScene("MainMenu");
-        }
+        }*/
     }
-
-    public void OnCarSelected(int carIndex)
+    
+    //TODO: modificar este metodo para demostrar visualmente cuando de los dos botones de autos seleccionaste.
+    // no hacer que se deshabilite el auto que no se selecciono, sino que sea algo visual como un "disableColor"
+    /*public void OnCarSelected(int carIndex)
     {
         PlayerData.CarSelected = carIndex;
         selectedCar = carIndex;
@@ -93,16 +97,15 @@ public class LobbyUI : MonoBehaviour
 
         // Habilitar continuar
         continueButton.interactable = true;
-    }
-
-    public void UpdateConnectedPlayers(int count)
+    }*/
+    
+    private void ShowPanel(GameObject panelToShow)
     {
-        connectedPlayersText.text = $"Jugadores conectados: {count}";
-        startGameButton.interactable = (count >= 2);
-    }
+        _initialPanel.SetActive(false);
+        _sessionPanel.SetActive(false);
+        _hostPanel.SetActive(false);
+        _statusPanel.SetActive(false);
 
-    public void OnStartGame()
-    {
-        SceneManager.LoadScene("Gameplay");
+        panelToShow.SetActive(true);
     }
 }

@@ -17,7 +17,7 @@ public class MainMenuUI : MonoBehaviour
 
     public void OnStartClicked()
     {
-        networkHandler.StartGame(GameMode.AutoHostOrClient);
+        //networkHandler.StartGame(GameMode.AutoHostOrClient);
         SceneManager.LoadScene("Lobby");
     }
 
