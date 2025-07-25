@@ -21,9 +21,8 @@ public class PlayerController : NetworkBehaviour
     private NetworkCharacterControllerCustom _myCharacterController;
     private WeaponHandler _myWeaponHandler;
     private LifeHandler _myLifeHandler;
-
-    public CinemachineVirtualCamera vCamPrefab;
-    private CinemachineVirtualCamera myCam;
+    
+    [SerializeField] private PlayerCameraHandler playerCameraHandler;
     
     /*[SerializeField] private float minCrashForce = 7f;
     [SerializeField] private int crashDamage = 30;*/
@@ -53,17 +52,8 @@ public class PlayerController : NetworkBehaviour
         // Si es mi propio jugador
         if (!Object.HasInputAuthority) return;
         
-        if (vCamPrefab != null)
-        {
-            myCam = Instantiate(vCamPrefab);
-
-            // Buscar el CameraTarget (empty hijo del auto) o el propio transform
-            Transform camTarget = transform.Find("CameraTarget");
-            if (camTarget == null) camTarget = transform;
-
-            myCam.Follow = camTarget;
-            myCam.LookAt = camTarget;
-        }
+        playerCameraHandler.virtualCamera.enabled = true;
+        playerCameraHandler.virtualCamera.Priority = 20;
         
         if (playerLocalUIPrefab != null)
         {
@@ -143,6 +133,7 @@ public class PlayerController : NetworkBehaviour
         if (networkInputData.isTakeDamagePressed)
         {
             _myLifeHandler.ModifyLife(-25);
+            playerCameraHandler.Shake(1);
         }
 
     }
