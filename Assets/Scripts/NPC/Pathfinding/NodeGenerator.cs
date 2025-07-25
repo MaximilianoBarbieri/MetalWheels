@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Fusion;
 using UnityEngine;
 
-public class NodeGenerator : MonoBehaviour
+public class NodeGenerator : NetworkBehaviour
 {
     [Header("Tamaño de la grilla (X-Z)")] [SerializeField]
     private Vector2Int gridSize;

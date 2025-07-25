@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
+using Fusion;
 using UnityEngine;
 using static MoodsNpc;
 using static GoapActionName;
 
-public class NPCGoap : MonoBehaviour
+public class NPCGoap : NetworkBehaviour
 {
     public WorldState worldState;
 
@@ -17,7 +18,7 @@ public class NPCGoap : MonoBehaviour
 
     private Coroutine currentPlanRoutine;
 
-    private void Awake()
+    private void Start()
     {
         npc = GetComponent<NPC>();
 
@@ -222,7 +223,12 @@ public class NPCGoap : MonoBehaviour
 
     private IEnumerator TransitionToCoroutine(IState nextState)
     {
+        if (npc.fsm == null)
+        {
+            Debug.LogError("FSM no inicializada en NPC.");
+            yield break;
+        }
+
         npc.fsm.TransitionTo(nextState);
-        yield break;
     }
 }

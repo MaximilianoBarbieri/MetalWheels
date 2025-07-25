@@ -1,6 +1,7 @@
+using Fusion;
 using UnityEngine;
 
-public class InteractableNPC : MonoBehaviour
+public class InteractableNPC : NetworkBehaviour
 {
     public InteractionType type;
     public Transform sitTarget;

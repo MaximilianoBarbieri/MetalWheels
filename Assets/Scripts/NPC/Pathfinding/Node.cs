@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 
-public class Node : MonoBehaviour
+public class Node : NetworkBehaviour
 {
     [Tooltip("Tipo de interacción que este nodo representa (por ejemplo, Sit o Talk, o solo para caminar)")]
     public InteractionType type;

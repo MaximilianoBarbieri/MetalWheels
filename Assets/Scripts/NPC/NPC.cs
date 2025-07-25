@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
+using Fusion;
 using UnityEngine;
 
-public class NPC : MonoBehaviour
+public class NPC : NetworkBehaviour
 {
     public Node CurrentNode => GetCurrentNode();
     public Animator animator => GetComponent<Animator>();
@@ -24,11 +25,9 @@ public class NPC : MonoBehaviour
     [SerializeField] internal Escape_NPC escapeNpc;
     [SerializeField] internal Death_NPC deathNpc;
 
-    private void Start()
-    {
-        fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
-        fsm.Active = true;
-    }
+    private void Awake() => fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
+    
+    private void Start() => fsm.Active = true;
 
     private void Update() => fsm.Update(); // Llama al estado actual (solo UpdateLoop y ProcessInput)
 
@@ -121,7 +120,7 @@ public class NPC : MonoBehaviour
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    private IEnumerator FollowPath(List<Node> path, float speed,float speedRotation, Action<int> onStep = null)
+    private IEnumerator FollowPath(List<Node> path, float speed, float speedRotation, Action<int> onStep = null)
     {
         if (path == null || path.Count == 0)
             yield break;
@@ -146,7 +145,7 @@ public class NPC : MonoBehaviour
     /// </summary>
     /// <param name="target"></param>
     /// <returns></returns>
-    public IEnumerator MoveTo(Node target, float speed,float speedRotation, Action<int> onStep = null)
+    public IEnumerator MoveTo(Node target, float speed, float speedRotation, Action<int> onStep = null)
     {
         List<Node> path = null;
         yield return GeneratePath(CurrentNode, target, result => path = result);
