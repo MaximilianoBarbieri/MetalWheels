@@ -13,7 +13,7 @@ public class Walk_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.animator.SetTrigger(AnimNpc.WalkNpc);
+        npc.Animator.SetTrigger(AnimNpc.WalkAnimNpc);
         
         npcGoap.worldState.Mood = Exploring;
 
@@ -36,7 +36,7 @@ public class Walk_NPC : MonoBaseState
                                 npcGoap.worldState.SpeedRotation,
                          steps => npcGoap.worldState.Steps -= steps);
 
-        npc.currentInteractable = npc.GetClosestInteractable();
+        npc.CurrentInteractable = npc.GetClosestInteractable();
         npcGoap.worldState.Mood = Waiting;
     }
 

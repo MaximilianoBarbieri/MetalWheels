@@ -19,7 +19,7 @@ public class Idle_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.animator.SetTrigger(IdleNpc);
+        npc.Animator.SetTrigger(IdleAnimNpc);
 
         npcGoap.worldState.Mood = LightRest;
         npcGoap.worldState.UpdateSpeedByMood();

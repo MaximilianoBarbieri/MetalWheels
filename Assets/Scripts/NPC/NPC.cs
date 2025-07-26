@@ -5,13 +5,16 @@ using System.Linq;
 using FSM;
 using Fusion;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class NPC : NetworkBehaviour
 {
     public Node CurrentNode => GetCurrentNode();
-    public Animator animator => GetComponent<Animator>();
+    public Rigidbody Rigidbody => GetComponent<Rigidbody>();
+    public Animator Animator => GetComponent<Animator>();
 
-    [Header("Interacción")] public InteractableNPC currentInteractable;
+    [Header("Interacción")] public InteractableNPC CurrentInteractable;
+    public CharacterController CurrentCar;
 
     private List<CharacterController> _carsInRange = new();
     private HashSet<InteractableNPC> _interactablesInRange = new();
@@ -23,10 +26,11 @@ public class NPC : NetworkBehaviour
     [SerializeField] internal Sitdown_NPC sitdownNpc;
     [SerializeField] internal Talk_NPC talkNpc;
     [SerializeField] internal Escape_NPC escapeNpc;
+    [SerializeField] internal Damage_NPC damageNpc;
     [SerializeField] internal Death_NPC deathNpc;
 
     private void Awake() => fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
-    
+
     private void Start() => fsm.Active = true;
 
     private void Update() => fsm.Update(); // Llama al estado actual (solo UpdateLoop y ProcessInput)
@@ -87,11 +91,11 @@ public class NPC : NetworkBehaviour
     /// Devuelve el vehiculo mas cercano
     /// </summary>
     /// <returns></returns>
-    private CharacterController ClosestCar() =>
-        _carsInRange
-            .Where(car => car != null)
-            .OrderBy(car => Vector3.Distance(transform.position, car.transform.position))
-            .FirstOrDefault(); //Metodo auxiliar, por si necesito este obj
+    public CharacterController HitByTheCar() => CurrentCar = _carsInRange
+        .Where(car => car != null)
+        .OrderBy(car => Vector3.Distance(transform.position, car.transform.position) > 0.1f)
+        .FirstOrDefault(); //Metodo auxiliar, por si necesito este obj
+
 
     /// <summary>
     /// Generacion del camino para AStart

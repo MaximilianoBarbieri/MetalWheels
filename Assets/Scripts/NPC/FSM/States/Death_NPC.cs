@@ -17,7 +17,7 @@ public class Death_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.animator.SetTrigger(AnimNpc.DeathNpc);
+        npc.Animator.SetTrigger(AnimNpc.DeathAnimNpc);
         
         npcGoap.worldState.Mood = Dying;
         npcGoap.worldState.UpdateSpeedByMood();

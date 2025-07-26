@@ -40,11 +40,13 @@ public class NPCGoap : NetworkBehaviour
 
     private WorldState GetCurrentWorldState()
     {
-        worldState.InteractionType = npc.currentInteractable != null
-            ? npc.currentInteractable.type
+        worldState.InteractionType = npc.CurrentInteractable != null
+            ? npc.CurrentInteractable.type
             : InteractionType.OnlyForPath;
 
         worldState.CarInRange = !NodeGenerator.Instance.GetZoneForNode(npc.CurrentNode)?.IsSafe ?? false;
+
+        worldState.Impacted = npc.HitByTheCar() != null;
 
         return worldState;
     }
@@ -57,7 +59,7 @@ public class NPCGoap : NetworkBehaviour
             {
                 Name = IdleGoapNpc,
                 Precondition = s => !s.CarInRange &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(Waiting),
                 Effect = s =>
                 {
@@ -75,7 +77,7 @@ public class NPCGoap : NetworkBehaviour
                 Name = WalkGoapNpc,
                 Precondition = s => !s.CarInRange &&
                                     s.Steps == s.MaxSteps &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(LightRest),
                 Effect = s =>
                 {
@@ -92,7 +94,7 @@ public class NPCGoap : NetworkBehaviour
                 Name = SitdownGoapNpc,
                 Precondition = s => !s.CarInRange && s.Steps == s.MaxSteps &&
                                     s.InteractionType == InteractionType.Sit &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(LightRest),
                 Effect = s =>
                 {
@@ -109,7 +111,7 @@ public class NPCGoap : NetworkBehaviour
                 Name = TalkGoapNpc,
                 Precondition = s => !s.CarInRange && s.Steps == s.MaxSteps &&
                                     s.InteractionType == InteractionType.Talk &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(LightRest),
                 Effect = s =>
                 {
@@ -124,7 +126,7 @@ public class NPCGoap : NetworkBehaviour
             {
                 Name = EscapeGoapNpc,
                 Precondition = s => s.CarInRange &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(Waiting, LightRest, Exploring, Relaxed, Curious),
                 Effect = s =>
                 {
@@ -134,6 +136,22 @@ public class NPCGoap : NetworkBehaviour
                 },
                 Execute = () => TransitionToCoroutine(npc.escapeNpc),
                 Cost = 1
+            },
+            new GoapAction
+            {
+                Name = DamageGoapNpc,
+                Precondition = s => s.Impacted &&
+                                    s.IsMoodNot(Dying, Injured) &&
+                                    s.IsMoodOneOf(Waiting, NotSafe, LightRest, Exploring, Relaxed, Curious),
+                Effect = s =>
+                {
+                    var ns = s.Clone();
+                    ns.Mood = Injured;
+                    ns.Life -= 25; //Reemplazar por un utils de Cars que diga "Damage a los NPC [Hasta entonces, asumimos que es 25]"
+                    return ns;
+                },
+                Execute = () => TransitionToCoroutine(npc.damageNpc),
+                Cost = 0
             },
             new GoapAction
             {
@@ -155,30 +173,31 @@ public class NPCGoap : NetworkBehaviour
 
     private Func<WorldState, bool> SelectGoal(WorldState state)
     {
-        // 1. NPC muerto
+        // 1. Condición para Death
         if (state.Life <= 0f)
             return s => s.Mood == Dying;
 
-        // 2. Escape si hay autos cerca
+        // 2. Condición para Escape
         if (state.CarInRange && state.Mood != NotSafe)
             return s => s.Mood == NotSafe; //"Safe"
 
-        //if (!state.carInRange && state.mood == NotSafe)
-        //    return s => s.mood == Waiting;
+        // 3. Condición para Damage
+        if (state.Impacted && state.Mood != Injured)
+            return s => s.Mood == Injured;
 
-        // 3. Charla si no está curioso
+        // 4. Condición para Talk
         if (state.InteractionType == InteractionType.Talk && state.Mood != Curious)
             return s => s.Mood == Curious;
 
-        // 4. Sentarse si no está relajado
+        // 5. Condición para Sitdown
         if (state.InteractionType == InteractionType.Sit && state.Mood != Relaxed)
             return s => s.Mood == Relaxed;
 
-        // 5. Si aún no exploró
+        // 6. Condición para Walk
         if (state.Steps >= state.MaxSteps && state.Mood != Exploring)
             return s => s.Mood == Exploring;
 
-        //6. Si tengo que recargar pasos despeus de una accion
+        //7. Condición para Idle
         if (!state.CarInRange &&
             state.Steps < state.MaxSteps &&
             state.Mood == Waiting)

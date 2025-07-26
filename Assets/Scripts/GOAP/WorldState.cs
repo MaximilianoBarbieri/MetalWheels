@@ -8,6 +8,7 @@ public class WorldState
     public string Mood;
     
     public bool CarInRange;
+    public bool Impacted;
     
     public int Steps;
     public int MaxSteps;
@@ -25,6 +26,7 @@ public class WorldState
         { MoodsNpc.Relaxed,         2f },
         { MoodsNpc.Curious,         0.5f },
         { MoodsNpc.NotSafe,         6f },
+        { MoodsNpc.Injured,         1f },
         { MoodsNpc.Dying,           0f }
     };
 

@@ -46,12 +46,10 @@ public class NodeGenerator : NetworkBehaviour
         GetNodes();
     }
 
-    public List<GameObject> GetNodes()
+    private void GetNodes()
     {
         if (!IsReady && _generationRoutine == null)
             _generationRoutine = StartCoroutine(GenerateGridLazy());
-
-        return _nodes;
     }
 
     private IEnumerator GenerateGridLazy()
@@ -154,15 +152,14 @@ public class NodeGenerator : NetworkBehaviour
         Debug.Log("[Zonas] Vecinas asignadas.");
     }
 
-    
+
     public void ClearGrid()
     {
         if (_nodes == null) return;
 
-        foreach (var node in _nodes)
+        foreach (var node in _nodes.Where(node => node != null))
         {
-            if (node != null)
-                DestroyImmediate(node);
+            DestroyImmediate(node);
         }
 
         _nodes.Clear();

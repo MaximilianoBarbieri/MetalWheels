@@ -16,7 +16,7 @@ public class Escape_NPC : MonoBaseState
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
         Debug.Log("Enter [Escape]");
-        npc.animator.SetTrigger(AnimNpc.EscapeNpc);
+        npc.Animator.SetTrigger(AnimNpc.EscapeAnimNpc);
 
         npcGoap.worldState.Mood = NotSafe;
         npcGoap.worldState.UpdateSpeedByMood();
