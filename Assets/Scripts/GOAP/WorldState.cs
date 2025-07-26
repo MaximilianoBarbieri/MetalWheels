@@ -1,20 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class WorldState
 {
     public float Life;
-    
-    public string Mood;
-    
-    public bool CarInRange;
-    public bool Impacted;
+    public float Speed;
+    public float SpeedRotation;
     
     public int Steps;
     public int MaxSteps;
     
-    public float Speed;
-    public float SpeedRotation;
+    public bool CarInRange;
+    public bool Impacted;
+    
+    public string Mood;
+    
+    public CharacterController CurrentCar;
     
     public InteractionType? InteractionType;
 
@@ -30,24 +32,16 @@ public class WorldState
         { MoodsNpc.Dying,           0f }
     };
 
+
     public void UpdateSpeedByMood()
     {
         if (_moodSpeeds.TryGetValue(Mood, out float newSpeed))
             Speed = newSpeed;
     }
 
-    public WorldState Clone()
-    {
-        return (WorldState)this.MemberwiseClone(); // copia superficial
-    }
-
-    public bool IsMoodOneOf(params string[] validMoods)
-    {
-        return validMoods.Contains(Mood);
-    }
-
-    public bool IsMoodNot(params string[] moods)
-    {
-        return !moods.Contains(Mood);
-    }
+    public WorldState Clone() => (WorldState)this.MemberwiseClone();
+    
+    public bool IsMoodOneOf(params string[] validMoods) => validMoods.Contains(Mood);
+    
+    public bool IsMoodNot(params string[] moods) => !moods.Contains(Mood);
 }

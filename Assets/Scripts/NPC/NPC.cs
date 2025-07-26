@@ -14,7 +14,6 @@ public class NPC : NetworkBehaviour
     public Animator Animator => GetComponent<Animator>();
 
     [Header("Interacción")] public InteractableNPC CurrentInteractable;
-    public CharacterController CurrentCar;
 
     private List<CharacterController> _carsInRange = new();
     private HashSet<InteractableNPC> _interactablesInRange = new();
@@ -91,11 +90,19 @@ public class NPC : NetworkBehaviour
     /// Devuelve el vehiculo mas cercano
     /// </summary>
     /// <returns></returns>
-    public CharacterController HitByTheCar() => CurrentCar = _carsInRange
-        .Where(car => car != null)
-        .OrderBy(car => Vector3.Distance(transform.position, car.transform.position) > 0.1f)
-        .FirstOrDefault(); //Metodo auxiliar, por si necesito este obj
+    public CharacterController GetClosestCarIfHit()
+    {
+        var car = _carsInRange
+            .Where(c => c != null)
+            .OrderBy(c => Vector3.Distance(transform.position, c.transform.position))
+            .FirstOrDefault();
 
+        if (car == null)
+            return null;
+
+        float distance = Vector3.Distance(transform.position, car.transform.position);
+        return (distance <= 0.75f) ? car : null;
+    }
 
     /// <summary>
     /// Generacion del camino para AStart

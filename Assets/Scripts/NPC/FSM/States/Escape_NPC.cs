@@ -65,26 +65,47 @@ public class Escape_NPC : MonoBaseState
         var currentZone = NodeGenerator.Instance.GetZoneForNode(currentNode);
         if (currentZone == null) return null;
 
-        var safeZones = currentZone.neighbors.Where(z => z.IsSafe);
+        var bestNode = null as Node;
+        float bestScore = float.MinValue;
 
-        var candidates = safeZones
-            .SelectMany(z => z.nodes)
-            .Where(n => n.neighbors.Any(nb => currentZone.nodes.Contains(nb))) // frontera
-            .ToList();
+        foreach (var neighborZone in currentZone.neighbors)
+        {
+            if (!neighborZone.IsSafe)
+                continue;
 
-        if (candidates.Count == 0) return null;
-
-        return candidates
-            .OrderByDescending(n =>
+            foreach (var node in neighborZone.nodes)
             {
-                Vector3 dirToNode = (n.transform.position - currentNode.transform.position).normalized;
+                // Verificamos si es un nodo frontera (tiene vecino en zona actual)
+                bool isFrontier = false;
+                foreach (var nb in node.neighbors)
+                {
+                    if (currentZone.nodes.Contains(nb))
+                    {
+                        isFrontier = true;
+                        break;
+                    }
+                }
+
+                if (!isFrontier) continue;
+
+                // Cálculo de score
+                Vector3 dirToNode = (node.transform.position - currentNode.transform.position).normalized;
                 Vector3 opposite = -npc.transform.forward;
                 float dirScore = Vector3.Dot(dirToNode, opposite);
-                float distScore = Vector3.Distance(n.transform.position, currentNode.transform.position);
-                return dirScore * 0.6f + distScore * 0.4f;
-            })
-            .FirstOrDefault();
+                float distScore = Vector3.Distance(node.transform.position, currentNode.transform.position);
+                float score = dirScore * 0.6f + distScore * 0.4f;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestNode = node;
+                }
+            }
+        }
+
+        return bestNode;
     }
+
 
     private IEnumerator EscapeRoutine(Node destination)
     {

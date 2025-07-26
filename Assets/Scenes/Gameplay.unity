@@ -19403,6 +19403,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GeneratorNode
       objectReference: {fileID: 0}
+    - target: {fileID: 8119894545645812489, guid: 604c74fe35a6b674aa216afdf9432821, type: 3}
+      propertyPath: runner
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

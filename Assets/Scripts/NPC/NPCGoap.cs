@@ -46,7 +46,8 @@ public class NPCGoap : NetworkBehaviour
 
         worldState.CarInRange = !NodeGenerator.Instance.GetZoneForNode(npc.CurrentNode)?.IsSafe ?? false;
 
-        worldState.Impacted = npc.HitByTheCar() != null;
+        worldState.CurrentCar ??= npc.GetClosestCarIfHit();
+        worldState.Impacted = worldState.CurrentCar != null;
 
         return worldState;
     }
