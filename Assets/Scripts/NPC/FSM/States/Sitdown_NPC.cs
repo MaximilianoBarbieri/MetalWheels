@@ -19,13 +19,13 @@ public class Sitdown_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.animator.SetTrigger(AnimNpc.SitdownNpc);
+        npc.Animator.SetTrigger(AnimNpc.SitdownAnimNpc);
 
-        npcGoap.worldState.Mood = Relaxed;
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.Mood = Relaxed;
+        npcGoap.WorldState.UpdateSpeedByMood();
 
-        if (npc.currentInteractable != null)
-            _sitCoroutine = StartCoroutine(SitRoutine(npc.currentInteractable));
+        if (npc.CurrentInteractable != null)
+            _sitCoroutine = StartCoroutine(SitRoutine(npc.CurrentInteractable));
     }
 
     public override Dictionary<string, object> Exit(IState to)
@@ -33,7 +33,7 @@ public class Sitdown_NPC : MonoBaseState
         StopCoroutine(_sitCoroutine);
         StopCoroutine(_movementRoutine);
 
-        npc.currentInteractable = null;
+        npc.CurrentInteractable = null;
 
         return base.Exit(to);
     }
@@ -45,11 +45,11 @@ public class Sitdown_NPC : MonoBaseState
 
     private IEnumerator SitRoutine(InteractableNPC interactable)
     {
-        npc.currentInteractable = null;
+        npc.CurrentInteractable = null;
 
         yield return _movementRoutine = StartCoroutine(npc.MoveTo(interactable.assignedNode, 
-            npcGoap.worldState.Speed, 
-            npcGoap.worldState.SpeedRotation));
+            npcGoap.WorldState.Speed, 
+            npcGoap.WorldState.SpeedRotation));
 
         Vector3 target = interactable.sitTarget.position;
         target.y = npc.transform.position.y;
@@ -57,15 +57,15 @@ public class Sitdown_NPC : MonoBaseState
         while (Vector3.Distance(npc.transform.position, target) > 0.05f)
         {
             Vector3 dir = (target - npc.transform.position).normalized;
-            npc.transform.position += dir * npcGoap.worldState.Speed * Time.deltaTime;
-            npc.transform.forward = Vector3.Lerp(npc.transform.forward, dir, npcGoap.worldState.SpeedRotation * Time.deltaTime);
+            npc.transform.position += dir * npcGoap.WorldState.Speed * Time.deltaTime;
+            npc.transform.forward = Vector3.Lerp(npc.transform.forward, dir, npcGoap.WorldState.SpeedRotation * Time.deltaTime);
             yield return null;
         }
 
         yield return new WaitForSeconds(5f);
 
-        npcGoap.worldState.Steps = npcGoap.worldState.MaxSteps - 1;
+        npcGoap.WorldState.Steps = npcGoap.WorldState.MaxSteps - 1;
 
-        npcGoap.worldState.Mood = Waiting;
+        npcGoap.WorldState.Mood = Waiting;
     }
 }

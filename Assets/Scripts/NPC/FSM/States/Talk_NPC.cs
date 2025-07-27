@@ -19,13 +19,13 @@ public class Talk_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.animator.SetTrigger(AnimNpc.WalkNpc);
+        npc.Animator.SetTrigger(AnimNpc.WalkAnimNpc);
 
-        npcGoap.worldState.Mood = MoodsNpc.Curious;
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.Mood = MoodsNpc.Curious;
+        npcGoap.WorldState.UpdateSpeedByMood();
 
-        if (npc.currentInteractable != null)
-            _talkCoroutine = StartCoroutine(TalkRoutine(npc.currentInteractable));
+        if (npc.CurrentInteractable != null)
+            _talkCoroutine = StartCoroutine(TalkRoutine(npc.CurrentInteractable));
     }
 
     public override Dictionary<string, object> Exit(IState to)
@@ -35,7 +35,7 @@ public class Talk_NPC : MonoBaseState
 
         StopCoroutine(_movementRoutine);
 
-        npc.currentInteractable = null;
+        npc.CurrentInteractable = null;
 
         return base.Exit(to);
     }
@@ -48,18 +48,18 @@ public class Talk_NPC : MonoBaseState
     private IEnumerator TalkRoutine(InteractableNPC interactable)
     {
         yield return _movementRoutine = StartCoroutine(npc.MoveTo(interactable.assignedNode, 
-            npcGoap.worldState.Speed, 
-            npcGoap.worldState.SpeedRotation));
+            npcGoap.WorldState.Speed, 
+            npcGoap.WorldState.SpeedRotation));
 
         Vector3 dir = (interactable.transform.position - npc.transform.position);
         dir.y = 0;
         npc.transform.forward = dir.normalized;
 
-        npc.animator.SetTrigger(AnimNpc.TalkNpc);
+        npc.Animator.SetTrigger(AnimNpc.TalkAnimNpc);
 
         yield return new WaitForSeconds(5f);
 
-        npcGoap.worldState.Mood = MoodsNpc.Waiting;
-        npc.currentInteractable = null;
+        npcGoap.WorldState.Mood = MoodsNpc.Waiting;
+        npc.CurrentInteractable = null;
     }
 }

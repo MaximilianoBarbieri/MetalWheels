@@ -1,13 +1,14 @@
+using Fusion;
 using UnityEngine;
 
-public class InteractableNPC : MonoBehaviour
+public class InteractableNPC : NetworkBehaviour
 {
     public InteractionType type;
     public Transform sitTarget;
     public Node assignedNode;
 
-    private void Start() => NodeGenerator.Instance.Register(this);
-    
+    // private void Start() => NodeGenerator.Instance.Register(this);
+
     public void AssignClosestNode(float radius)
     {
         float minDist = float.MaxValue;
@@ -24,10 +25,10 @@ public class InteractableNPC : MonoBehaviour
         }
 
         if (closest == null) return;
-        
+
         closest.type = type;
         assignedNode = closest;
-        
+
 //        Debug.Log("El " +$"{gameObject.name}" + " ha sido asociado al nodo " + $"{assignedNode}");
     }
 
@@ -36,8 +37,13 @@ public class InteractableNPC : MonoBehaviour
         if (assignedNode != null)
         {
             Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(transform.position + Vector3.up * 0.2f, assignedNode.transform.position + Vector3.up * 0.2f);
+            Gizmos.DrawLine(transform.position + Vector3.up * 0.2f,
+                assignedNode.transform.position + Vector3.up * 0.2f);
         }
     }
-}
 
+    private void OnEnable()
+    {
+        NodeGenerator.OnGameReady += () => { NodeGenerator.Instance.Register(this); };
+    }
+}

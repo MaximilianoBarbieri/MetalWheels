@@ -46,41 +46,20 @@ public class MoodsNpc
 
     public const string Exploring = "ExploringNPC";
 
-    // public const string Safe = "SafeNPC";
     public const string NotSafe = "NotSafeNPC";
+    public const string Injured = "InjuredNPC";
     public const string Dying = "DyingNPC";
-}
-
-public class SpeedsNPC
-{
-    public Dictionary<String, float> moodSpeeds = new()
-    {
-        { MoodsNpc.Exploring, 5f },
-        { MoodsNpc.Relaxed, 6f },
-        { MoodsNpc.Curious, 4f },
-        { MoodsNpc.NotSafe, 8f },
-        
-    };
-}
-
-public static class StatesNpc
-{
-    public const string ToIdleNpc = "ToIdleNPC";
-    public const string ToWalkNpc = "ToWalkNPC";
-    public const string ToEscapeNpc = "ToEscapeNPC";
-    public const string ToTalkNpc = "ToTalkNPC";
-    public const string ToSitdownNpc = "ToSitdownNPC";
-    public const string ToDeathNpc = "ToDeathNPC";
 }
 
 public static class AnimNpc
 {
-    public const string IdleNpc = "IdleNPC";
-    public const string WalkNpc = "WalkNPC";
-    public const string EscapeNpc = "EscapeNPC";
-    public const string TalkNpc = "TalkNPC";
-    public const string SitdownNpc = "SitdownNPC";
-    public const string DeathNpc = "DeathNPC";
+    public const string IdleAnimNpc = "IdleNPC";
+    public const string WalkAnimNpc = "WalkNPC";
+    public const string EscapeAnimNpc = "EscapeNPC";
+    public const string TalkAnimNpc = "TalkNPC";
+    public const string SitdownAnimNpc = "SitdownNPC";
+    public const string DamageAnimNpc = "DamageNPC";
+    public const string DeathAnimNpc = "DeathNPC";
 }
 
 public static class GoapActionName
@@ -90,6 +69,7 @@ public static class GoapActionName
     public const string EscapeGoapNpc = "Escape";
     public const string TalkGoapNpc = "Talk";
     public const string SitdownGoapNpc = "Sitdown";
+    public const string DamageGoapNpc = "Damage";
     public const string DeathGoapNpc = "Death";
 }
 

@@ -16,17 +16,17 @@ public class Escape_NPC : MonoBaseState
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
         Debug.Log("Enter [Escape]");
-        npc.animator.SetTrigger(AnimNpc.EscapeNpc);
+        npc.Animator.SetTrigger(AnimNpc.EscapeAnimNpc);
 
-        npcGoap.worldState.Mood = NotSafe;
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.Mood = NotSafe;
+        npcGoap.WorldState.UpdateSpeedByMood();
 
         targetNode = FindSafeNeighborZoneNode(npc.CurrentNode);
 
         if (targetNode == null)
         {
             Debug.LogWarning("[Escape] No hay zona vecina segura disponible.");
-            npcGoap.worldState.Mood = Waiting;
+            npcGoap.WorldState.Mood = Waiting;
             return;
         }
 
@@ -35,10 +35,10 @@ public class Escape_NPC : MonoBaseState
 
     public override void UpdateLoop()
     {
-        if (!npcGoap.worldState.CarInRange && escapeRoutine != null)
+        if (!npcGoap.WorldState.CarInRange && escapeRoutine != null)
         {
             StopEscape();
-            npcGoap.worldState.Mood = Waiting;
+            npcGoap.WorldState.Mood = Waiting;
             Debug.Log("[Escape] Ya no hay coche cerca.");
         }
     }
@@ -65,35 +65,56 @@ public class Escape_NPC : MonoBaseState
         var currentZone = NodeGenerator.Instance.GetZoneForNode(currentNode);
         if (currentZone == null) return null;
 
-        var safeZones = currentZone.neighbors.Where(z => z.IsSafe);
+        var bestNode = null as Node;
+        float bestScore = float.MinValue;
 
-        var candidates = safeZones
-            .SelectMany(z => z.nodes)
-            .Where(n => n.neighbors.Any(nb => currentZone.nodes.Contains(nb))) // frontera
-            .ToList();
+        foreach (var neighborZone in currentZone.neighbors)
+        {
+            if (!neighborZone.IsSafe)
+                continue;
 
-        if (candidates.Count == 0) return null;
-
-        return candidates
-            .OrderByDescending(n =>
+            foreach (var node in neighborZone.nodes)
             {
-                Vector3 dirToNode = (n.transform.position - currentNode.transform.position).normalized;
+                // Verificamos si es un nodo frontera (tiene vecino en zona actual)
+                bool isFrontier = false;
+                foreach (var nb in node.neighbors)
+                {
+                    if (currentZone.nodes.Contains(nb))
+                    {
+                        isFrontier = true;
+                        break;
+                    }
+                }
+
+                if (!isFrontier) continue;
+
+                // Cálculo de score
+                Vector3 dirToNode = (node.transform.position - currentNode.transform.position).normalized;
                 Vector3 opposite = -npc.transform.forward;
                 float dirScore = Vector3.Dot(dirToNode, opposite);
-                float distScore = Vector3.Distance(n.transform.position, currentNode.transform.position);
-                return dirScore * 0.6f + distScore * 0.4f;
-            })
-            .FirstOrDefault();
+                float distScore = Vector3.Distance(node.transform.position, currentNode.transform.position);
+                float score = dirScore * 0.6f + distScore * 0.4f;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestNode = node;
+                }
+            }
+        }
+
+        return bestNode;
     }
+
 
     private IEnumerator EscapeRoutine(Node destination)
     {
         yield return npc.MoveTo(destination,
-            npcGoap.worldState.Speed,
-            npcGoap.worldState.SpeedRotation);
+            npcGoap.WorldState.Speed,
+            npcGoap.WorldState.SpeedRotation);
 
         // Reevaluar si sigue en peligro
-        if (npcGoap.worldState.CarInRange)
+        if (npcGoap.WorldState.CarInRange)
         {
             var newTarget = FindSafeNeighborZoneNode(npc.CurrentNode);
             if (newTarget != null && newTarget != destination)
@@ -103,6 +124,6 @@ public class Escape_NPC : MonoBaseState
             }
         }
 
-        npcGoap.worldState.Mood = Waiting;
+        npcGoap.WorldState.Mood = Waiting;
     }
 }
