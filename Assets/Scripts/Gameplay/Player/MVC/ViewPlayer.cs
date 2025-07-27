@@ -63,14 +63,12 @@ public class ViewPlayer : MonoBehaviour
             damageFX.SetActive(true);
         }
     }
-    
-    public void PlayFireFX()
+
+    private void PlayFireFX()
     {
-        if (fireFX)
-        {
-            fireFX.SetActive(false);
-            fireFX.SetActive(true);
-        }
+        if (!fireFX) return;
+        fireFX.SetActive(false);
+        fireFX.SetActive(true);
     }
 
     public void SetCarMaterial(Material mat)

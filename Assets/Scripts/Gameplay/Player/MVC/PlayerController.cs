@@ -14,6 +14,7 @@ Alternativamente, el GameManager puede hacer un FindObjectsOfType<PlayerControll
 [RequireComponent(typeof(NetworkCharacterControllerCustom))]
 [RequireComponent(typeof(LifeHandler))]
 [RequireComponent(typeof(WeaponHandler))]
+[RequireComponent(typeof(PlayerCameraHandler))]
 public class PlayerController : NetworkBehaviour
 {
     private ModelPlayer _model;
@@ -21,9 +22,8 @@ public class PlayerController : NetworkBehaviour
     private NetworkCharacterControllerCustom _myCharacterController;
     private WeaponHandler _myWeaponHandler;
     private LifeHandler _myLifeHandler;
-
-    public CinemachineVirtualCamera vCamPrefab;
-    private CinemachineVirtualCamera myCam;
+    
+    [SerializeField] private PlayerCameraHandler playerCameraHandler;
     
     /*[SerializeField] private float minCrashForce = 7f;
     [SerializeField] private int crashDamage = 30;*/
@@ -39,8 +39,8 @@ public class PlayerController : NetworkBehaviour
         _myWeaponHandler = GetComponent<WeaponHandler>();
         _myLifeHandler = GetComponent<LifeHandler>();
         
+        //_myLifeHandler.OnDamageTaken += playerCameraHandler.Shake;
         _myLifeHandler.OnDead += () => {/* opcional: cámara, efectos, etc */ };
-
         _myLifeHandler.OnRespawn += () =>
         {
             /* opcional: reposicionar, limpiar estado */
@@ -53,17 +53,8 @@ public class PlayerController : NetworkBehaviour
         // Si es mi propio jugador
         if (!Object.HasInputAuthority) return;
         
-        if (vCamPrefab != null)
-        {
-            myCam = Instantiate(vCamPrefab);
-
-            // Buscar el CameraTarget (empty hijo del auto) o el propio transform
-            Transform camTarget = transform.Find("CameraTarget");
-            if (camTarget == null) camTarget = transform;
-
-            myCam.Follow = camTarget;
-            myCam.LookAt = camTarget;
-        }
+        playerCameraHandler.virtualCamera.enabled = true;
+        playerCameraHandler.virtualCamera.Priority = 20;
         
         if (playerLocalUIPrefab != null)
         {
@@ -143,13 +134,26 @@ public class PlayerController : NetworkBehaviour
         if (networkInputData.isTakeDamagePressed)
         {
             _myLifeHandler.ModifyLife(-25);
+            playerCameraHandler.Shake(1);
         }
 
+    }
+    
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    public void Rpc_TriggerShake(float magnitude)
+    {
+        if (playerCameraHandler != null)
+            playerCameraHandler.Shake(magnitude);
     }
     
     void OnDestroy()
     {
         GameManager.OnGameStateChanged -= OnGameStateChanged;
+        
+        // Importante: desuscribirse
+        if (Object == null || !Object.HasInputAuthority) return;
+        /*if (_myLifeHandler != null && playerCameraHandler != null)
+            _myLifeHandler.OnDamageTaken -= playerCameraHandler.Shake;*/
     }
     
     void OnGameStateChanged(GameState state)
