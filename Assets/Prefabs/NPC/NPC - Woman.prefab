@@ -1191,6 +1191,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2908942538196820998, guid: c36fefbce852dde4ea17528c661bd5f5, type: 3}
+      propertyPath: SortKey
+      value: 3088757424
+      objectReference: {fileID: 0}
+    - target: {fileID: 7654642955078004439, guid: c36fefbce852dde4ea17528c661bd5f5, type: 3}
+      propertyPath: SortKey
+      value: 3294004176
+      objectReference: {fileID: 0}
     - target: {fileID: 7762872981204630707, guid: c36fefbce852dde4ea17528c661bd5f5, type: 3}
       propertyPath: m_Name
       value: NPC - Woman

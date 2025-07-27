@@ -19,8 +19,8 @@ public class Death_NPC : MonoBaseState
     {
         npc.Animator.SetTrigger(AnimNpc.DeathAnimNpc);
         
-        npcGoap.worldState.Mood = Dying;
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.Mood = Dying;
+        npcGoap.WorldState.UpdateSpeedByMood();
 
         _deathRoutine = StartCoroutine(DeathSequence());
     }

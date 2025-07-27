@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3997716402635442364}
   - component: {fileID: 6237995866024526491}
   - component: {fileID: -8906455945583059245}
+  - component: {fileID: 4758998273506275702}
   m_Layer: 0
   m_Name: Node
   m_TagString: Untagged
@@ -50,6 +51,7 @@ MonoBehaviour:
   gizmoSize: 0.2
   neighbors: []
   neighborColor: {r: 1, g: 0, b: 0, a: 1}
+  _hasCar: 0
 --- !u!135 &6237995866024526491
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -69,7 +71,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &-8906455945583059245
 MonoBehaviour:
@@ -89,4 +91,22 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 3997716402635442364}
+  - {fileID: 4758998273506275702}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &4758998273506275702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5863631844612583335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0

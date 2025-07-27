@@ -15,9 +15,9 @@ public class Walk_NPC : MonoBaseState
     {
         npc.Animator.SetTrigger(AnimNpc.WalkAnimNpc);
         
-        npcGoap.worldState.Mood = Exploring;
+        npcGoap.WorldState.Mood = Exploring;
 
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.UpdateSpeedByMood();
         
         _movementRoutine = StartCoroutine(DoWalk());
     }
@@ -32,12 +32,12 @@ public class Walk_NPC : MonoBaseState
         Node targetNode = GetTargetNode(startNode);
 
         yield return npc.MoveTo(targetNode, 
-                                npcGoap.worldState.Speed, 
-                                npcGoap.worldState.SpeedRotation,
-                         steps => npcGoap.worldState.Steps -= steps);
+                                npcGoap.WorldState.Speed, 
+                                npcGoap.WorldState.SpeedRotation,
+                         steps => npcGoap.WorldState.Steps -= steps);
 
         npc.CurrentInteractable = npc.GetClosestInteractable();
-        npcGoap.worldState.Mood = Waiting;
+        npcGoap.WorldState.Mood = Waiting;
     }
 
     private Node GetTargetNode(Node start)

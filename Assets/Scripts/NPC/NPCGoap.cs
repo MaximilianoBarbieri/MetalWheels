@@ -10,7 +10,7 @@ using static GoapActionName;
 
 public class NPCGoap : NetworkBehaviour
 {
-    public WorldState worldState;
+    public WorldState WorldState;
 
     private NPC npc;
     private List<GoapAction> _actions;
@@ -18,45 +18,46 @@ public class NPCGoap : NetworkBehaviour
 
     private Coroutine currentPlanRoutine;
 
-    private void Start()
+    public override void Spawned()
     {
+        base.Spawned();
+
         npc = GetComponent<NPC>();
 
-        if (worldState == null)
-            worldState = new WorldState();
+        WorldState ??= new WorldState();
 
-        worldState.Steps = 0;
-        worldState.MaxSteps = 5;
-        worldState.SpeedRotation = 5f;
-        worldState.Life = 100f;
-        worldState.Mood = Waiting;
+        WorldState.Steps = 0;
+        WorldState.MaxSteps = 5;
+        WorldState.SpeedRotation = 5f;
+        WorldState.Life = 100f;
+        WorldState.Mood = Waiting;
 
         _actions = CreateActions();
 
         StartCoroutine(RunPlanLoop());
     }
 
-    private void Update() => Debug.Log("Mi mood actual es => " + $"{worldState.Mood}");
+    private void Update() => Debug.Log("Mi mood actual es => " + $"{WorldState.Mood}");
 
     private WorldState GetCurrentWorldState()
     {
-        worldState.InteractionType = npc.CurrentInteractable != null
+        WorldState.InteractionType = npc.CurrentInteractable
             ? npc.CurrentInteractable.type
             : InteractionType.OnlyForPath;
 
-        worldState.CarInRange = !NodeGenerator.Instance.GetZoneForNode(npc.CurrentNode)?.IsSafe ?? false;
+        WorldState.CarInRange = !NodeGenerator.Instance?.GetZoneForNode(npc.CurrentNode)!?.IsSafe ?? false;
 
-        worldState.CurrentCar ??= npc.GetClosestCarIfHit();
-        worldState.Impacted = worldState.CurrentCar != null;
+        WorldState.CurrentCar ??= npc.GetClosestCarIfHit();
+        WorldState.Impacted = WorldState.CurrentCar;
 
-        return worldState;
+        return WorldState;
     }
 
     private List<GoapAction> CreateActions()
     {
         return new List<GoapAction>
         {
-            new GoapAction
+            new GoapAction //Idle
             {
                 Name = IdleGoapNpc,
                 Precondition = s => !s.CarInRange &&
@@ -73,7 +74,7 @@ public class NPCGoap : NetworkBehaviour
                 Cost = 3
             },
 
-            new GoapAction
+            new GoapAction //Walk
             {
                 Name = WalkGoapNpc,
                 Precondition = s => !s.CarInRange &&
@@ -90,7 +91,7 @@ public class NPCGoap : NetworkBehaviour
                 Cost = 3
             },
 
-            new GoapAction
+            new GoapAction //Talk
             {
                 Name = SitdownGoapNpc,
                 Precondition = s => !s.CarInRange && s.Steps == s.MaxSteps &&
@@ -103,11 +104,11 @@ public class NPCGoap : NetworkBehaviour
                     ns.Mood = Relaxed;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.sitdownNpc),
+                Execute = () => TransitionToCoroutine(npc.sitDownNpc),
                 Cost = 2
             },
 
-            new GoapAction
+            new GoapAction //Sitdown
             {
                 Name = TalkGoapNpc,
                 Precondition = s => !s.CarInRange && s.Steps == s.MaxSteps &&
@@ -123,7 +124,8 @@ public class NPCGoap : NetworkBehaviour
                 Execute = () => TransitionToCoroutine(npc.talkNpc),
                 Cost = 2
             },
-            new GoapAction
+
+            new GoapAction //Escape
             {
                 Name = EscapeGoapNpc,
                 Precondition = s => s.CarInRange &&
@@ -138,7 +140,8 @@ public class NPCGoap : NetworkBehaviour
                 Execute = () => TransitionToCoroutine(npc.escapeNpc),
                 Cost = 1
             },
-            new GoapAction
+
+            new GoapAction //Damage
             {
                 Name = DamageGoapNpc,
                 Precondition = s => s.Impacted &&
@@ -154,7 +157,8 @@ public class NPCGoap : NetworkBehaviour
                 Execute = () => TransitionToCoroutine(npc.damageNpc),
                 Cost = 0
             },
-            new GoapAction
+
+            new GoapAction //Death
             {
                 Name = DeathGoapNpc,
                 Precondition = s => s.Life <= 0f,
@@ -223,8 +227,6 @@ public class NPCGoap : NetworkBehaviour
 
                 if (plan != null)
                     _currentPlan = new Queue<GoapAction>(plan);
-                // else
-                //     Debug.Log("No plan found.");
             }
 
             if (_currentPlan.Count > 0)
@@ -243,12 +245,8 @@ public class NPCGoap : NetworkBehaviour
 
     private IEnumerator TransitionToCoroutine(IState nextState)
     {
-        if (npc.fsm == null)
-        {
-            Debug.LogError("FSM no inicializada en NPC.");
-            yield break;
-        }
+        if (npc.Fsm == null) yield break;
 
-        npc.fsm.TransitionTo(nextState);
+        npc.Fsm.TransitionTo(nextState);
     }
 }

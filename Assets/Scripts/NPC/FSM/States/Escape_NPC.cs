@@ -18,15 +18,15 @@ public class Escape_NPC : MonoBaseState
         Debug.Log("Enter [Escape]");
         npc.Animator.SetTrigger(AnimNpc.EscapeAnimNpc);
 
-        npcGoap.worldState.Mood = NotSafe;
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.Mood = NotSafe;
+        npcGoap.WorldState.UpdateSpeedByMood();
 
         targetNode = FindSafeNeighborZoneNode(npc.CurrentNode);
 
         if (targetNode == null)
         {
             Debug.LogWarning("[Escape] No hay zona vecina segura disponible.");
-            npcGoap.worldState.Mood = Waiting;
+            npcGoap.WorldState.Mood = Waiting;
             return;
         }
 
@@ -35,10 +35,10 @@ public class Escape_NPC : MonoBaseState
 
     public override void UpdateLoop()
     {
-        if (!npcGoap.worldState.CarInRange && escapeRoutine != null)
+        if (!npcGoap.WorldState.CarInRange && escapeRoutine != null)
         {
             StopEscape();
-            npcGoap.worldState.Mood = Waiting;
+            npcGoap.WorldState.Mood = Waiting;
             Debug.Log("[Escape] Ya no hay coche cerca.");
         }
     }
@@ -110,11 +110,11 @@ public class Escape_NPC : MonoBaseState
     private IEnumerator EscapeRoutine(Node destination)
     {
         yield return npc.MoveTo(destination,
-            npcGoap.worldState.Speed,
-            npcGoap.worldState.SpeedRotation);
+            npcGoap.WorldState.Speed,
+            npcGoap.WorldState.SpeedRotation);
 
         // Reevaluar si sigue en peligro
-        if (npcGoap.worldState.CarInRange)
+        if (npcGoap.WorldState.CarInRange)
         {
             var newTarget = FindSafeNeighborZoneNode(npc.CurrentNode);
             if (newTarget != null && newTarget != destination)
@@ -124,6 +124,6 @@ public class Escape_NPC : MonoBaseState
             }
         }
 
-        npcGoap.worldState.Mood = Waiting;
+        npcGoap.WorldState.Mood = Waiting;
     }
 }

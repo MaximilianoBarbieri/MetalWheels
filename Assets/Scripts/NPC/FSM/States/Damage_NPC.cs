@@ -20,7 +20,7 @@ public class Damage_NPC : MonoBaseState
 
         Debug.Log("El npc " + $"${npc.name}" + " acaba de ser atropellado");
 
-        npcGoap.worldState.Mood = Injured;
+        npcGoap.WorldState.Mood = Injured;
 
         _damageRoutine = StartCoroutine(DamageRoutine());
     }
@@ -44,9 +44,9 @@ public class Damage_NPC : MonoBaseState
 
     private IEnumerator DamageRoutine()
     {
-        npc.ModifyLife(npcGoap.worldState.Life, 25);
+        npc.ModifyLife(npcGoap.WorldState.Life, 25);
 
-        var direction = (npc.Rigidbody.transform.position - npcGoap.worldState.CurrentCar.transform.position);
+        var direction = (npc.Rigidbody.transform.position - npcGoap.WorldState.CurrentCar.transform.position);
         direction.y = 0f; // anulamos componente Y
         direction = direction.normalized;
 
@@ -59,7 +59,7 @@ public class Damage_NPC : MonoBaseState
         yield return new WaitForSeconds(2f); // reposo adicional
         Debug.Log($"Terminó el daño del NPC {npc.name}");
 
-        npcGoap.worldState.Mood = Waiting;
-        npcGoap.worldState.CurrentCar = null;
+        npcGoap.WorldState.Mood = Waiting;
+        npcGoap.WorldState.CurrentCar = null;
     }
 }

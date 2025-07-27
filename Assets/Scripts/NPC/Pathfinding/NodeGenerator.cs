@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
+using Fusion.Sockets;
 using UnityEngine;
 
 public class NodeGenerator : NetworkBehaviour
@@ -27,38 +28,43 @@ public class NodeGenerator : NetworkBehaviour
     [Header("Lista de interactuables en la escena")] [SerializeField]
     private List<InteractableNPC> interactables;
 
+    //[Header("Runner de red")]
+    [SerializeField] private NetworkRunner runner => FindObjectOfType<NetworkRunner>();
+
     [Header("Lista de zonas seguras")] public List<SafeZone> zones = new();
 
     private Action _onGridCreated;
-    private List<GameObject> _nodes;
+    private List<NetworkObject> _nodes;
     private Coroutine _generationRoutine;
+
+    public static event Action OnGameReady;
+    public static NodeGenerator Instance { get; private set; }
     private bool IsReady => _nodes != null && _nodes.Count == gridSize.x * gridSize.y;
 
-    public static NodeGenerator Instance { get; private set; }
 
-    private void Awake()
+    public override void Spawned()
     {
-        if (Instance != null && Instance != this)
-            Destroy(gameObject);
-        else
-            Instance = this;
+        base.Spawned();
 
-        GetNodes();
+        if (Instance == null) Instance = this;
+
+        if (runner.IsServer)
+            GetNodes();
     }
 
     private void GetNodes()
     {
+        if (!HasStateAuthority) return;
+
         if (!IsReady && _generationRoutine == null)
             _generationRoutine = StartCoroutine(GenerateGridLazy());
     }
 
     private IEnumerator GenerateGridLazy()
     {
-        _nodes = new List<GameObject>();
-
+        _nodes = new List<NetworkObject>();
         Vector3 origin = transform.position;
         float y = origin.y;
-
         int created = 0;
 
         for (int x = 0; x < gridSize.x; x++)
@@ -66,13 +72,14 @@ public class NodeGenerator : NetworkBehaviour
             for (int z = 0; z < gridSize.y; z++)
             {
                 Vector3 pos = new Vector3(origin.x + x * nodeSpacing, y, origin.z + z * nodeSpacing);
-                GameObject node = Instantiate(nodePrefab, pos, Quaternion.identity, transform);
+
+                NetworkObject node = Runner.Spawn(nodePrefab, pos, Quaternion.identity, Runner.LocalPlayer, null);
                 node.name = $"Node_{x}_{z}";
                 _nodes.Add(node);
 
                 created++;
                 if (created % nodesPerFrame == 0)
-                    yield return null; // Espera un frame cada X nodos
+                    yield return null;
             }
         }
 
@@ -82,9 +89,13 @@ public class NodeGenerator : NetworkBehaviour
         _onGridCreated?.Invoke();
     }
 
-    private void DetectAllNeighbors(int distance) => _nodes.Select(n => n.GetComponent<Node>())
-        .Where(n => n != null).ToList()
-        .ForEach(n => n.DetectNeighbors(distance));
+    private void DetectAllNeighbors(int distance)
+    {
+        _nodes.Select(n => n.GetComponent<Node>())
+            .Where(n => n != null)
+            .ToList()
+            .ForEach(n => n.DetectNeighbors(distance));
+    }
 
     public void Register(InteractableNPC npc)
     {
@@ -92,8 +103,10 @@ public class NodeGenerator : NetworkBehaviour
             interactables.Add(npc);
     }
 
-    private void ActivateInteractable() => interactables.ToList()
-        .ForEach(i => i.AssignClosestNode(2f));
+    private void ActivateInteractable()
+    {
+        interactables.ToList().ForEach(i => i.AssignClosestNode(2f));
+    }
 
     private void GenerateSafeZones()
     {
@@ -150,16 +163,22 @@ public class NodeGenerator : NetworkBehaviour
         }
 
         Debug.Log("[Zonas] Vecinas asignadas.");
+
+        OnGameReady.Invoke();
     }
 
 
     public void ClearGrid()
     {
-        if (_nodes == null) return;
+        if (!HasStateAuthority || _nodes == null) return;
 
-        foreach (var node in _nodes.Where(node => node != null))
+        foreach (var node in _nodes.Where(n => n != null))
         {
-            DestroyImmediate(node);
+            var netObj = node.GetComponent<NetworkObject>();
+            if (netObj != null)
+                runner.Despawn(netObj);
+            else
+                Destroy(node);
         }
 
         _nodes.Clear();
@@ -193,7 +212,6 @@ public class NodeGenerator : NetworkBehaviour
     {
         _onGridCreated += ActivateInteractable;
         _onGridCreated += () => DetectAllNeighbors(nodeSpacing);
-        ;
         _onGridCreated += GenerateSafeZones;
     }
 
@@ -201,7 +219,6 @@ public class NodeGenerator : NetworkBehaviour
     {
         _onGridCreated -= ActivateInteractable;
         _onGridCreated -= () => DetectAllNeighbors(nodeSpacing);
-        ;
         _onGridCreated -= GenerateSafeZones;
     }
 }
@@ -212,7 +229,7 @@ public class SafeZone
     public Vector2Int segmentIndex;
     public List<SafeZone> neighbors = new();
 
-    public bool IsSafe => nodes.All(n => !n.hasCar);
+    [Networked] public bool IsSafe => nodes.All(n => !n.hasCar);
 
     public Vector3 Center => nodes.Count == 0
         ? Vector3.zero
