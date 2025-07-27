@@ -14,6 +14,7 @@ Alternativamente, el GameManager puede hacer un FindObjectsOfType<PlayerControll
 [RequireComponent(typeof(NetworkCharacterControllerCustom))]
 [RequireComponent(typeof(LifeHandler))]
 [RequireComponent(typeof(WeaponHandler))]
+[RequireComponent(typeof(PlayerCameraHandler))]
 public class PlayerController : NetworkBehaviour
 {
     private ModelPlayer _model;
@@ -38,8 +39,8 @@ public class PlayerController : NetworkBehaviour
         _myWeaponHandler = GetComponent<WeaponHandler>();
         _myLifeHandler = GetComponent<LifeHandler>();
         
+        //_myLifeHandler.OnDamageTaken += playerCameraHandler.Shake;
         _myLifeHandler.OnDead += () => {/* opcional: cámara, efectos, etc */ };
-
         _myLifeHandler.OnRespawn += () =>
         {
             /* opcional: reposicionar, limpiar estado */
@@ -138,9 +139,21 @@ public class PlayerController : NetworkBehaviour
 
     }
     
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    public void Rpc_TriggerShake(float magnitude)
+    {
+        if (playerCameraHandler != null)
+            playerCameraHandler.Shake(magnitude);
+    }
+    
     void OnDestroy()
     {
         GameManager.OnGameStateChanged -= OnGameStateChanged;
+        
+        // Importante: desuscribirse
+        if (Object == null || !Object.HasInputAuthority) return;
+        /*if (_myLifeHandler != null && playerCameraHandler != null)
+            _myLifeHandler.OnDamageTaken -= playerCameraHandler.Shake;*/
     }
     
     void OnGameStateChanged(GameState state)

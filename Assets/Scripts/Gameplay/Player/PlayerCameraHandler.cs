@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Cinemachine;
 
@@ -8,7 +9,7 @@ public class PlayerCameraHandler : MonoBehaviour
     public Transform targetFollow; // el auto a seguir
 
     [Header("Shake")]
-    public float shakeDuration = 0.5f;
+    public float shakeDuration = 0.25f;
     public float shakeAmplitude = 2f;
     public float shakeFrequency = 2f;
     private float shakeTimer;
@@ -21,7 +22,7 @@ public class PlayerCameraHandler : MonoBehaviour
     public float distanceLerpSpeed = 5f;
 
     private CinemachineTransposer transposer;
-
+    
     void Awake()
     {
         if (!virtualCamera) virtualCamera = GetComponent<CinemachineVirtualCamera>();
