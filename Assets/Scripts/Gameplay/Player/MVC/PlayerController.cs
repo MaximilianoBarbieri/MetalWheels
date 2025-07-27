@@ -14,7 +14,6 @@ Alternativamente, el GameManager puede hacer un FindObjectsOfType<PlayerControll
 [RequireComponent(typeof(NetworkCharacterControllerCustom))]
 [RequireComponent(typeof(LifeHandler))]
 [RequireComponent(typeof(WeaponHandler))]
-[RequireComponent(typeof(PlayerCameraHandler))]
 public class PlayerController : NetworkBehaviour
 {
     private ModelPlayer _model;
