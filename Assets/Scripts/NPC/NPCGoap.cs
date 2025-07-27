@@ -37,7 +37,7 @@ public class NPCGoap : NetworkBehaviour
         StartCoroutine(RunPlanLoop());
     }
 
-    private void Update() => Debug.Log("Mi mood actual es => " + $"{WorldState.Mood}");
+    private void Update() => Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
 
     private WorldState GetCurrentWorldState()
     {

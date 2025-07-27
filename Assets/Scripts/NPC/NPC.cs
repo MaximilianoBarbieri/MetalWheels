@@ -19,9 +19,11 @@ public class NPC : NetworkBehaviour
 
     private HashSet<InteractableNPC> _interactablesInRange = new();
     private List<CharacterController> _carsInRange = new();
-
+    
+    [Header("Estados de FSM")]
+    
     public FiniteStateMachine Fsm;
-
+    
     [SerializeField] internal Idle_NPC idleNpc;
     [SerializeField] internal Walk_NPC walkNpc;
     [SerializeField] internal Sitdown_NPC sitDownNpc;
@@ -164,13 +166,6 @@ public class NPC : NetworkBehaviour
         yield return FollowPath(path, speed, speedRotation, onStep);
     }
 
-    /// <summary>
-    /// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
-    /// </summary>
-    /// <param name="life"></param>
-    /// <param name="value"></param>
-    public void ModifyLife(float life, int value) => life += value;
-
     private void ActivateFsm() => Fsm.Active = true;
 
     private void OnEnable()
@@ -182,4 +177,12 @@ public class NPC : NetworkBehaviour
     {
         NodeGenerator.OnGameReady -= ActivateFsm;
     }
+    
+    
+/// <summary>
+/// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
+/// </summary>
+/// <param name="life"></param>
+/// <param name="value"></param>
+    public void ModifyLife(float life, int value) => life += value;
 }
