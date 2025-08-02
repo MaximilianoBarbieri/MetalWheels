@@ -83,7 +83,7 @@ public class NodeGenerator : NetworkBehaviour
             }
         }
 
-        Debug.Log($"[Grid] Generación completada: {_nodes.Count} nodos.");
+//        Debug.Log($"[Grid] Generación completada: {_nodes.Count} nodos.");
         _generationRoutine = null;
 
         _onGridCreated?.Invoke();
@@ -134,7 +134,7 @@ public class NodeGenerator : NetworkBehaviour
             zone.nodes.Add(node);
         }
 
-        Debug.Log($"[Zonas] Total generadas: {zones.Count}");
+//        Debug.Log($"[Zonas] Total generadas: {zones.Count}");
 
         DetectZoneNeighbors();
     }
@@ -162,7 +162,7 @@ public class NodeGenerator : NetworkBehaviour
             }
         }
 
-        Debug.Log("[Zonas] Vecinas asignadas.");
+//        Debug.Log("[Zonas] Vecinas asignadas.");
 
         OnGameReady.Invoke();
     }
@@ -190,24 +190,7 @@ public class NodeGenerator : NetworkBehaviour
         Vector3 size = new Vector3(gridSize.x * nodeSpacing, 0.1f, gridSize.y * nodeSpacing);
         Gizmos.DrawWireCube(transform.position + size / 2f, size);
     }
-
-    private void OnDrawGizmos()
-    {
-        if (zones != null && zones.Count > 0)
-        {
-            foreach (var zone in zones)
-            {
-                Gizmos.color = zone.IsSafe ? new Color(0f, 1f, 0f, 0.25f) : new Color(1f, 0f, 0f, 0.25f);
-                Vector3 zoneSize = new Vector3(
-                    (gridSize.x / segmentX) * nodeSpacing,
-                    0.1f,
-                    (gridSize.y / segmentZ) * nodeSpacing
-                );
-                Gizmos.DrawCube(zone.Center + Vector3.up * 0.1f, zoneSize);
-            }
-        }
-    }
-
+    
     private void OnEnable()
     {
         _onGridCreated += ActivateInteractable;
@@ -227,11 +210,5 @@ public class SafeZone
 {
     public List<Node> nodes = new();
     public Vector2Int segmentIndex;
-    public List<SafeZone> neighbors = new();
-
-    [Networked] public bool IsSafe => nodes.All(n => !n.hasCar);
-
-    public Vector3 Center => nodes.Count == 0
-        ? Vector3.zero
-        : nodes.Select(n => n.transform.position).Aggregate(Vector3.zero, (acc, pos) => acc + pos) / nodes.Count;
+    public List<SafeZone> neighbors = new(); 
 }

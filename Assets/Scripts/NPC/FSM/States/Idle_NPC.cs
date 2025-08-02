@@ -40,7 +40,7 @@ public class Idle_NPC : MonoBaseState
 
     private IEnumerator RecoverStepsOverTime()
     {
-        Debug.Log("Entro a corrutina de Steps");
+//        Debug.Log("Entro a corrutina de Steps");
 
         while (npcGoap.WorldState.Steps < npcGoap.WorldState.MaxSteps)
         {

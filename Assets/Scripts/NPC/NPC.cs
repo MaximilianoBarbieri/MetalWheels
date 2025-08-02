@@ -5,7 +5,6 @@ using System.Linq;
 using FSM;
 using Fusion;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class NPC : NetworkBehaviour
 {

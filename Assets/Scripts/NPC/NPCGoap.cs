@@ -5,10 +5,11 @@ using System.Linq;
 using FSM;
 using Fusion;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static MoodsNpc;
 using static GoapActionName;
 
-public class NPCGoap : NetworkBehaviour
+public class NPCGoap : NetworkBehaviour, IGridEntity
 {
     public WorldState WorldState;
 
@@ -17,6 +18,16 @@ public class NPCGoap : NetworkBehaviour
     private Queue<GoapAction> _currentPlan = new();
 
     private Coroutine currentPlanRoutine;
+
+    public event Action<IGridEntity> OnMove;
+
+    public Vector3 Position
+    {
+        get => transform.position;
+        set => transform.position = value;
+    }
+
+    [SerializeField] private SpatialGrid spatialGrid;
 
     public override void Spawned()
     {
@@ -37,7 +48,23 @@ public class NPCGoap : NetworkBehaviour
         StartCoroutine(RunPlanLoop());
     }
 
-    private void Update() => Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
+    private void Start()
+    {
+        if (spatialGrid.isInitialized)
+            spatialGrid.UpdateEntity(this);
+    }
+
+    public override void FixedUpdateNetwork()
+    {
+        base.FixedUpdateNetwork();
+
+        OnMove?.Invoke(this);
+    }
+
+    private void FixedUpdate()
+    {
+//        Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
+    }
 
     private WorldState GetCurrentWorldState()
     {
@@ -45,7 +72,7 @@ public class NPCGoap : NetworkBehaviour
             ? npc.CurrentInteractable.type
             : InteractionType.OnlyForPath;
 
-        WorldState.CarInRange = !NodeGenerator.Instance?.GetZoneForNode(npc.CurrentNode)!?.IsSafe ?? false;
+        // WorldState.CarInRange = !NodeGenerator.Instance?.GetZoneForNode(npc.CurrentNode)!?.IsSafe ?? false;
 
         WorldState.CurrentCar ??= npc.GetClosestCarIfHit();
         WorldState.Impacted = WorldState.CurrentCar;
