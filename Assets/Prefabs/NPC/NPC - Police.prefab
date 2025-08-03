@@ -1384,7 +1384,7 @@ GameObject:
   - component: {fileID: 3196979719995423138}
   - component: {fileID: -4099828723088100263}
   - component: {fileID: 7903600503487076307}
-  - component: {fileID: 2908942538196820998}
+  - component: {fileID: 1309784513354755363}
   m_Layer: 0
   m_Name: NPC - Police
   m_TagString: Untagged
@@ -1530,7 +1530,7 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
---- !u!114 &2908942538196820998
+--- !u!114 &1309784513354755363
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1542,9 +1542,9 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 3065484607
+  SortKey: 2811481279
   ObjectInterest: 1
-  Flags: 327681
+  Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 8512673234735326415}

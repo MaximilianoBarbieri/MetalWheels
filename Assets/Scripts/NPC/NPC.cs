@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FSM;
 using Fusion;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class NPC : NetworkBehaviour
@@ -11,6 +12,8 @@ public class NPC : NetworkBehaviour
     public Node CurrentNode => GetCurrentNode();
     public Rigidbody Rigidbody => GetComponent<Rigidbody>();
     public Animator Animator => GetComponent<Animator>();
+    [CanBeNull] public SpatialGrid SpatialGrid => FindObjectOfType<SpatialGrid>();
+//    public PlayerQuery playerQuery => FindObjectOfType<PlayerQuery>();
 
     [Header("Interacción")] 
     
@@ -61,6 +64,9 @@ public class NPC : NetworkBehaviour
         if (other.gameObject.TryGetComponent<CharacterController>(out var car))
             _carsInRange.Remove(car);
     }
+    
+    public bool IsInAnyPlayerQuery(NPCGoap npcGoap) => SpatialGrid?.players.Any(p => p.CurrentlyInDanger
+                                                                           .Contains(npcGoap)) == true;
 
     /// <summary>
     /// Devuelve el nodo mas cercano

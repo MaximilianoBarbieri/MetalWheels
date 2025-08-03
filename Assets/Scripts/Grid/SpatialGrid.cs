@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Fusion;
 using UnityEngine;
 
-public class SpatialGrid : MonoBehaviour
+public class SpatialGrid : NetworkBehaviour
 {
     #region Variables
 
@@ -42,7 +43,15 @@ public class SpatialGrid : MonoBehaviour
     //Una colección vacía a devolver en las queries si no hay nada que devolver
     readonly public IGridEntity[] Empty = new IGridEntity[0];
 
+    public List<PlayerQuery> players = new();
+
     #endregion
+
+    public void RegisterQuerys(PlayerQuery player)
+    {
+        if (!players.Contains(player))
+            players.Add(player);
+    }
 
     #region Funciones
 
@@ -130,8 +139,8 @@ public class SpatialGrid : MonoBehaviour
             Generators.Clamp(fromCoord.Item2, 0, height));
         toCoord = Tuple.Create(Generators.Clamp(toCoord.Item1, 0, width), Generators.Clamp(toCoord.Item2, 0, height));
 
-        Debug.Log($"[Grid] From {fromCoord} To {toCoord} | IsInside: {IsInsideGrid(fromCoord)} & {IsInsideGrid(toCoord)}");
-        
+//        Debug.Log($"[Grid] From {fromCoord} To {toCoord} | IsInside: {IsInsideGrid(fromCoord)} & {IsInsideGrid(toCoord)}");
+
         if (!IsInsideGrid(fromCoord) && !IsInsideGrid(toCoord))
             return Empty;
 
@@ -160,14 +169,15 @@ public class SpatialGrid : MonoBehaviour
             .Where(n => filterByPosition(n.Position));
     }
 
-    public Tuple<int, int> GetPositionInGrid(Vector3 pos) {
+    public Tuple<int, int> GetPositionInGrid(Vector3 pos)
+    {
         float gx = (pos.x - x) / cellWidth;
         float gz = (pos.z - z) / cellHeight;
 //        Debug.Log($"Calculando celda: pos=({pos.x},{pos.z}) -> ({gx}, {gz})");
 
         return Tuple.Create(Mathf.FloorToInt(gx), Mathf.FloorToInt(gz));
     }
-    
+
     public bool IsInsideGrid(Tuple<int, int> position)
     {
         //si es menor a 0 o mayor a width o height, no esta dentro de la grilla

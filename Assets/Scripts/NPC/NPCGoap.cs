@@ -11,7 +11,7 @@ using static GoapActionName;
 
 public class NPCGoap : NetworkBehaviour, IGridEntity
 {
-    public WorldState WorldState;
+    public WorldState WorldState = new();
 
     private NPC npc;
     private List<GoapAction> _actions;
@@ -35,13 +35,12 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
 
         npc = GetComponent<NPC>();
 
-        WorldState ??= new WorldState();
-
         WorldState.Steps = 0;
         WorldState.MaxSteps = 5;
         WorldState.SpeedRotation = 5f;
         WorldState.Life = 100f;
         WorldState.Mood = Waiting;
+        WorldState.CarInRange = false;
 
         _actions = CreateActions();
 
@@ -63,8 +62,10 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
 
     private void FixedUpdate()
     {
-//        Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
+        Debug.Log($"[{name}] CarInRange = {WorldState.CarInRange}");
+        Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
     }
+
 
     private WorldState GetCurrentWorldState()
     {
@@ -72,8 +73,12 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
             ? npc.CurrentInteractable.type
             : InteractionType.OnlyForPath;
 
-        // WorldState.CarInRange = !NodeGenerator.Instance?.GetZoneForNode(npc.CurrentNode)!?.IsSafe ?? false;
+        // AHORA: solo está en peligro si figura en la tabla central
 
+        WorldState.CarInRange = npc.IsInAnyPlayerQuery(this);
+
+        Debug.Log($"Car In Range {WorldState.CarInRange}");
+        
         WorldState.CurrentCar ??= npc.GetClosestCarIfHit();
         WorldState.Impacted = WorldState.CurrentCar;
 

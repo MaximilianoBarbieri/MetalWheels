@@ -13,6 +13,8 @@ public class Escape_NPC : MonoBaseState
     private Node targetNode;
     private Coroutine escapeRoutine;
 
+    private Coroutine dangerTimeoutRoutine; // NUEVO
+
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
         Debug.Log("Enter [Escape]");
@@ -20,8 +22,8 @@ public class Escape_NPC : MonoBaseState
 
         npcGoap.WorldState.Mood = NotSafe;
         npcGoap.WorldState.UpdateSpeedByMood();
-        //
-        // targetNode = FindSafeNeighborZoneNode(npc.CurrentNode);
+
+        dangerTimeoutRoutine = npc.StartCoroutine(DangerCooldown(3f)); // NUEVO
 
         if (targetNode == null)
         {
@@ -35,12 +37,12 @@ public class Escape_NPC : MonoBaseState
 
     public override void UpdateLoop()
     {
-        if (!npcGoap.WorldState.CarInRange && escapeRoutine != null)
-        {
-            StopEscape();
-            npcGoap.WorldState.Mood = Waiting;
-            Debug.Log("[Escape] Ya no hay coche cerca.");
-        }
+        //if (!npcGoap.WorldState.CarInRange && escapeRoutine != null)
+        //{
+        //    StopEscape();
+        //    npcGoap.WorldState.Mood = Waiting;
+        //    Debug.Log("[Escape] Ya no hay coche cerca.");
+        //}
     }
 
     public override Dictionary<string, object> Exit(IState to)
@@ -58,72 +60,18 @@ public class Escape_NPC : MonoBaseState
             StopCoroutine(escapeRoutine);
             escapeRoutine = null;
         }
+
+        if (dangerTimeoutRoutine != null) // NUEVO
+        {
+            StopCoroutine(dangerTimeoutRoutine);
+            dangerTimeoutRoutine = null;
+        }
     }
 
-    // private Node FindSafeNeighborZoneNode(Node currentNode)
-    // {
-    //     var currentZone = NodeGenerator.Instance.GetZoneForNode(currentNode);
-    //     if (currentZone == null) return null;
-    //
-    //     var bestNode = null as Node;
-    //     float bestScore = float.MinValue;
-    //
-    //     foreach (var neighborZone in currentZone.neighbors)
-    //     {
-    //         if (!neighborZone.IsSafe)
-    //             continue;
-    //
-    //         foreach (var node in neighborZone.nodes)
-    //         {
-    //             // Verificamos si es un nodo frontera (tiene vecino en zona actual)
-    //             bool isFrontier = false;
-    //             foreach (var nb in node.neighbors)
-    //             {
-    //                 if (currentZone.nodes.Contains(nb))
-    //                 {
-    //                     isFrontier = true;
-    //                     break;
-    //                 }
-    //             }
-    //
-    //             if (!isFrontier) continue;
-    //
-    //             // Cálculo de score
-    //             Vector3 dirToNode = (node.transform.position - currentNode.transform.position).normalized;
-    //             Vector3 opposite = -npc.transform.forward;
-    //             float dirScore = Vector3.Dot(dirToNode, opposite);
-    //             float distScore = Vector3.Distance(node.transform.position, currentNode.transform.position);
-    //             float score = dirScore * 0.6f + distScore * 0.4f;
-    //
-    //             if (score > bestScore)
-    //             {
-    //                 bestScore = score;
-    //                 bestNode = node;
-    //             }
-    //         }
-    //     }
-    //
-    //     return bestNode;
-    // }
-
-
-    // private IEnumerator EscapeRoutine(Node destination)
-    // {
-    //     yield return npc.MoveTo(destination,
-    //         npcGoap.WorldState.Speed,
-    //         npcGoap.WorldState.SpeedRotation);
-    //
-    //     // Reevaluar si sigue en peligro
-    //     if (npcGoap.WorldState.CarInRange)
-    //     {
-    //         var newTarget = FindSafeNeighborZoneNode(npc.CurrentNode);
-    //         if (newTarget != null && newTarget != destination)
-    //         {
-    //             escapeRoutine = StartCoroutine(EscapeRoutine(newTarget));
-    //             yield break;
-    //         }
-    //     }
-    //
-    //     npcGoap.WorldState.Mood = Waiting;
-    // }
+    private IEnumerator DangerCooldown(float duration) // NUEVO
+    {
+        yield return new WaitForSeconds(duration);
+        //npcGoap.WorldState.CarInRange = false;
+        Debug.Log($"[Escape] Timeout: peligro despejado → CarInRange = false");
+    }
 }
