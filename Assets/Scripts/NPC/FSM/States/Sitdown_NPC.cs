@@ -24,8 +24,8 @@ public class Sitdown_NPC : MonoBaseState
         npcGoap.WorldState.Mood = Relaxed;
         npcGoap.WorldState.UpdateSpeedByMood();
 
-        if (npc.CurrentInteractable != null)
-            _sitCoroutine = StartCoroutine(SitRoutine(npc.CurrentInteractable));
+        if (npc.currentInteractable != null)
+            _sitCoroutine = StartCoroutine(SitRoutine(npc.currentInteractable));
     }
 
     public override Dictionary<string, object> Exit(IState to)
@@ -33,7 +33,7 @@ public class Sitdown_NPC : MonoBaseState
         StopCoroutine(_sitCoroutine);
         StopCoroutine(_movementRoutine);
 
-        npc.CurrentInteractable = null;
+        npc.currentInteractable = null;
 
         return base.Exit(to);
     }
@@ -45,11 +45,11 @@ public class Sitdown_NPC : MonoBaseState
 
     private IEnumerator SitRoutine(InteractableNPC interactable)
     {
-        npc.CurrentInteractable = null;
+        npc.currentInteractable = null;
 
         yield return _movementRoutine = StartCoroutine(npc.MoveTo(interactable.assignedNode, 
-            npcGoap.WorldState.Speed, 
-            npcGoap.WorldState.SpeedRotation));
+                                                                        npcGoap.WorldState.Speed, 
+                                                                        npcGoap.WorldState.SpeedRotation));
 
         Vector3 target = interactable.sitTarget.position;
         target.y = npc.transform.position.y;

@@ -36,7 +36,7 @@ public class Walk_NPC : MonoBaseState
                                 npcGoap.WorldState.SpeedRotation,
                          steps => npcGoap.WorldState.Steps -= steps);
 
-        npc.CurrentInteractable = npc.GetClosestInteractable();
+        npc.currentInteractable = npc.GetClosestInteractable();
         npcGoap.WorldState.Mood = Waiting;
     }
 

@@ -5,11 +5,12 @@ using System.Linq;
 using FSM;
 using Fusion;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 using UnityEngine.Serialization;
 using static MoodsNpc;
 using static GoapActionName;
 
-public class NPCGoap : NetworkBehaviour, IGridEntity
+public class NPCGoap : NetworkBehaviour
 {
     public WorldState WorldState = new();
 
@@ -18,16 +19,6 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
     private Queue<GoapAction> _currentPlan = new();
 
     private Coroutine currentPlanRoutine;
-
-    public event Action<IGridEntity> OnMove;
-
-    public Vector3 Position
-    {
-        get => transform.position;
-        set => transform.position = value;
-    }
-
-    [SerializeField] private SpatialGrid spatialGrid;
 
     public override void Spawned()
     {
@@ -47,40 +38,29 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
         StartCoroutine(RunPlanLoop());
     }
 
-    private void Start()
-    {
-        if (spatialGrid.isInitialized)
-            spatialGrid.UpdateEntity(this);
-    }
-
-    public override void FixedUpdateNetwork()
-    {
-        base.FixedUpdateNetwork();
-
-        OnMove?.Invoke(this);
-    }
-
     private void FixedUpdate()
     {
-        Debug.Log($"[{name}] CarInRange = {WorldState.CarInRange}");
-        Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
+//        Debug.Log($"[{name}] CarInRange = {WorldState.CarInRange}");
+//        Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
     }
 
 
     private WorldState GetCurrentWorldState()
     {
-        WorldState.InteractionType = npc.CurrentInteractable
-            ? npc.CurrentInteractable.type
+        var (inRange, dir) = npc.IsPlayerQueryInRange(1f);
+
+        WorldState.Impacted = inRange;
+        WorldState.DirectionToFly = dir;
+
+        Debug.Log($"Current World State Impacted {WorldState.Impacted}");
+
+        WorldState.InteractionType = npc.currentInteractable
+            ? npc.currentInteractable.type
             : InteractionType.OnlyForPath;
 
-        // AHORA: solo está en peligro si figura en la tabla central
-
-        WorldState.CarInRange = npc.IsInAnyPlayerQuery(this);
+        WorldState.CarInRange = npc.IsInAnyPlayerQuery();
 
         Debug.Log($"Car In Range {WorldState.CarInRange}");
-        
-        WorldState.CurrentCar ??= npc.GetClosestCarIfHit();
-        WorldState.Impacted = WorldState.CurrentCar;
 
         return WorldState;
     }
@@ -160,7 +140,7 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
             new GoapAction //Escape
             {
                 Name = EscapeGoapNpc,
-                Precondition = s => s.CarInRange &&
+                Precondition = s => s.CarInRange && !s.Impacted &&
                                     s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(Waiting, LightRest, Exploring, Relaxed, Curious),
                 Effect = s =>
@@ -213,14 +193,14 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
         // 1. Condición para Death
         if (state.Life <= 0f)
             return s => s.Mood == Dying;
-
-        // 2. Condición para Escape
-        if (state.CarInRange && state.Mood != NotSafe)
-            return s => s.Mood == NotSafe; //"Safe"
-
-        // 3. Condición para Damage
+        
+        // 2. Condición para Damage
         if (state.Impacted && state.Mood != Injured)
             return s => s.Mood == Injured;
+       
+        // 3. Condición para Escape
+        if (state.CarInRange && state.Mood != NotSafe)
+            return s => s.Mood == NotSafe; //"Safe"
 
         // 4. Condición para Talk
         if (state.InteractionType == InteractionType.Talk && state.Mood != Curious)
@@ -275,6 +255,12 @@ public class NPCGoap : NetworkBehaviour, IGridEntity
         }
     }
 
+    public void ForceReplan()
+    {
+        _currentPlan.Clear(); // ✅ esto forzará a que se replantee el siguiente frame
+    }
+
+    
     private IEnumerator TransitionToCoroutine(IState nextState)
     {
         if (npc.Fsm == null) yield break;

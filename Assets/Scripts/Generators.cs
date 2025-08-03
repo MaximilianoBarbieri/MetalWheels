@@ -73,6 +73,11 @@ public static class GoapActionName
     public const string DeathGoapNpc = "Death";
 }
 
+public static class NPCStats
+{
+    public const float DISTANCE_TO_IMPACT = 1f;
+}
+
 public enum InteractionType
 {
     Talk,

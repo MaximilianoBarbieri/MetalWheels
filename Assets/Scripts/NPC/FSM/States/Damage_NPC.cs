@@ -46,7 +46,7 @@ public class Damage_NPC : MonoBaseState
     {
         npc.ModifyLife(npcGoap.WorldState.Life, 25);
 
-        var direction = (npc.Rigidbody.transform.position - npcGoap.WorldState.CurrentCar.transform.position);
+        var direction = (npc.Rigidbody.transform.position - npcGoap.WorldState.DirectionToFly);
         direction.y = 0f; // anulamos componente Y
         direction = direction.normalized;
 
@@ -60,6 +60,6 @@ public class Damage_NPC : MonoBaseState
         Debug.Log($"Terminó el daño del NPC {npc.name}");
 
         npcGoap.WorldState.Mood = Waiting;
-        npcGoap.WorldState.CurrentCar = null;
+        npcGoap.WorldState.DirectionToFly = Vector3.zero;
     }
 }

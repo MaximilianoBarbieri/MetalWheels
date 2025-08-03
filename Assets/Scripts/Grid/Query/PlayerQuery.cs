@@ -10,10 +10,10 @@ public class PlayerQuery : NetworkBehaviour, IQuery
 {
     public SpatialGrid targetGrid;
     public float radius = 25f;
-    public float dangerDuration = 3f;
+    public float dangerDuration = 1f;
 
-    private Dictionary<NPCGoap, float> activeNpcTimers = new();
-    public List<NPCGoap> CurrentlyInDanger = new();
+    private Dictionary<NPC, float> activeNpcTimers = new();
+    public List<NPC> CurrentlyInDanger = new();
 
     private void Start()
     {
@@ -34,7 +34,7 @@ public class PlayerQuery : NetworkBehaviour, IQuery
     private void FixedUpdate()
     {
         float now = Time.time;
-        var npcsInRange = Query().OfType<NPCGoap>().ToList();
+        var npcsInRange = Query().OfType<NPC>().ToList();
 
         foreach (var npc in npcsInRange)
         {
@@ -57,7 +57,7 @@ public class PlayerQuery : NetworkBehaviour, IQuery
         {
             activeNpcTimers.Remove(npc);
             CurrentlyInDanger.Remove(npc);
-            Debug.Log($"[PlayerQuery] Removido: {npc.name}");
+//            Debug.Log($"[PlayerQuery] Removido: {npc.name}");
         }
     }
 

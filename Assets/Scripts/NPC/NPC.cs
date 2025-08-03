@@ -6,26 +6,34 @@ using FSM;
 using Fusion;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class NPC : NetworkBehaviour
+public class NPC : NetworkBehaviour, IGridEntity
 {
     public Node CurrentNode => GetCurrentNode();
     public Rigidbody Rigidbody => GetComponent<Rigidbody>();
     public Animator Animator => GetComponent<Animator>();
-    [CanBeNull] public SpatialGrid SpatialGrid => FindObjectOfType<SpatialGrid>();
-//    public PlayerQuery playerQuery => FindObjectOfType<PlayerQuery>();
+    private static SpatialGrid SpatialGrid => FindObjectOfType<SpatialGrid>();
 
+    public event Action<IGridEntity> OnMove;
+
+    public Vector3 Position
+    {
+        get => transform.position;
+        set => transform.position = value;
+    }
+    
     [Header("Interacción")] 
     
-    public InteractableNPC CurrentInteractable;
+    public InteractableNPC currentInteractable;
 
     private HashSet<InteractableNPC> _interactablesInRange = new();
     private List<CharacterController> _carsInRange = new();
-    
-    [Header("Estados de FSM")]
+
+    [Header("Estados de FSM")] 
     
     public FiniteStateMachine Fsm;
-    
+
     [SerializeField] internal Idle_NPC idleNpc;
     [SerializeField] internal Walk_NPC walkNpc;
     [SerializeField] internal Sitdown_NPC sitDownNpc;
@@ -34,9 +42,18 @@ public class NPC : NetworkBehaviour
     [SerializeField] internal Damage_NPC damageNpc;
     [SerializeField] internal Death_NPC deathNpc;
 
+    private void Start()
+    {
+        if (SpatialGrid.isInitialized) SpatialGrid.UpdateEntity(this);
+    }
+
     public override void Spawned() => Fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
 
-    private void Update() => Fsm?.Update();
+    private void Update()
+    {
+        OnMove?.Invoke(this);
+        Fsm?.Update();
+    }
 
     private void OnTriggerStay(Collider other)
     {
@@ -64,9 +81,27 @@ public class NPC : NetworkBehaviour
         if (other.gameObject.TryGetComponent<CharacterController>(out var car))
             _carsInRange.Remove(car);
     }
+
+    public bool IsInAnyPlayerQuery() => SpatialGrid?.players.Any(p => p.CurrentlyInDanger
+        .Contains(this)) == true;
     
-    public bool IsInAnyPlayerQuery(NPCGoap npcGoap) => SpatialGrid?.players.Any(p => p.CurrentlyInDanger
-                                                                           .Contains(npcGoap)) == true;
+    public (bool inRange, Vector3 player) IsPlayerQueryInRange(float maxDistance)
+    {
+        foreach (var playerQuery in SpatialGrid?.players)
+        {
+            var controller = playerQuery.gameObject;
+            
+            if (Vector3.Distance(transform.position, controller.transform.position) <= maxDistance)
+            {
+            
+                Debug.Log($"La distancia entre {controller} y {name} es {Vector3.Distance(transform.position, controller.transform.position) <= maxDistance} ");
+    
+                return (true, controller.transform.position);
+            }
+        }
+
+        return (false, Vector3.zero);
+    }
 
     /// <summary>
     /// Devuelve el nodo mas cercano
@@ -182,12 +217,13 @@ public class NPC : NetworkBehaviour
     {
         NodeGenerator.OnGameReady -= ActivateFsm;
     }
-    
-    
-/// <summary>
-/// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
-/// </summary>
-/// <param name="life"></param>
-/// <param name="value"></param>
+
+
+    /// <summary>
+    /// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
+    /// </summary>
+    /// <param name="life"></param>
+    /// <param name="value"></param>
     public void ModifyLife(float life, int value) => life += value;
+
 }

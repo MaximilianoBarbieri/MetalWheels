@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
+using JetBrains.Annotations;
 using UnityEngine;
 using static MoodsNpc;
 
@@ -23,55 +24,56 @@ public class Escape_NPC : MonoBaseState
         npcGoap.WorldState.Mood = NotSafe;
         npcGoap.WorldState.UpdateSpeedByMood();
 
-        dangerTimeoutRoutine = npc.StartCoroutine(DangerCooldown(3f)); // NUEVO
-
-        if (targetNode == null)
-        {
-            Debug.LogWarning("[Escape] No hay zona vecina segura disponible.");
-            npcGoap.WorldState.Mood = Waiting;
-            return;
-        }
-
-        // escapeRoutine = StartCoroutine(EscapeRoutine(targetNode));
+        escapeRoutine = npc.StartCoroutine(EscapeLoop());
     }
+
 
     public override void UpdateLoop()
     {
-        //if (!npcGoap.WorldState.CarInRange && escapeRoutine != null)
-        //{
-        //    StopEscape();
-        //    npcGoap.WorldState.Mood = Waiting;
-        //    Debug.Log("[Escape] Ya no hay coche cerca.");
-        //}
     }
 
     public override Dictionary<string, object> Exit(IState to)
     {
-        StopEscape();
+
         return base.Exit(to);
     }
 
-    public override IState ProcessInput() => this;
-
     private void StopEscape()
     {
-        if (escapeRoutine != null)
-        {
-            StopCoroutine(escapeRoutine);
-            escapeRoutine = null;
-        }
-
-        if (dangerTimeoutRoutine != null) // NUEVO
-        {
-            StopCoroutine(dangerTimeoutRoutine);
-            dangerTimeoutRoutine = null;
-        }
+        StopCoroutine(escapeRoutine);
     }
+    
+    public override IState ProcessInput() => this;
 
-    private IEnumerator DangerCooldown(float duration) // NUEVO
+    private IEnumerator EscapeLoop()
     {
-        yield return new WaitForSeconds(duration);
-        //npcGoap.WorldState.CarInRange = false;
-        Debug.Log($"[Escape] Timeout: peligro despejado → CarInRange = false");
+        while (true)
+        {
+            if (npcGoap.WorldState.Impacted)
+            {
+                Debug.Log("[Escape] Impactado durante escape. Deteniendo y replanteando...");
+                npcGoap.ForceReplan(); // ⚠️ Asegurate que este método cancele el plan actual
+                yield break;
+            }
+
+            if (!npcGoap.WorldState.CarInRange)
+            {
+                Debug.Log("[Escape] Ya no hay coche cerca. Terminando escape.");
+                npcGoap.WorldState.Mood = Waiting;
+                yield break;
+            }
+
+            Vector3 direction = npc.transform.position - npcGoap.WorldState.DirectionToFly;
+            direction.y = 0f;
+            direction.Normalize();
+
+            npc.transform.position += direction * npcGoap.WorldState.Speed * Time.deltaTime;
+            npc.transform.forward = Vector3.Lerp(npc.transform.forward, direction, npcGoap.WorldState.SpeedRotation * Time.deltaTime);
+
+            yield return null;
+        }
+        
     }
+
+
 }

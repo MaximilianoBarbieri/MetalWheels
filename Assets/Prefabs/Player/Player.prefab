@@ -24774,8 +24774,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetGrid: {fileID: 0}
-  radius: 25
-  dangerDuration: 3
+  radius: 5
+  dangerDuration: 1
   CurrentlyInDanger: []
 --- !u!1001 &5715007836269763495
 PrefabInstance:

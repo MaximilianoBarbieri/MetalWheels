@@ -24,8 +24,8 @@ public class Talk_NPC : MonoBaseState
         npcGoap.WorldState.Mood = MoodsNpc.Curious;
         npcGoap.WorldState.UpdateSpeedByMood();
 
-        if (npc.CurrentInteractable != null)
-            _talkCoroutine = StartCoroutine(TalkRoutine(npc.CurrentInteractable));
+        if (npc.currentInteractable != null)
+            _talkCoroutine = StartCoroutine(TalkRoutine(npc.currentInteractable));
     }
 
     public override Dictionary<string, object> Exit(IState to)
@@ -35,7 +35,7 @@ public class Talk_NPC : MonoBaseState
 
         StopCoroutine(_movementRoutine);
 
-        npc.CurrentInteractable = null;
+        npc.currentInteractable = null;
 
         return base.Exit(to);
     }
@@ -60,6 +60,6 @@ public class Talk_NPC : MonoBaseState
         yield return new WaitForSeconds(5f);
 
         npcGoap.WorldState.Mood = MoodsNpc.Waiting;
-        npc.CurrentInteractable = null;
+        npc.currentInteractable = null;
     }
 }

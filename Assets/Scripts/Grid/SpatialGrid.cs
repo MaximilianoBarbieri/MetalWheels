@@ -144,7 +144,7 @@ public class SpatialGrid : NetworkBehaviour
         if (!IsInsideGrid(fromCoord) && !IsInsideGrid(toCoord))
             return Empty;
 
-        Debug.Log("Ejecutando Query");
+//        Debug.Log("Ejecutando Query");
 
         // Creamos tuplas de cada celda
         var cols = Generators.Generate(fromCoord.Item1, x => x + 1)
