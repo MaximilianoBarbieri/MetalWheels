@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FSM;
 using Fusion;
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class NPC : NetworkBehaviour, IGridEntity
 {
@@ -28,7 +26,6 @@ public class NPC : NetworkBehaviour, IGridEntity
     public InteractableNPC currentInteractable;
 
     private HashSet<InteractableNPC> _interactablesInRange = new();
-    private List<CharacterController> _carsInRange = new();
 
     [Header("Estados de FSM")] 
     
@@ -55,36 +52,18 @@ public class NPC : NetworkBehaviour, IGridEntity
         Fsm?.Update();
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
-        {
-            if (interactable.type != InteractionType.OnlyForPath)
-                _interactablesInRange.Add(interactable);
-        }
-
-        if (other.gameObject.TryGetComponent<CharacterController>(out var car))
-        {
-            if (!_carsInRange.Contains(car))
-                _carsInRange.Add(car);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
-        {
-            if (interactable.type != InteractionType.OnlyForPath)
-                _interactablesInRange.Remove(interactable);
-        }
-
-        if (other.gameObject.TryGetComponent<CharacterController>(out var car))
-            _carsInRange.Remove(car);
-    }
-
+    /// <summary>
+    /// Consulta si hay algun auto cerca
+    /// </summary>
+    /// <returns></returns>
     public bool IsInAnyPlayerQuery() => SpatialGrid?.players.Any(p => p.CurrentlyInDanger
         .Contains(this)) == true;
     
+    /// <summary>
+    /// Consulta si el NPC fue impactado por un auto y desde que direccion lo golpeo
+    /// </summary>
+    /// <param name="maxDistance"></param>
+    /// <returns></returns>
     public (bool inRange, Vector3 player) IsPlayerQueryInRange(float maxDistance)
     {
         foreach (var playerQuery in SpatialGrid?.players)
@@ -127,25 +106,7 @@ public class NPC : NetworkBehaviour, IGridEntity
             .Where(obj => obj != null)
             .OrderBy(obj => Vector3.Distance(transform.position, obj.transform.position))
             .FirstOrDefault();
-
-    /// <summary>
-    /// Devuelve el vehiculo mas cercano
-    /// </summary>
-    /// <returns></returns>
-    public CharacterController GetClosestCarIfHit()
-    {
-        var car = _carsInRange
-            .Where(c => c != null)
-            .OrderBy(c => Vector3.Distance(transform.position, c.transform.position))
-            .FirstOrDefault();
-
-        if (car == null)
-            return null;
-
-        float distance = Vector3.Distance(transform.position, car.transform.position);
-        return (distance <= 0.75f) ? car : null;
-    }
-
+    
     /// <summary>
     /// Generacion del camino para AStart
     /// </summary>
@@ -192,7 +153,6 @@ public class NPC : NetworkBehaviour, IGridEntity
         }
     }
 
-
     /// <summary>
     /// Corrutina optimizada para ejecutar la busqueda del camino + recorrerlo
     /// </summary>
@@ -206,24 +166,58 @@ public class NPC : NetworkBehaviour, IGridEntity
         yield return FollowPath(path, speed, speedRotation, onStep);
     }
 
+    
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
+        {
+            if (interactable.type != InteractionType.OnlyForPath)
+                _interactablesInRange.Add(interactable);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.TryGetComponent<InteractableNPC>(out var interactable))
+        {
+            if (interactable.type != InteractionType.OnlyForPath)
+                _interactablesInRange.Remove(interactable);
+        }
+    }
+
+    
     private void ActivateFsm() => Fsm.Active = true;
 
-    private void OnEnable()
-    {
-        NodeGenerator.OnGameReady += ActivateFsm;
-    }
+    private void OnEnable() => NodeGenerator.OnGameReady += ActivateFsm;
 
-    private void OnDisable()
-    {
-        NodeGenerator.OnGameReady -= ActivateFsm;
-    }
-
-
+    private void OnDisable() => NodeGenerator.OnGameReady -= ActivateFsm;
+    
     /// <summary>
     /// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
     /// </summary>
     /// <param name="life"></param>
     /// <param name="value"></param>
     public void ModifyLife(float life, int value) => life += value;
+    
+    #region Metodos descartados 
+    /// <summary>
+    /// Devuelve el vehiculo mas cercano
+    /// </summary>
+    /// <returns></returns>
+//    public CharacterController GetClosestCarIfHit()
+//    {
+//        var car = _carsInRange
+//            .Where(c => c != null)
+//            .OrderBy(c => Vector3.Distance(transform.position, c.transform.position))
+//            .FirstOrDefault();
+//
+//        if (car == null)
+//            return null;
+//
+//        float distance = Vector3.Distance(transform.position, car.transform.position);
+//        return (distance <= 0.75f) ? car : null;
+//    }
+//
+    #endregion
 
 }

@@ -10,30 +10,23 @@ public class Damage_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
 
-    private const int ImpactForce = 10;
-
     private Coroutine _damageRoutine;
+
+    private const int ImpactForce = 10;
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
         npc.Animator.SetTrigger(IdleAnimNpc);
-
-        Debug.Log("El npc " + $"${npc.name}" + " acaba de ser atropellado");
-
+        
         npcGoap.WorldState.Mood = Injured;
 
         _damageRoutine = StartCoroutine(DamageRoutine());
     }
 
-    public override void UpdateLoop()
-    {
-    }
+    public override IState ProcessInput() => this;
 
-    public override IState ProcessInput()
-    {
-        return this;
-    }
-
+    public override void UpdateLoop() { }
+    
     public override Dictionary<string, object> Exit(IState to)
     {
         if (_damageRoutine != null)
@@ -44,22 +37,26 @@ public class Damage_NPC : MonoBaseState
 
     private IEnumerator DamageRoutine()
     {
-        npc.ModifyLife(npcGoap.WorldState.Life, 25);
+        npcGoap.WorldState.Life -= 25;
 
         var direction = (npc.Rigidbody.transform.position - npcGoap.WorldState.DirectionToFly);
-        direction.y = 0f; // anulamos componente Y
+        
+        direction.y = 0f;
+        
         direction = direction.normalized;
 
         npc.Rigidbody.AddForce(direction * ImpactForce, ForceMode.Impulse);
 
-        yield return new WaitForSeconds(0.25f); // reposo adicional
+        yield return new WaitForSeconds(0.25f);
 
         npc.Rigidbody.velocity = Vector3.zero;
 
-        yield return new WaitForSeconds(2f); // reposo adicional
-        Debug.Log($"Terminó el daño del NPC {npc.name}");
+        yield return new WaitForSeconds(2f);
 
+        if (!(npcGoap.WorldState.Life > 0)) yield break;
+        
         npcGoap.WorldState.Mood = Waiting;
+            
         npcGoap.WorldState.DirectionToFly = Vector3.zero;
     }
 }
