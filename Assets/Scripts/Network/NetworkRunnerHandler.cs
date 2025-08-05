@@ -77,7 +77,8 @@ public class NetworkRunnerHandler : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = gameMode,
             Scene =  SceneRef.FromIndex(sceneIndex),
             SessionName = sessionName,
-            ConnectionToken = connectionToken // Aquí pasamos el token
+            ConnectionToken = connectionToken, // Aquí pasamos el token
+            PlayerCount = 4
         });
         
         if (!result.Ok)
