@@ -14,9 +14,7 @@ public class Node : NetworkBehaviour
     public List<Node> neighbors = new();
 
     public Color neighborColor;
-
-    [Networked] public bool hasCar { get; private set; }
-
+    
     public void DetectNeighbors(float radius)
     {
         neighbors.Clear();
@@ -32,7 +30,6 @@ public class Node : NetworkBehaviour
     {
         Gizmos.DrawCube(transform.position + Vector3.up * 0.1f, Vector3.one * gizmoSize);
 
-        Gizmos.color = hasCar ? Color.red : Color.green;
         Gizmos.DrawCube(transform.position + Vector3.up * 0.1f, Vector3.one * gizmoSize);
 
         Gizmos.color = neighborColor;
@@ -43,27 +40,5 @@ public class Node : NetworkBehaviour
                 Gizmos.DrawLine(transform.position + Vector3.up * 0.1f,
                     neighbor.transform.position + Vector3.up * 0.1f);
         }
-    }
-
-    private HashSet<CharacterController> _carsInside = new();
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //if (!Object.HasStateAuthority) return;
-
-        if (!other.TryGetComponent<CharacterController>(out var car)) return;
-
-        _carsInside.Add(car);
-        hasCar = _carsInside.Count > 0; // Fusion sincroniza este valor
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        //if (!Object.HasStateAuthority) return;
-
-        if (!other.TryGetComponent<CharacterController>(out var car)) return;
-
-        _carsInside.Remove(car);
-        hasCar = _carsInside.Count > 0;
     }
 }

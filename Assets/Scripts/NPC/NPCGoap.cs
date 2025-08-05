@@ -10,46 +10,46 @@ using static GoapActionName;
 
 public class NPCGoap : NetworkBehaviour
 {
-    public WorldState WorldState;
+    private NPC _npc;
 
-    private NPC npc;
+    public WorldState WorldState = new();
+    private WorldState _lastState;
+
+    private Coroutine _currentPlanRoutine;
+
     private List<GoapAction> _actions;
     private Queue<GoapAction> _currentPlan = new();
-
-    private Coroutine currentPlanRoutine;
 
     public override void Spawned()
     {
         base.Spawned();
 
-        npc = GetComponent<NPC>();
-
-        WorldState ??= new WorldState();
+        _npc = GetComponent<NPC>();
 
         WorldState.Steps = 0;
         WorldState.MaxSteps = 5;
         WorldState.SpeedRotation = 5f;
         WorldState.Life = 100f;
         WorldState.Mood = Waiting;
+        WorldState.CarInRange = false;
 
         _actions = CreateActions();
 
         StartCoroutine(RunPlanLoop());
     }
 
-    private void Update() => Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
-
     private WorldState GetCurrentWorldState()
     {
-        WorldState.InteractionType = npc.CurrentInteractable
-            ? npc.CurrentInteractable.type
-            : InteractionType.OnlyForPath;
+        var (inRange, dir) = _npc.IsPlayerQueryInRange(1f);
 
-        WorldState.CarInRange = !NodeGenerator.Instance?.GetZoneForNode(npc.CurrentNode)!?.IsSafe ?? false;
-
-        WorldState.CurrentCar ??= npc.GetClosestCarIfHit();
-        WorldState.Impacted = WorldState.CurrentCar;
-
+        WorldState.Impacted = inRange;
+        
+        WorldState.DirectionToFly = dir;
+        
+        WorldState.InteractionType = _npc.currentInteractable ? _npc.currentInteractable.type
+                                                                   : InteractionType.OnlyForPath;
+        WorldState.CarInRange = _npc.IsInAnyPlayerQuery();
+        
         return WorldState;
     }
 
@@ -70,7 +70,7 @@ public class NPCGoap : NetworkBehaviour
                     ns.Steps = ns.MaxSteps;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.idleNpc),
+                Execute = () => TransitionToCoroutine(_npc.idleNpc),
                 Cost = 3
             },
 
@@ -87,7 +87,7 @@ public class NPCGoap : NetworkBehaviour
                     ns.Mood = Exploring;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.walkNpc),
+                Execute = () => TransitionToCoroutine(_npc.walkNpc),
                 Cost = 3
             },
 
@@ -104,7 +104,7 @@ public class NPCGoap : NetworkBehaviour
                     ns.Mood = Relaxed;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.sitDownNpc),
+                Execute = () => TransitionToCoroutine(_npc.sitDownNpc),
                 Cost = 2
             },
 
@@ -121,14 +121,14 @@ public class NPCGoap : NetworkBehaviour
                     ns.Mood = Curious;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.talkNpc),
+                Execute = () => TransitionToCoroutine(_npc.talkNpc),
                 Cost = 2
             },
 
             new GoapAction //Escape
             {
                 Name = EscapeGoapNpc,
-                Precondition = s => s.CarInRange &&
+                Precondition = s => s.CarInRange && !s.Impacted &&
                                     s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(Waiting, LightRest, Exploring, Relaxed, Curious),
                 Effect = s =>
@@ -137,7 +137,7 @@ public class NPCGoap : NetworkBehaviour
                     ns.Mood = NotSafe;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.escapeNpc),
+                Execute = () => TransitionToCoroutine(_npc.escapeNpc),
                 Cost = 1
             },
 
@@ -151,10 +151,9 @@ public class NPCGoap : NetworkBehaviour
                 {
                     var ns = s.Clone();
                     ns.Mood = Injured;
-                    ns.Life -= 25; //Reemplazar por un utils de Cars que diga "Damage a los NPC [Hasta entonces, asumimos que es 25]"
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.damageNpc),
+                Execute = () => TransitionToCoroutine(_npc.damageNpc),
                 Cost = 0
             },
 
@@ -168,7 +167,7 @@ public class NPCGoap : NetworkBehaviour
                     ns.Mood = Dying;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.deathNpc),
+                Execute = () => TransitionToCoroutine(_npc.deathNpc),
                 Cost = 0
             },
         };
@@ -181,14 +180,14 @@ public class NPCGoap : NetworkBehaviour
         // 1. Condición para Death
         if (state.Life <= 0f)
             return s => s.Mood == Dying;
-
-        // 2. Condición para Escape
-        if (state.CarInRange && state.Mood != NotSafe)
-            return s => s.Mood == NotSafe; //"Safe"
-
-        // 3. Condición para Damage
+        
+        // 2. Condición para Damage
         if (state.Impacted && state.Mood != Injured)
             return s => s.Mood == Injured;
+       
+        // 3. Condición para Escape
+        if (state.CarInRange && state.Mood != NotSafe)
+            return s => s.Mood == NotSafe; //"Safe"
 
         // 4. Condición para Talk
         if (state.InteractionType == InteractionType.Talk && state.Mood != Curious)
@@ -212,13 +211,14 @@ public class NPCGoap : NetworkBehaviour
         return s => s.Mood == Waiting;
     }
 
+
     private IEnumerator RunPlanLoop()
     {
         while (true)
         {
             var current = GetCurrentWorldState();
 
-            bool needsReplanning = _currentPlan.Count == 0;
+            bool needsReplanning = _currentPlan.Count == 0 || WorldStateChanged(current, _lastState);
 
             if (needsReplanning)
             {
@@ -233,20 +233,28 @@ public class NPCGoap : NetworkBehaviour
             {
                 var action = _currentPlan.Dequeue();
 
-                if (currentPlanRoutine != null)
-                    StopCoroutine(currentPlanRoutine);
+                if (_currentPlanRoutine != null)
+                    StopCoroutine(_currentPlanRoutine);
 
-                yield return currentPlanRoutine = StartCoroutine(action.Execute());
+                yield return _currentPlanRoutine = StartCoroutine(action.Execute());
             }
 
+            _lastState = current.Clone(); 
             yield return null;
         }
     }
 
+    private bool WorldStateChanged(WorldState a, WorldState b) => a.Life != b.Life ||
+                                                                  a.Steps != b.Steps ||
+                                                                  a.CarInRange != b.CarInRange ||
+                                                                  a.Impacted != b.Impacted ||
+                                                                  a.Mood != b.Mood ||
+                                                                  a.InteractionType != b.InteractionType;
+    
     private IEnumerator TransitionToCoroutine(IState nextState)
     {
-        if (npc.Fsm == null) yield break;
+        if (_npc.Fsm == null) yield break;
 
-        npc.Fsm.TransitionTo(nextState);
+        _npc.Fsm.TransitionTo(nextState);
     }
 }

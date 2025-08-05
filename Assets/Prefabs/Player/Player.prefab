@@ -24543,6 +24543,7 @@ GameObject:
   - component: {fileID: -8410449478962887658}
   - component: {fileID: -6260556829295157084}
   - component: {fileID: -941250226265239958}
+  - component: {fileID: 1960131902001810464}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -24591,6 +24592,7 @@ MonoBehaviour:
   - {fileID: 6747240166403912663}
   - {fileID: -6260556829295157084}
   - {fileID: -941250226265239958}
+  - {fileID: 1960131902001810464}
   ForceRemoteRenderTimeframe: 0
 --- !u!143 &7792159476141714268
 CharacterController:
@@ -24759,6 +24761,22 @@ MonoBehaviour:
   _firingPositionTransform: {fileID: 5652579983590283510}
   _shootingParticles: {fileID: 9130956613953339743}
   fireCooldown: 1
+--- !u!114 &1960131902001810464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7851659979244366952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74906f21e868e2e4c91734e9b235d9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetGrid: {fileID: 0}
+  radius: 5
+  dangerDuration: 1
+  CurrentlyInDanger: []
 --- !u!1001 &5715007836269763495
 PrefabInstance:
   m_ObjectHideFlags: 0

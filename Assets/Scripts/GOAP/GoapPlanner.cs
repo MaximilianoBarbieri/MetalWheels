@@ -12,7 +12,7 @@ public class GoapPlanner : MonoBehaviour
     {
         var frontier = new List<(List<GoapAction> path, WorldState state, float cost)>();
         frontier.Add((new List<GoapAction>(), start, 0));
-
+        
         while (frontier.Count > 0)
         {
             // Ordenamos por costo acumulado
@@ -31,6 +31,8 @@ public class GoapPlanner : MonoBehaviour
             {
                 if (action.Precondition(state))
                 {
+//                    Debug.Log($"[GOAP] Acción válida: {action.Name}, CarInRange: {state.CarInRange}");
+
                     var newState = action.Effect(state.Clone());
                     var newPath = new List<GoapAction>(path) { action };
                     var newCost = currentCost + action.Cost;

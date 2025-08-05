@@ -4,16 +4,18 @@ using System.Linq;
 using FSM;
 using static MoodsNpc;
 using UnityEngine;
+using static AnimNpc;
 
 public class Walk_NPC : MonoBaseState
 {
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
+    
     private Coroutine _movementRoutine;
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.Animator.SetTrigger(AnimNpc.WalkAnimNpc);
+        npc.Animator.SetTrigger(WalkAnimNpc);
         
         npcGoap.WorldState.Mood = Exploring;
 
@@ -21,11 +23,17 @@ public class Walk_NPC : MonoBaseState
         
         _movementRoutine = StartCoroutine(DoWalk());
     }
+    public override IState ProcessInput() => this;
 
-    public override void UpdateLoop()
+    public override void UpdateLoop() { }
+
+    public override Dictionary<string, object> Exit(IState to)
     {
-    }
+        StopCoroutine(_movementRoutine);
 
+        return base.Exit(to);
+    }
+    
     private IEnumerator DoWalk()
     {
         Node startNode = npc.CurrentNode;
@@ -36,7 +44,7 @@ public class Walk_NPC : MonoBaseState
                                 npcGoap.WorldState.SpeedRotation,
                          steps => npcGoap.WorldState.Steps -= steps);
 
-        npc.CurrentInteractable = npc.GetClosestInteractable();
+        npc.currentInteractable = npc.GetClosestInteractable();
         npcGoap.WorldState.Mood = Waiting;
     }
 
@@ -46,22 +54,11 @@ public class Walk_NPC : MonoBaseState
         if (zone == null)
             return null;
 
-        var candidates = zone.nodes.Where(n => n != start).ToList();
+        var candidates = zone.nodes.Where(n => n != start)
+                                            .ToList();
         if (candidates.Count == 0)
             return null;
 
         return candidates[Random.Range(0, candidates.Count)];
-    }
-
-    public override Dictionary<string, object> Exit(IState to)
-    {
-        StopCoroutine(_movementRoutine);
-
-        return base.Exit(to);
-    }
-
-    public override IState ProcessInput()
-    {
-        return this;
     }
 }

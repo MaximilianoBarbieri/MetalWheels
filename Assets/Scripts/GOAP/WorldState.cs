@@ -16,7 +16,7 @@ public class WorldState
     
     public string Mood;
     
-    public CharacterController CurrentCar;
+    public Vector3 DirectionToFly;
     
     public InteractionType? InteractionType;
 

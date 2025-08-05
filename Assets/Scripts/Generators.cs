@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -71,6 +70,11 @@ public static class GoapActionName
     public const string SitdownGoapNpc = "Sitdown";
     public const string DamageGoapNpc = "Damage";
     public const string DeathGoapNpc = "Death";
+}
+
+public static class NPCStats
+{
+    public const float DISTANCE_TO_IMPACT = 1f;
 }
 
 public enum InteractionType

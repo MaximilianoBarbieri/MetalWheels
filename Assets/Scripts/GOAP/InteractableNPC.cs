@@ -6,9 +6,7 @@ public class InteractableNPC : NetworkBehaviour
     public InteractionType type;
     public Transform sitTarget;
     public Node assignedNode;
-
-    // private void Start() => NodeGenerator.Instance.Register(this);
-
+    
     public void AssignClosestNode(float radius)
     {
         float minDist = float.MaxValue;
@@ -28,10 +26,10 @@ public class InteractableNPC : NetworkBehaviour
 
         closest.type = type;
         assignedNode = closest;
-
-//        Debug.Log("El " +$"{gameObject.name}" + " ha sido asociado al nodo " + $"{assignedNode}");
     }
-
+    
+    private void OnEnable() => NodeGenerator.OnGameReady += () => { NodeGenerator.Instance.Register(this); };
+    
     private void OnDrawGizmosSelected()
     {
         if (assignedNode != null)
@@ -40,10 +38,5 @@ public class InteractableNPC : NetworkBehaviour
             Gizmos.DrawLine(transform.position + Vector3.up * 0.2f,
                 assignedNode.transform.position + Vector3.up * 0.2f);
         }
-    }
-
-    private void OnEnable()
-    {
-        NodeGenerator.OnGameReady += () => { NodeGenerator.Instance.Register(this); };
     }
 }
