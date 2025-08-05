@@ -3,13 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
+using Fusion;
 using UnityEngine;
 using static MoodsNpc;
 using static GoapActionName;
 
-public class NPCGoap : MonoBehaviour
+public class NPCGoap : NetworkBehaviour
 {
-    public WorldState worldState;
+    public WorldState WorldState;
 
     private NPC npc;
     private List<GoapAction> _actions;
@@ -17,46 +18,50 @@ public class NPCGoap : MonoBehaviour
 
     private Coroutine currentPlanRoutine;
 
-    private void Awake()
+    public override void Spawned()
     {
+        base.Spawned();
+
         npc = GetComponent<NPC>();
 
-        if (worldState == null)
-            worldState = new WorldState();
+        WorldState ??= new WorldState();
 
-        worldState.Steps = 0;
-        worldState.MaxSteps = 5;
-        worldState.SpeedRotation = 5f;
-        worldState.Life = 100f;
-        worldState.Mood = Waiting;
+        WorldState.Steps = 0;
+        WorldState.MaxSteps = 5;
+        WorldState.SpeedRotation = 5f;
+        WorldState.Life = 100f;
+        WorldState.Mood = Waiting;
 
         _actions = CreateActions();
 
         StartCoroutine(RunPlanLoop());
     }
 
-    private void Update() => Debug.Log("Mi mood actual es => " + $"{worldState.Mood}");
+    private void Update() => Debug.Log($"Mi mood actual es => {WorldState?.Mood ?? "No iniciado"}");
 
     private WorldState GetCurrentWorldState()
     {
-        worldState.InteractionType = npc.currentInteractable != null
-            ? npc.currentInteractable.type
+        WorldState.InteractionType = npc.CurrentInteractable
+            ? npc.CurrentInteractable.type
             : InteractionType.OnlyForPath;
 
-        worldState.CarInRange = !NodeGenerator.Instance.GetZoneForNode(npc.CurrentNode)?.IsSafe ?? false;
+        WorldState.CarInRange = !NodeGenerator.Instance?.GetZoneForNode(npc.CurrentNode)!?.IsSafe ?? false;
 
-        return worldState;
+        WorldState.CurrentCar ??= npc.GetClosestCarIfHit();
+        WorldState.Impacted = WorldState.CurrentCar;
+
+        return WorldState;
     }
 
     private List<GoapAction> CreateActions()
     {
         return new List<GoapAction>
         {
-            new GoapAction
+            new GoapAction //Idle
             {
                 Name = IdleGoapNpc,
                 Precondition = s => !s.CarInRange &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(Waiting),
                 Effect = s =>
                 {
@@ -69,12 +74,12 @@ public class NPCGoap : MonoBehaviour
                 Cost = 3
             },
 
-            new GoapAction
+            new GoapAction //Walk
             {
                 Name = WalkGoapNpc,
                 Precondition = s => !s.CarInRange &&
                                     s.Steps == s.MaxSteps &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(LightRest),
                 Effect = s =>
                 {
@@ -86,12 +91,12 @@ public class NPCGoap : MonoBehaviour
                 Cost = 3
             },
 
-            new GoapAction
+            new GoapAction //Talk
             {
                 Name = SitdownGoapNpc,
                 Precondition = s => !s.CarInRange && s.Steps == s.MaxSteps &&
                                     s.InteractionType == InteractionType.Sit &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(LightRest),
                 Effect = s =>
                 {
@@ -99,16 +104,16 @@ public class NPCGoap : MonoBehaviour
                     ns.Mood = Relaxed;
                     return ns;
                 },
-                Execute = () => TransitionToCoroutine(npc.sitdownNpc),
+                Execute = () => TransitionToCoroutine(npc.sitDownNpc),
                 Cost = 2
             },
 
-            new GoapAction
+            new GoapAction //Sitdown
             {
                 Name = TalkGoapNpc,
                 Precondition = s => !s.CarInRange && s.Steps == s.MaxSteps &&
                                     s.InteractionType == InteractionType.Talk &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(LightRest),
                 Effect = s =>
                 {
@@ -119,11 +124,12 @@ public class NPCGoap : MonoBehaviour
                 Execute = () => TransitionToCoroutine(npc.talkNpc),
                 Cost = 2
             },
-            new GoapAction
+
+            new GoapAction //Escape
             {
                 Name = EscapeGoapNpc,
                 Precondition = s => s.CarInRange &&
-                                    s.IsMoodNot(Dying, NotSafe) &&
+                                    s.IsMoodNot(Dying, Injured, NotSafe) &&
                                     s.IsMoodOneOf(Waiting, LightRest, Exploring, Relaxed, Curious),
                 Effect = s =>
                 {
@@ -134,7 +140,25 @@ public class NPCGoap : MonoBehaviour
                 Execute = () => TransitionToCoroutine(npc.escapeNpc),
                 Cost = 1
             },
-            new GoapAction
+
+            new GoapAction //Damage
+            {
+                Name = DamageGoapNpc,
+                Precondition = s => s.Impacted &&
+                                    s.IsMoodNot(Dying, Injured) &&
+                                    s.IsMoodOneOf(Waiting, NotSafe, LightRest, Exploring, Relaxed, Curious),
+                Effect = s =>
+                {
+                    var ns = s.Clone();
+                    ns.Mood = Injured;
+                    ns.Life -= 25; //Reemplazar por un utils de Cars que diga "Damage a los NPC [Hasta entonces, asumimos que es 25]"
+                    return ns;
+                },
+                Execute = () => TransitionToCoroutine(npc.damageNpc),
+                Cost = 0
+            },
+
+            new GoapAction //Death
             {
                 Name = DeathGoapNpc,
                 Precondition = s => s.Life <= 0f,
@@ -154,30 +178,31 @@ public class NPCGoap : MonoBehaviour
 
     private Func<WorldState, bool> SelectGoal(WorldState state)
     {
-        // 1. NPC muerto
+        // 1. Condición para Death
         if (state.Life <= 0f)
             return s => s.Mood == Dying;
 
-        // 2. Escape si hay autos cerca
+        // 2. Condición para Escape
         if (state.CarInRange && state.Mood != NotSafe)
             return s => s.Mood == NotSafe; //"Safe"
 
-        //if (!state.carInRange && state.mood == NotSafe)
-        //    return s => s.mood == Waiting;
+        // 3. Condición para Damage
+        if (state.Impacted && state.Mood != Injured)
+            return s => s.Mood == Injured;
 
-        // 3. Charla si no está curioso
+        // 4. Condición para Talk
         if (state.InteractionType == InteractionType.Talk && state.Mood != Curious)
             return s => s.Mood == Curious;
 
-        // 4. Sentarse si no está relajado
+        // 5. Condición para Sitdown
         if (state.InteractionType == InteractionType.Sit && state.Mood != Relaxed)
             return s => s.Mood == Relaxed;
 
-        // 5. Si aún no exploró
+        // 6. Condición para Walk
         if (state.Steps >= state.MaxSteps && state.Mood != Exploring)
             return s => s.Mood == Exploring;
 
-        //6. Si tengo que recargar pasos despeus de una accion
+        //7. Condición para Idle
         if (!state.CarInRange &&
             state.Steps < state.MaxSteps &&
             state.Mood == Waiting)
@@ -202,8 +227,6 @@ public class NPCGoap : MonoBehaviour
 
                 if (plan != null)
                     _currentPlan = new Queue<GoapAction>(plan);
-                // else
-                //     Debug.Log("No plan found.");
             }
 
             if (_currentPlan.Count > 0)
@@ -222,7 +245,8 @@ public class NPCGoap : MonoBehaviour
 
     private IEnumerator TransitionToCoroutine(IState nextState)
     {
-        npc.fsm.TransitionTo(nextState);
-        yield break;
+        if (npc.Fsm == null) yield break;
+
+        npc.Fsm.TransitionTo(nextState);
     }
 }

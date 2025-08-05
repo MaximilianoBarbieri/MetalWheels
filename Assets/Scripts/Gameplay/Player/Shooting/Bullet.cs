@@ -61,6 +61,9 @@ public class Bullet : NetworkBehaviour
         {
             if (other.TryGetComponent(out LifeHandler lifeHandler))
             {
+                // Es mi propio dueño, ignorar el daño
+                if (lifeHandler.PlayerRef == OwnerPlayerRef) return;
+                
                 Debug.Log($"[Bullet] Haciendo daño a {other.name} de {OwnerPlayerRef.ToString()}");
                 lifeHandler.ModifyLife(-_damage, OwnerPlayerRef);
 

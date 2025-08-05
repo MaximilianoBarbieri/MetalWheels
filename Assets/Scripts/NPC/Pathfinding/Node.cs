@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 
-public class Node : MonoBehaviour
+public class Node : NetworkBehaviour
 {
     [Tooltip("Tipo de interacción que este nodo representa (por ejemplo, Sit o Talk, o solo para caminar)")]
     public InteractionType type;
@@ -14,8 +15,7 @@ public class Node : MonoBehaviour
 
     public Color neighborColor;
 
-    public bool hasCar { get; private set; }
-    private readonly HashSet<GameObject> carsInside = new();
+    [Networked] public bool hasCar { get; private set; }
 
     public void DetectNeighbors(float radius)
     {
@@ -34,10 +34,7 @@ public class Node : MonoBehaviour
 
         Gizmos.color = hasCar ? Color.red : Color.green;
         Gizmos.DrawCube(transform.position + Vector3.up * 0.1f, Vector3.one * gizmoSize);
-    }
 
-    private void OnDrawGizmosSelected()
-    {
         Gizmos.color = neighborColor;
 
         foreach (var neighbor in neighbors)
@@ -48,28 +45,25 @@ public class Node : MonoBehaviour
         }
     }
 
+    private HashSet<CharacterController> _carsInside = new();
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<CharacterController>(out var car))
-        {
-            carsInside.Add(car.gameObject);
-            hasCar = true;
-            UpdateColor(true);
-        }
+        //if (!Object.HasStateAuthority) return;
+
+        if (!other.TryGetComponent<CharacterController>(out var car)) return;
+
+        _carsInside.Add(car);
+        hasCar = _carsInside.Count > 0; // Fusion sincroniza este valor
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.TryGetComponent<CharacterController>(out var car))
-        {
-            carsInside.Remove(car.gameObject);
-            hasCar = carsInside.Count > 0;
-            UpdateColor(hasCar);
-        }
-    }
+        //if (!Object.HasStateAuthority) return;
 
-    private void UpdateColor(bool danger)
-    {
-        neighborColor = danger ? Color.red : Color.green;
+        if (!other.TryGetComponent<CharacterController>(out var car)) return;
+
+        _carsInside.Remove(car);
+        hasCar = _carsInside.Count > 0;
     }
 }

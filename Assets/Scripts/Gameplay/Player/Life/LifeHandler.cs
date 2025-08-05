@@ -13,6 +13,9 @@ public class LifeHandler : NetworkBehaviour
     private ModelPlayer _model;
     private PlayerGlobalUIHandler _globalUI;
     
+    public PlayerRef PlayerRef { get; set; } // o un campo público
+    
+    public event Action<float> OnDamageTaken; // float = magnitud del daño
     public event Action OnTakeDamageFX = delegate { };
     public event Action<float> OnLifeUpdate = delegate { };
     public event Action OnRespawn = delegate { };
@@ -22,6 +25,8 @@ public class LifeHandler : NetworkBehaviour
     {
         _model = GetComponent<ModelPlayer>();
         CurrentLife = _model.CurrentHealth;
+        
+        PlayerRef = GetComponent<NetworkObject>().InputAuthority;
         
         OnDead += DisableVisuals; //se puede agregar efectos visuales aca
         OnRespawn += EnableVisuals; //se puede agregar efectos visuales aca
@@ -38,14 +43,21 @@ public class LifeHandler : NetworkBehaviour
         UpdateUI();
     }
 
-    public void ModifyLife(int delta, PlayerRef? attacker = null)
+    public void ModifyLife(int amount, PlayerRef? attacker = null)
     {
         if (_model.IsDead) return;
-        _model.ModifyLife(delta, attacker);
+        _model.ModifyLife(amount, attacker);
         CurrentLife = _model.CurrentHealth;
         
-        if (delta < 0) {
+        if (amount < 0) { //Solo si es daño (si es negativo es daño)
             _model.DamageFXCounter++;
+            //OnDamageTaken?.Invoke(Mathf.Abs(1.25f)); //TODO: hardcode por ahora, estaria bueno que reciba un shake proporcional al daño
+            var playerController = GetComponent<PlayerController>();
+            if (playerController != null)
+            {
+                // Llama al RPC para que SOLO el cliente local haga el shake
+                playerController.Rpc_TriggerShake(1f); // o pasá el valor de magnitude si querés
+            }
         }
     }
 

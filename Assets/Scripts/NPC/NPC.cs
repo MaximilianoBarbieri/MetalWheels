@@ -3,34 +3,38 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FSM;
+using Fusion;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class NPC : MonoBehaviour
+public class NPC : NetworkBehaviour
 {
     public Node CurrentNode => GetCurrentNode();
-    public Animator animator => GetComponent<Animator>();
+    public Rigidbody Rigidbody => GetComponent<Rigidbody>();
+    public Animator Animator => GetComponent<Animator>();
 
-    [Header("Interacción")] public InteractableNPC currentInteractable;
+    [Header("Interacción")] 
+    
+    public InteractableNPC CurrentInteractable;
 
-    private List<CharacterController> _carsInRange = new();
     private HashSet<InteractableNPC> _interactablesInRange = new();
-
-    public FiniteStateMachine fsm;
-
+    private List<CharacterController> _carsInRange = new();
+    
+    [Header("Estados de FSM")]
+    
+    public FiniteStateMachine Fsm;
+    
     [SerializeField] internal Idle_NPC idleNpc;
     [SerializeField] internal Walk_NPC walkNpc;
-    [SerializeField] internal Sitdown_NPC sitdownNpc;
+    [SerializeField] internal Sitdown_NPC sitDownNpc;
     [SerializeField] internal Talk_NPC talkNpc;
     [SerializeField] internal Escape_NPC escapeNpc;
+    [SerializeField] internal Damage_NPC damageNpc;
     [SerializeField] internal Death_NPC deathNpc;
 
-    private void Start()
-    {
-        fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
-        fsm.Active = true;
-    }
+    public override void Spawned() => Fsm = new FiniteStateMachine(idleNpc, StartCoroutine);
 
-    private void Update() => fsm.Update(); // Llama al estado actual (solo UpdateLoop y ProcessInput)
+    private void Update() => Fsm?.Update();
 
     private void OnTriggerStay(Collider other)
     {
@@ -88,11 +92,19 @@ public class NPC : MonoBehaviour
     /// Devuelve el vehiculo mas cercano
     /// </summary>
     /// <returns></returns>
-    private CharacterController ClosestCar() =>
-        _carsInRange
-            .Where(car => car != null)
-            .OrderBy(car => Vector3.Distance(transform.position, car.transform.position))
-            .FirstOrDefault(); //Metodo auxiliar, por si necesito este obj
+    public CharacterController GetClosestCarIfHit()
+    {
+        var car = _carsInRange
+            .Where(c => c != null)
+            .OrderBy(c => Vector3.Distance(transform.position, c.transform.position))
+            .FirstOrDefault();
+
+        if (car == null)
+            return null;
+
+        float distance = Vector3.Distance(transform.position, car.transform.position);
+        return (distance <= 0.75f) ? car : null;
+    }
 
     /// <summary>
     /// Generacion del camino para AStart
@@ -121,7 +133,7 @@ public class NPC : MonoBehaviour
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    private IEnumerator FollowPath(List<Node> path, float speed,float speedRotation, Action<int> onStep = null)
+    private IEnumerator FollowPath(List<Node> path, float speed, float speedRotation, Action<int> onStep = null)
     {
         if (path == null || path.Count == 0)
             yield break;
@@ -146,7 +158,7 @@ public class NPC : MonoBehaviour
     /// </summary>
     /// <param name="target"></param>
     /// <returns></returns>
-    public IEnumerator MoveTo(Node target, float speed,float speedRotation, Action<int> onStep = null)
+    public IEnumerator MoveTo(Node target, float speed, float speedRotation, Action<int> onStep = null)
     {
         List<Node> path = null;
         yield return GeneratePath(CurrentNode, target, result => path = result);
@@ -154,10 +166,23 @@ public class NPC : MonoBehaviour
         yield return FollowPath(path, speed, speedRotation, onStep);
     }
 
-    /// <summary>
-    /// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
-    /// </summary>
-    /// <param name="life"></param>
-    /// <param name="value"></param>
+    private void ActivateFsm() => Fsm.Active = true;
+
+    private void OnEnable()
+    {
+        NodeGenerator.OnGameReady += ActivateFsm;
+    }
+
+    private void OnDisable()
+    {
+        NodeGenerator.OnGameReady -= ActivateFsm;
+    }
+    
+    
+/// <summary>
+/// Uso exclusivo para testeo, se utiliza en el NPCGoapEditor [Para el inspector de Unity]
+/// </summary>
+/// <param name="life"></param>
+/// <param name="value"></param>
     public void ModifyLife(float life, int value) => life += value;
 }

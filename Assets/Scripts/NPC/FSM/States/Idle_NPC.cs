@@ -19,10 +19,10 @@ public class Idle_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.animator.SetTrigger(IdleNpc);
+        npc.Animator.SetTrigger(IdleAnimNpc);
 
-        npcGoap.worldState.Mood = LightRest;
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.Mood = LightRest;
+        npcGoap.WorldState.UpdateSpeedByMood();
 
         _recoverStepsRoutine = StartCoroutine(RecoverStepsOverTime());
     }
@@ -42,9 +42,9 @@ public class Idle_NPC : MonoBaseState
     {
         Debug.Log("Entro a corrutina de Steps");
 
-        while (npcGoap.worldState.Steps < npcGoap.worldState.MaxSteps)
+        while (npcGoap.WorldState.Steps < npcGoap.WorldState.MaxSteps)
         {
-            npcGoap.worldState.Steps++;
+            npcGoap.WorldState.Steps++;
             //Debug.Log("Se sumo un step, ahora tus steps son:" + $"{npcGoap.worldState.steps}");
             yield return new WaitForSeconds(2);
         }

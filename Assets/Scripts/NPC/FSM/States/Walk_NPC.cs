@@ -13,11 +13,11 @@ public class Walk_NPC : MonoBaseState
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.animator.SetTrigger(AnimNpc.WalkNpc);
+        npc.Animator.SetTrigger(AnimNpc.WalkAnimNpc);
         
-        npcGoap.worldState.Mood = Exploring;
+        npcGoap.WorldState.Mood = Exploring;
 
-        npcGoap.worldState.UpdateSpeedByMood();
+        npcGoap.WorldState.UpdateSpeedByMood();
         
         _movementRoutine = StartCoroutine(DoWalk());
     }
@@ -32,12 +32,12 @@ public class Walk_NPC : MonoBaseState
         Node targetNode = GetTargetNode(startNode);
 
         yield return npc.MoveTo(targetNode, 
-                                npcGoap.worldState.Speed, 
-                                npcGoap.worldState.SpeedRotation,
-                         steps => npcGoap.worldState.Steps -= steps);
+                                npcGoap.WorldState.Speed, 
+                                npcGoap.WorldState.SpeedRotation,
+                         steps => npcGoap.WorldState.Steps -= steps);
 
-        npc.currentInteractable = npc.GetClosestInteractable();
-        npcGoap.worldState.Mood = Waiting;
+        npc.CurrentInteractable = npc.GetClosestInteractable();
+        npcGoap.WorldState.Mood = Waiting;
     }
 
     private Node GetTargetNode(Node start)
