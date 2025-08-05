@@ -39,15 +39,11 @@ public class PlayerQuery : NetworkBehaviour, IQuery
         foreach (var npc in npcsInRange)
         {
             if (!activeNpcTimers.ContainsKey(npc))
-            {
                 CurrentlyInDanger.Add(npc);
-               // Debug.Log($"[PlayerQuery] Añadido: {npc.name}");
-            }
 
             activeNpcTimers[npc] = now + dangerDuration;
         }
 
-        // Remover los que ya expiraron
         var expired = activeNpcTimers
             .Where(pair => pair.Value <= now)
             .Select(pair => pair.Key)
@@ -57,7 +53,6 @@ public class PlayerQuery : NetworkBehaviour, IQuery
         {
             activeNpcTimers.Remove(npc);
             CurrentlyInDanger.Remove(npc);
-//            Debug.Log($"[PlayerQuery] Removido: {npc.name}");
         }
     }
 

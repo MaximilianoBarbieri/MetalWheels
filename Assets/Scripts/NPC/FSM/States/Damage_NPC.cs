@@ -20,6 +20,8 @@ public class Damage_NPC : MonoBaseState
         
         npcGoap.WorldState.Mood = Injured;
 
+        npcGoap.WorldState.UpdateSpeedByMood();
+        
         _damageRoutine = StartCoroutine(DamageRoutine());
     }
 
