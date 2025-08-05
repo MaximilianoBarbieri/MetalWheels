@@ -145,7 +145,15 @@ public class PlayerLocalUIHandler : MonoBehaviour
             (defeatPanel != null && defeatPanel.activeSelf) ||
             (waitingPanel != null && waitingPanel.activeSelf);
 
-        if (goToMainMenuButton != null) goToMainMenuButton.gameObject.SetActive(shouldShow);
+        // 1. Encontrar el runner (si no lo tenés referenciado ya)
+        NetworkRunner runner = FindObjectOfType<NetworkRunner>();
+        bool isHost = runner != null && runner.IsServer;
+
+        // 2. Mostrar SOLO si es Host
+        bool shouldShowButton = shouldShow && isHost;
+
+        if (goToMainMenuButton != null)
+            goToMainMenuButton.gameObject.SetActive(shouldShowButton);
     }
     
     private void OnGoToMainMenuPressed()
