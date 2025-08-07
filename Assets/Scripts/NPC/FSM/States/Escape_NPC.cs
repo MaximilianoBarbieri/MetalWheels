@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FSM;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static AnimNpc;
 using static MoodsNpc;
 
@@ -10,16 +11,18 @@ public class Escape_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
 
+    [SerializeField] private Texture2D moodImage;
+
     private Coroutine _escapeRoutine;
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.Animator.SetTrigger(EscapeAnimNpc);
+        Generators.SetupStateWithAnimation(NotSafe,
+                                   EscapeAnimNpc, 
+                                                moodImage)
+            (npcGoap, npc);
 
-        npcGoap.WorldState.Mood = NotSafe;
-     
-        npcGoap.WorldState.UpdateSpeedByMood();
-
+        
         _escapeRoutine = npc.StartCoroutine(EscapeLoop());
     }
     

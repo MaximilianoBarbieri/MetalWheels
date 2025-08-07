@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FSM;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static AnimNpc;
 using static MoodsNpc;
 
@@ -10,17 +11,19 @@ public class Sitdown_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
 
+    [SerializeField] private Texture2D moodImage;
+
     private Coroutine _sitCoroutine;
     private Coroutine _movementRoutine;
     
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.Animator.SetTrigger(SitdownAnimNpc);
+        Generators.SetupStateWithAnimation(Relaxed,
+                                   SitdownAnimNpc, 
+                                                moodImage)
+            (npcGoap, npc);
 
-        npcGoap.WorldState.Mood = Relaxed;
-    
-        npcGoap.WorldState.UpdateSpeedByMood();
-
+        
         if (npc.currentInteractable != null)
             _sitCoroutine = StartCoroutine(SitRoutine(npc.currentInteractable));
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 
 public static class Generators
@@ -34,6 +35,42 @@ public static class Generators
                 yield return component;
         }
     }
+    
+    /// <summary>
+    /// Devuelve una función que configura el WorldState con un nuevo mood, velocidad y FX.
+    /// </summary>
+    public static Action<NPCGoap, NPC> SetupStateWithAnimation(string mood, string animationTrigger, Texture2D moodImage)
+    {
+        return (goap, npc) =>
+        {
+            npc.Animator.SetTrigger(animationTrigger);
+            goap.WorldState.Mood = mood;
+            goap.WorldState.UpdateSpeedByMood();
+            goap.WorldState.UpdateMoodsFX(npc, moodImage);
+        };
+    }
+    
+    public static IEnumerable<NetworkObject> GenerateNodes(
+        Vector2Int gridSize,
+        float nodeSpacing,
+        Vector3 origin,
+        GameObject nodePrefab,
+        NetworkRunner runner)
+    {
+        float y = origin.y;
+
+        for (int x = 0; x < gridSize.x; x++)
+        {
+            for (int z = 0; z < gridSize.y; z++)
+            {
+                Vector3 pos = new Vector3(origin.x + x * nodeSpacing, y, origin.z + z * nodeSpacing);
+                NetworkObject node = runner.Spawn(nodePrefab, pos, Quaternion.identity, runner.LocalPlayer, null);
+                node.name = $"Node_{x}_{z}";
+                yield return node;
+            }
+        }
+    }
+
 }
 
 public class MoodsNpc

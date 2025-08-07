@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FSM;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static AnimNpc;
 using static MoodsNpc;
 
@@ -10,17 +11,19 @@ public class Talk_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
 
+    [SerializeField] private Texture2D moodImage;
+
     private Coroutine _talkCoroutine;
     private Coroutine _movementRoutine;
     
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.Animator.SetTrigger(WalkAnimNpc);
+        Generators.SetupStateWithAnimation(Curious,
+                                   WalkAnimNpc, 
+                                                moodImage)
+            (npcGoap, npc);
 
-        npcGoap.WorldState.Mood = Curious;
         
-        npcGoap.WorldState.UpdateSpeedByMood();
-
         if (npc.currentInteractable != null)
             _talkCoroutine = StartCoroutine(TalkRoutine(npc.currentInteractable));
     }

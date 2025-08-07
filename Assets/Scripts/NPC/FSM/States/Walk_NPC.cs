@@ -4,6 +4,7 @@ using System.Linq;
 using FSM;
 using static MoodsNpc;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static AnimNpc;
 
 public class Walk_NPC : MonoBaseState
@@ -11,15 +12,17 @@ public class Walk_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
     
+    [SerializeField] private Texture2D moodImage;
+
     private Coroutine _movementRoutine;
 
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.Animator.SetTrigger(WalkAnimNpc);
-        
-        npcGoap.WorldState.Mood = Exploring;
+        Generators.SetupStateWithAnimation(Exploring,
+                                   WalkAnimNpc, 
+                                                moodImage)
+            (npcGoap, npc);
 
-        npcGoap.WorldState.UpdateSpeedByMood();
         
         _movementRoutine = StartCoroutine(DoWalk());
     }

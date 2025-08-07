@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using FSM;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static AnimNpc;
 using static MoodsNpc;
 
@@ -10,16 +11,18 @@ public class Death_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
     
+    [SerializeField] private Texture2D moodImage;
+
     private Coroutine _deathRoutine;
     
     public override void Enter(IState from, Dictionary<string, object> transitionParameters = null)
     {
-        npc.Animator.SetTrigger(DeathAnimNpc);
-        
-        npcGoap.WorldState.Mood = Dying;
-        
-        npcGoap.WorldState.UpdateSpeedByMood();
+        Generators.SetupStateWithAnimation(Dying,
+                                   DeathAnimNpc, 
+                                                moodImage)
+            (npcGoap, npc);
 
+        
         _deathRoutine = StartCoroutine(DeathSequence());
     }
     

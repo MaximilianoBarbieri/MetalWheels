@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 public class WorldState
 {
@@ -31,12 +32,17 @@ public class WorldState
         { MoodsNpc.Injured,         1f },
         { MoodsNpc.Dying,           0f }
     };
-
-
+    
     public void UpdateSpeedByMood()
     {
         if (_moodSpeeds.TryGetValue(Mood, out float newSpeed))
             Speed = newSpeed;
+    }
+
+    public void UpdateMoodsFX(NPC npc, Texture2D newText)
+    {
+        npc.materialMoods.mainTexture = newText;
+        npc.moodsFX.Play();
     }
 
     public WorldState Clone() => (WorldState)this.MemberwiseClone();

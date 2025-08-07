@@ -12,9 +12,8 @@ public class NPC : NetworkBehaviour, IGridEntity
     public Rigidbody Rigidbody => GetComponent<Rigidbody>();
     public Animator Animator => GetComponent<Animator>();
     private static SpatialGrid SpatialGrid => FindObjectOfType<SpatialGrid>();
-
     public event Action<IGridEntity> OnMove;
-
+    
     public Vector3 Position
     {
         get => transform.position;
@@ -39,6 +38,9 @@ public class NPC : NetworkBehaviour, IGridEntity
     [SerializeField] internal Damage_NPC damageNpc;
     [SerializeField] internal Death_NPC deathNpc;
 
+    [Header("Fx")]
+    public Material materialMoods;
+    public ParticleSystem moodsFX;
     private void Start()
     {
         if (SpatialGrid.isInitialized) SpatialGrid.UpdateEntity(this);

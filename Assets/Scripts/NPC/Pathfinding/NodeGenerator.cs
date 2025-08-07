@@ -67,31 +67,21 @@ public class NodeGenerator : NetworkBehaviour
     private IEnumerator GenerateGridLazy()
     {
         _nodes = new List<NetworkObject>();
-        Vector3 origin = transform.position;
-        float y = origin.y;
         int created = 0;
 
-        for (int x = 0; x < gridSize.x; x++)
+        foreach (var node in Generators.GenerateNodes(gridSize, nodeSpacing, transform.position, nodePrefab, runner))
         {
-            for (int z = 0; z < gridSize.y; z++)
-            {
-                Vector3 pos = new Vector3(origin.x + x * nodeSpacing, y, origin.z + z * nodeSpacing);
+            _nodes.Add(node);
+            created++;
 
-                NetworkObject node = Runner.Spawn(nodePrefab, pos, Quaternion.identity, Runner.LocalPlayer, null);
-                node.name = $"Node_{x}_{z}";
-                _nodes.Add(node);
-
-                created++;
-                if (created % nodesPerFrame == 0)
-                    yield return null;
-            }
+            if (created % nodesPerFrame == 0)
+                yield return null;
         }
 
         _generationRoutine = null;
-
         _onGridCreated?.Invoke();
     }
-
+    
     private void DetectAllNeighbors() => _nodes.Select(n => n.GetComponent<Node>())
                                                            .Where(n => n != null)
                                                            .ToList()
