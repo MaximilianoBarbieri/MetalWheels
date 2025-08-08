@@ -22,7 +22,7 @@ public class ModelPlayer : NetworkBehaviour
     
     private LifeHandler _lifeHandler;
     
-    public bool IsNitroActive { get; set; }
+    [Networked] public bool IsNitroActive { get; set; }
     [Networked, OnChangedRender(nameof(OnDamageFXChanged))]
     public int DamageFXCounter { get; set; }
 
