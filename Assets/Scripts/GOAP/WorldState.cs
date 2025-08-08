@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 public class WorldState
 {
@@ -42,7 +41,7 @@ public class WorldState
     public void UpdateMoodsFX(NPC npc, Texture2D newText)
     {
         npc.materialMoods.mainTexture = newText;
-        npc.moodsFX.Play();
+        npc.RpcPlayMoodFX();
     }
 
     public WorldState Clone() => (WorldState)this.MemberwiseClone();

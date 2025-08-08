@@ -49,7 +49,7 @@ public class GameManager : NetworkBehaviour
         if (!HasStateAuthority) return;
 
         int playerCount = Runner.ActivePlayers.Count();
-        if (CurrentState == GameState.WaitingForPlayers && playerCount >= 1)
+        if (CurrentState == GameState.WaitingForPlayers && playerCount >= 2)
         {
             CurrentState = GameState.Playing;
         }

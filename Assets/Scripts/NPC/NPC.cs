@@ -10,7 +10,7 @@ public class NPC : NetworkBehaviour, IGridEntity
 {
     public Node CurrentNode => GetCurrentNode();
     public Rigidbody Rigidbody => GetComponent<Rigidbody>();
-    public Animator Animator => GetComponent<Animator>();
+    public NetworkMecanimAnimator Animator => GetComponent<NetworkMecanimAnimator>();
     private static SpatialGrid SpatialGrid => FindObjectOfType<SpatialGrid>();
     public event Action<IGridEntity> OnMove;
     
@@ -41,6 +41,8 @@ public class NPC : NetworkBehaviour, IGridEntity
     [Header("Fx")]
     public Material materialMoods;
     public ParticleSystem moodsFX;
+    public ParticleSystem injuredFX;
+
     private void Start()
     {
         if (SpatialGrid.isInitialized) SpatialGrid.UpdateEntity(this);
@@ -184,6 +186,11 @@ public class NPC : NetworkBehaviour, IGridEntity
         }
     }
 
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RpcPlayMoodFX() => moodsFX.Play();
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RpcPlayerInjuredFX() => injuredFX.Play();
     
     private void ActivateFsm() => Fsm.Active = true;
 

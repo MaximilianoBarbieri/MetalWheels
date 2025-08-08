@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using FSM;
 using UnityEngine;
-using UnityEngine.Serialization;
 using static AnimNpc;
 using static MoodsNpc;
 
@@ -11,7 +10,6 @@ public class Damage_NPC : MonoBaseState
     [SerializeField] private NPC npc;
     [SerializeField] private NPCGoap npcGoap;
 
-    [SerializeField] private ParticleSystem injuredFX;
 
     [SerializeField] private Texture2D moodImage;
 
@@ -27,7 +25,7 @@ public class Damage_NPC : MonoBaseState
             (npcGoap, npc);
 
         
-        injuredFX.Play();
+        npc.RpcPlayerInjuredFX();
 
         _damageRoutine = StartCoroutine(DamageRoutine());
     }
@@ -42,9 +40,7 @@ public class Damage_NPC : MonoBaseState
     {
         if (_damageRoutine != null)
             StopCoroutine(_damageRoutine);
-
-        injuredFX.Stop();
-
+        
         return base.Exit(to);
     }
 

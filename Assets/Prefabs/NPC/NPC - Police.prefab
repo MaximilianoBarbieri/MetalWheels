@@ -41,14 +41,14 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 187597567073274003}
   serializedVersion: 8
-  lengthInSec: 1
+  lengthInSec: 2
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 1
-  looping: 1
+  looping: 0
   prewarm: 0
   playOnAwake: 0
   useUnscaledTime: 0
@@ -116,7 +116,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 5
+      scalar: 2
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -5452,7 +5452,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   npc: {fileID: 8512673234735326415}
   npcGoap: {fileID: 5972692747980214818}
-  injuredFX: {fileID: 8466572029663573387}
   moodImage: {fileID: 2800000, guid: 7d272e019d2216743b0646d358cdc343, type: 3}
 --- !u!1 &3455744910640838557
 GameObject:
@@ -11058,6 +11057,7 @@ GameObject:
   - component: {fileID: -4099828723088100263}
   - component: {fileID: 7903600503487076307}
   - component: {fileID: 1309784513354755363}
+  - component: {fileID: 271157403541378850}
   m_Layer: 0
   m_Name: NPC - Police
   m_TagString: Untagged
@@ -11125,6 +11125,7 @@ MonoBehaviour:
   deathNpc: {fileID: 5505072709927309937}
   materialMoods: {fileID: 2100000, guid: 147e401ab8cfac14ca2fd58e8bc8ca97, type: 2}
   moodsFX: {fileID: 5978725160753203078}
+  injuredFX: {fileID: 8466572029663573387}
 --- !u!114 &5972692747980214818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11224,7 +11225,26 @@ MonoBehaviour:
   - {fileID: 8512673234735326415}
   - {fileID: 5972692747980214818}
   - {fileID: 7903600503487076307}
+  - {fileID: 271157403541378850}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &271157403541378850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7762872981204630707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 506319458, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Animator: {fileID: 5812014995978909665}
+  ApplyTiming: 2
+  SyncSettings: 79
+  StateHashes: 0000000051d2caa0d5f11c4f94d8790f8e4943e542d33927c6f0efc8584465f3b387ed0edfc9d1165bea07f98a794950b9ca6c67
+  TriggerHashes: 0000000051d2caa042d339278a794950dfc9d116584465f394d8790f
+  TotalWords: 1
 --- !u!1 &7998486200429853111
 GameObject:
   m_ObjectHideFlags: 0
