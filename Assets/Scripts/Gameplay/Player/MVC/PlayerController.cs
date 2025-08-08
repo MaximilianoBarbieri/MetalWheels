@@ -71,6 +71,8 @@ public class PlayerController : NetworkBehaviour
         if (GameManager.Instance != null) OnGameStateChanged(GameManager.Instance.CurrentState);
     }
 
+    bool usingNitro;
+    
     public override void FixedUpdateNetwork()
     {
 
@@ -87,7 +89,6 @@ public class PlayerController : NetworkBehaviour
         );
 
         // ------ NITRO ------
-        bool usingNitro = false;
         float acceleration = _myCharacterController.carAcceleration;
         float maxSpeed = _myCharacterController.carMaxSpeed;
 
@@ -101,6 +102,8 @@ public class PlayerController : NetworkBehaviour
                 maxSpeed *= 2f;
             }
         }
+        else
+            usingNitro = false;
         
         // Detección de cambio nitro:
         _model.IsNitroActive = usingNitro;
