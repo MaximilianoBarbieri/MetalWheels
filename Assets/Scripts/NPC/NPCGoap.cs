@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using FSM;
 using Fusion;
+using Unity.VisualScripting;
 using UnityEngine;
 using static MoodsNpc;
 using static GoapActionName;
+using IState = FSM.IState;
 
 public class NPCGoap : NetworkBehaviour
 {
@@ -25,7 +26,11 @@ public class NPCGoap : NetworkBehaviour
         base.Spawned();
 
         _npc = GetComponent<NPC>();
+    }
 
+    private void InitGoap()
+    {
+        
         WorldState.Steps = 0;
         WorldState.MaxSteps = 5;
         WorldState.SpeedRotation = 5f;
@@ -175,9 +180,26 @@ public class NPCGoap : NetworkBehaviour
 
     private List<GoapAction> GetAvailableActions() => _actions;
 
-    private Func<WorldState, bool> SelectGoal(WorldState state)
-    {
-        // 1. Condición para Death
+    private Func<WorldState, bool> 
+        SelectGoal(WorldState state)
+        =>  state.Life <= 0f                           ? s => s.Mood == Dying     :       //Death
+            state.Impacted && state.Mood != Injured    ? s => s.Mood == Injured   :       // Damage
+            state.CarInRange && state.Mood != NotSafe  ? s => s.Mood == NotSafe   :       // Escape
+            state.InteractionType == InteractionType.Talk && state.Mood != Curious
+                                                       ? s => s.Mood == Curious   :       //Talk
+            state.InteractionType == InteractionType.Sit && state.Mood != Relaxed
+                                                       ? s => s.Mood == Relaxed   :       //SitDown
+            state.Steps >= state.MaxSteps && state.Mood != Exploring
+                                                       ? s => s.Mood == Exploring :       //Walk
+            !state.CarInRange &&
+            state.Steps < state.MaxSteps &&
+            state.Mood == Waiting                      ? s => s.Mood == LightRest :       //Idle
+                                                          s => s.Mood == Waiting  ;       //Default
+
+    #region SelectGoal con If
+
+    /*
+     *     // 1. Condición para Death
         if (state.Life <= 0f)
             return s => s.Mood == Dying;
         
@@ -209,9 +231,11 @@ public class NPCGoap : NetworkBehaviour
 
         // Por defecto, no hay objetivo real
         return s => s.Mood == Waiting;
-    }
 
+     */
 
+    #endregion    
+    
     private IEnumerator RunPlanLoop()
     {
         while (true)
@@ -256,5 +280,15 @@ public class NPCGoap : NetworkBehaviour
         if (_npc.Fsm == null) yield break;
 
         _npc.Fsm.TransitionTo(nextState);
+    }
+
+    private void OnEnable()
+    {
+        NodeGenerator.OnGameReady += InitGoap;
+    }
+
+    private void OnDisable()
+    {
+        NodeGenerator.OnGameReady -= InitGoap;
     }
 }

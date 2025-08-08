@@ -5,15 +5,11 @@ using UnityEngine;
 
 public static class Generators
 {
-    // Transformaciones
-
-    //Clamp básico
     public static int Clamp(int v, int min, int max)
     {
         return v < min ? min : v > max ? max : v;
     }
 
-    //Generator genérico, lo vamos a ver más adelante.
     public static IEnumerable<Src> Generate<Src>(Src seed, Func<Src, Src> generator)
     {
         while (true)
@@ -36,9 +32,6 @@ public static class Generators
         }
     }
     
-    /// <summary>
-    /// Devuelve una función que configura el WorldState con un nuevo mood, velocidad y FX.
-    /// </summary>
     public static Action<NPCGoap, NPC> SetupStateWithAnimation(string mood, string animationTrigger, Texture2D moodImage)
     {
         return (goap, npc) =>

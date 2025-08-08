@@ -45,7 +45,7 @@ public class Idle_NPC : MonoBaseState
         {
             npcGoap.WorldState.Steps++;
 
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(1);
         }
     }
 }

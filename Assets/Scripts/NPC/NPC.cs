@@ -68,17 +68,14 @@ public class NPC : NetworkBehaviour, IGridEntity
     /// <returns></returns>
     public (bool inRange, Vector3 player) IsPlayerQueryInRange(float maxDistance)
     {
-        foreach (var playerQuery in SpatialGrid?.players)
+        foreach (var controller 
+                 in (SpatialGrid?.players).Select(playerQuery => playerQuery.gameObject)
+                                          .Where(controller => Vector3.Distance(transform.position,
+                                         controller.transform.position) <= maxDistance))
         {
-            var controller = playerQuery.gameObject;
-            
-            if (Vector3.Distance(transform.position, controller.transform.position) <= maxDistance)
-            {
-            
-                Debug.Log($"La distancia entre {controller} y {name} es {Vector3.Distance(transform.position, controller.transform.position) <= maxDistance} ");
+            Debug.Log($"La distancia entre {controller} y {name} es {Vector3.Distance(transform.position, controller.transform.position) <= maxDistance} ");
     
-                return (true, controller.transform.position);
-            }
+            return (true, controller.transform.position);
         }
 
         return (false, Vector3.zero);
@@ -151,7 +148,7 @@ public class NPC : NetworkBehaviour, IGridEntity
                 yield return null;
             }
 
-            onStep?.Invoke(1); // 🔁 le avisás que hiciste un paso
+            onStep?.Invoke(1);
         }
     }
 
