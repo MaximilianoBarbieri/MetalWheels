@@ -22,7 +22,6 @@ public class ModelPlayer : NetworkBehaviour
     
     private LifeHandler _lifeHandler;
     
-    [Networked, OnChangedRender(nameof(OnNitroChanged))]
     public bool IsNitroActive { get; set; }
     [Networked, OnChangedRender(nameof(OnDamageFXChanged))]
     public int DamageFXCounter { get; set; }
@@ -178,11 +177,6 @@ public class ModelPlayer : NetworkBehaviour
         if (!(BurnTimer <= 0f)) return;
         IsBurning = false;
         BurnTimer = 0f;
-    }
-    
-    private void OnNitroChanged()
-    {
-        // Vacío si usás Update en ViewPlayer, o podés llamar FX directo acá
     }
 
     private void OnDamageFXChanged()

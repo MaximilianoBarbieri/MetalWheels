@@ -40,10 +40,9 @@ public class WeaponHandler : NetworkBehaviour
 
     public void FireNormal()
     {
-        OnShoot?.Invoke();
-
-        if (!HasStateAuthority) return;
         if (Runner.SimulationTime < _nextFireTimeNormal) return;
+        OnShoot?.Invoke(); //si puedo disparar ejecuto la particle
+        if (!HasStateAuthority) return;
 
         _spawnedBullet = !_spawnedBullet;
         var bulletObj = Runner.Spawn(_bulletNormalPrefab, _firingPositionTransform.position, transform.rotation, null);
@@ -54,7 +53,6 @@ public class WeaponHandler : NetworkBehaviour
                 bullet.SetOwner(Object.InputAuthority);
             }
         }
-
         _nextFireTimeNormal = Runner.SimulationTime + fireCooldown;
     }
 
