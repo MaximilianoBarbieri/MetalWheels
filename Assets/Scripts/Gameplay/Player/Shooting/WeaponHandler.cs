@@ -40,6 +40,8 @@ public class WeaponHandler : NetworkBehaviour
 
     public void FireNormal()
     {
+        OnShoot?.Invoke();
+
         if (!HasStateAuthority) return;
         if (Runner.SimulationTime < _nextFireTimeNormal) return;
 
@@ -54,7 +56,6 @@ public class WeaponHandler : NetworkBehaviour
         }
 
         _nextFireTimeNormal = Runner.SimulationTime + fireCooldown;
-        OnShoot?.Invoke(); // NOTIFICAR VIEWPLAYER
     }
 
     public void FireSpecial(ModelPlayer.SpecialType specialType)
